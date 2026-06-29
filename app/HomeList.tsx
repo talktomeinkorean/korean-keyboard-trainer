@@ -26,7 +26,7 @@ export function HomeList() {
             <Link
               key={l.id}
               href={`/lesson/${l.id}`}
-              className="flex items-center justify-between px-4 py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700"
+              className="flex items-center justify-between px-4 py-3 rounded-xl bg-white text-neutral-900 border border-neutral-200 hover:bg-neutral-100"
             >
               <span>{l.title}</span>
               {done.has(l.id) && <span className="text-emerald-500">✓</span>}

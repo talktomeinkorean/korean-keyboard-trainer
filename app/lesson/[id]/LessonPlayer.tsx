@@ -49,9 +49,10 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       <h1 className="text-lg text-neutral-400">{lesson.title}</h1>
       <StatsBar wpm={session.wpm} accuracy={session.accuracy} index={session.currentIndex} total={lesson.items.length} />
       <TypingLine target={session.currentItem} typed={session.typed} />
-      <Keyboard nextCode={session.nextCode} />
+      <Keyboard nextCode={session.nextCode} onKeyPress={session.handleKey} />
       <NextKeyHint code={session.nextCode} />
       <p className="text-xs text-neutral-600">왼손=자음(주황) · 오른손=모음(초록)</p>
+      <p className="text-xs text-neutral-600 sm:hidden">모바일에서는 키를 직접 탭하세요</p>
 
       {session.isComplete && (
         <ResultOverlay
