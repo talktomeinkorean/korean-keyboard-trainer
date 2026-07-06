@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { Lesson } from '@/lib/curriculum/types';
 import { useLessonSession } from '@/lib/session/useLessonSession';
 import { Keyboard } from '@/components/Keyboard';
@@ -14,7 +13,6 @@ import { LocalProgressStore } from '@/lib/progress/localStore';
 const store = new LocalProgressStore();
 
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
-  const router = useRouter();
   const session = useLessonSession({ items: lesson.items });
   const savedRef = useRef(false);
 
@@ -59,7 +57,10 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         <ResultOverlay
           wpm={session.wpm}
           accuracy={session.accuracy}
-          onRetry={() => router.refresh()}
+          onRetry={() => {
+            savedRef.current = false;
+            session.reset();
+          }}
         />
       )}
     </main>

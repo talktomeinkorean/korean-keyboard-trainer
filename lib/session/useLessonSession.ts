@@ -24,6 +24,8 @@ export interface LessonSessionState {
   wpm: number;      // 분당 타수
   isComplete: boolean;
   handleKey(code: string): void;
+  /** 레슨을 처음부터 다시 시작 (상태 초기화) */
+  reset(): void;
 }
 
 /**
@@ -127,6 +129,18 @@ export function useLessonSession({ items, now = () => Date.now() }: Options): Le
     }
   }, [items]);
 
+  const reset = useCallback(() => {
+    composerRef.current.reset();
+    startRef.current = null;
+    endRef.current = null;
+    setIndex(0);
+    setTyped('');
+    setErrorCount(0);
+    setKeystrokes(0);
+    setTypedJamoCount(0);
+    setIsComplete(false);
+  }, []);
+
   const accuracy =
     keystrokes === 0 ? 100 : Math.round(((keystrokes - errorCount) / keystrokes) * 100);
 
@@ -148,5 +162,6 @@ export function useLessonSession({ items, now = () => Date.now() }: Options): Le
     wpm,
     isComplete,
     handleKey,
+    reset,
   };
 }
