@@ -5,6 +5,7 @@ import { Lesson } from '@/lib/curriculum/types';
 import { useLessonSession } from '@/lib/session/useLessonSession';
 import { Keyboard } from '@/components/Keyboard';
 import { TypingLine } from '@/components/TypingLine';
+import { JamoTrack } from '@/components/JamoTrack';
 import { StatsBar } from '@/components/StatsBar';
 import { NextKeyHint } from '@/components/NextKeyHint';
 import { ResultOverlay } from '@/components/ResultOverlay';
@@ -47,6 +48,11 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       <h1 className="text-lg text-neutral-400">{lesson.title}</h1>
       <StatsBar wpm={session.wpm} accuracy={session.accuracy} index={session.currentIndex} total={lesson.items.length} />
       <TypingLine target={session.currentItem} typed={session.typed} />
+      <JamoTrack
+        item={session.currentItem}
+        typedJamoCount={session.typedJamoCount}
+        errorCount={session.errorCount}
+      />
       <Keyboard nextCode={session.nextCode} onKeyPress={session.handleKey} />
       <NextKeyHint code={session.nextCode} />
       <p className="text-xs text-neutral-600">왼손=자음(주황) · 오른손=모음(초록)</p>
