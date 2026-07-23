@@ -18,6 +18,10 @@ export interface LessonSessionState {
   typed: string;
   /** 다음에 눌러야 할 키 code (없으면 null) */
   nextCode: string | null;
+  /** 현재 항목의 자모 시퀀스 */
+  targetJamos: string[];
+  /** 맞게 입력된 자모 개수 (targetJamos 의 앞 몇 개가 완료됐는지) */
+  typedJamoCount: number;
   errorCount: number;
   keystrokes: number;
   accuracy: number; // 0~100
@@ -156,6 +160,8 @@ export function useLessonSession({ items, now = () => Date.now() }: Options): Le
     currentItem,
     typed,
     nextCode,
+    targetJamos,
+    typedJamoCount,
     errorCount,
     keystrokes,
     accuracy,
