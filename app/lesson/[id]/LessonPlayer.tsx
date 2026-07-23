@@ -47,7 +47,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     <main className="min-h-screen flex flex-col items-center justify-center gap-8 p-6">
       <h1 className="text-lg text-neutral-400">{lesson.title}</h1>
       <StatsBar wpm={session.wpm} accuracy={session.accuracy} index={session.currentIndex} total={lesson.items.length} />
-      <TypingLine target={session.currentItem} typed={session.typed} />
+      <TypingLine target={session.currentItem} typedJamoCount={session.typedJamoCount} />
       <JamoTrack
         item={session.currentItem}
         typedJamoCount={session.typedJamoCount}
