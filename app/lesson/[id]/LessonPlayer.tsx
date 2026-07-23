@@ -55,9 +55,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       />
       <Keyboard nextCode={session.nextCode} onKeyPress={session.handleKey} />
       <NextKeyHint code={session.nextCode} />
-      <p className="text-xs text-neutral-600">왼손=자음(주황) · 오른손=모음(초록)</p>
+      <p className="text-xs text-neutral-600">Left hand = consonants (orange) · Right hand = vowels (green)</p>
       {/* 터치 기기(둔한 포인터)에서만 안내 — 창 너비가 아니라 실제 입력 방식 기준 */}
-      <p className="text-xs text-neutral-600 hidden [@media(pointer:coarse)]:block">키를 직접 탭하세요</p>
+      <p className="text-xs text-neutral-600 hidden [@media(pointer:coarse)]:block">Tap the keys to type</p>
 
       {session.isComplete && (
         <ResultOverlay

@@ -7,7 +7,7 @@ import { LocalProgressStore } from '@/lib/progress/localStore';
 
 const store = new LocalProgressStore();
 const STAGE_LABEL: Record<string, string> = {
-  consonant: '기초 자음', vowel: '기초 모음', syllable: '자모 조합', word: '단어', sentence: '짧은 문장',
+  consonant: 'Basic Consonants', vowel: 'Basic Vowels', syllable: 'Syllables', word: 'Words', sentence: 'Short Sentences',
 };
 
 export function HomeList() {
