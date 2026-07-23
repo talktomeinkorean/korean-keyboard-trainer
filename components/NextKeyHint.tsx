@@ -1,8 +1,8 @@
 import { keyByCode } from '@/lib/keyboard/dubeolsik';
 
-const FINGER_KO: Record<string, string> = {
-  'left-pinky': '왼손 새끼', 'left-ring': '왼손 약지', 'left-middle': '왼손 중지', 'left-index': '왼손 검지',
-  'right-index': '오른손 검지', 'right-middle': '오른손 중지', 'right-ring': '오른손 약지', 'right-pinky': '오른손 새끼',
+const FINGER_LABEL: Record<string, string> = {
+  'left-pinky': 'left pinky', 'left-ring': 'left ring', 'left-middle': 'left middle', 'left-index': 'left index',
+  'right-index': 'right index', 'right-middle': 'right middle', 'right-ring': 'right ring', 'right-pinky': 'right pinky',
 };
 
 export function NextKeyHint({ code }: { code: string | null }) {
@@ -12,7 +12,7 @@ export function NextKeyHint({ code }: { code: string | null }) {
   const letter = code.replace('Key', '');
   return (
     <div className="text-sm text-gray-500">
-      다음 키: <b className="text-blue-500">{letter} ({key.jamo})</b> · {FINGER_KO[key.finger]}
+      Next key: <b className="text-blue-500">{letter} ({key.jamo})</b> · {FINGER_LABEL[key.finger]}
     </div>
   );
 }

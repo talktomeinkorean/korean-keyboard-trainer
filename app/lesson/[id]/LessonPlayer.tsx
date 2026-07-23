@@ -5,6 +5,7 @@ import { Lesson } from '@/lib/curriculum/types';
 import { useLessonSession } from '@/lib/session/useLessonSession';
 import { Keyboard } from '@/components/Keyboard';
 import { TypingLine } from '@/components/TypingLine';
+import { JamoTrack } from '@/components/JamoTrack';
 import { StatsBar } from '@/components/StatsBar';
 import { NextKeyHint } from '@/components/NextKeyHint';
 import { ResultOverlay } from '@/components/ResultOverlay';
@@ -46,12 +47,17 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     <main className="min-h-screen flex flex-col items-center justify-center gap-8 p-6">
       <h1 className="text-lg text-neutral-400">{lesson.title}</h1>
       <StatsBar wpm={session.wpm} accuracy={session.accuracy} index={session.currentIndex} total={lesson.items.length} />
-      <TypingLine target={session.currentItem} typed={session.typed} />
+      <TypingLine target={session.currentItem} typedJamoCount={session.typedJamoCount} />
+      <JamoTrack
+        item={session.currentItem}
+        typedJamoCount={session.typedJamoCount}
+        errorCount={session.errorCount}
+      />
       <Keyboard nextCode={session.nextCode} onKeyPress={session.handleKey} />
       <NextKeyHint code={session.nextCode} />
-      <p className="text-xs text-neutral-600">왼손=자음(주황) · 오른손=모음(초록)</p>
+      <p className="text-xs text-neutral-600">Left hand = consonants (orange) · Right hand = vowels (green)</p>
       {/* 터치 기기(둔한 포인터)에서만 안내 — 창 너비가 아니라 실제 입력 방식 기준 */}
-      <p className="text-xs text-neutral-600 hidden [@media(pointer:coarse)]:block">키를 직접 탭하세요</p>
+      <p className="text-xs text-neutral-600 hidden [@media(pointer:coarse)]:block">Tap the keys to type</p>
 
       {session.isComplete && (
         <ResultOverlay

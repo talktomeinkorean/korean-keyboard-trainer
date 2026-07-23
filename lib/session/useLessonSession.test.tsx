@@ -53,4 +53,18 @@ describe('useLessonSession', () => {
     act(() => result.current.handleKey('KeyR'));
     expect(result.current.nextCode).toBe('KeyK'); // 다음 ㅏ
   });
+
+  it('targetJamos 와 typedJamoCount 를 노출한다', () => {
+    const { result } = renderHook(() =>
+      useLessonSession({ items: ['과'], now: makeNow() }),
+    );
+    expect(result.current.targetJamos).toEqual(['ㄱ', 'ㅗ', 'ㅏ']);
+    expect(result.current.typedJamoCount).toBe(0);
+
+    act(() => result.current.handleKey('KeyR')); // ㄱ (맞음)
+    expect(result.current.typedJamoCount).toBe(1);
+
+    act(() => result.current.handleKey('KeyS')); // ㄴ (오타 — 진행 안 됨)
+    expect(result.current.typedJamoCount).toBe(1);
+  });
 });
