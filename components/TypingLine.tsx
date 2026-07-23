@@ -9,6 +9,11 @@ export function TypingLine({ target, typed }: Props) {
   return (
     <div className="text-4xl tracking-widest font-medium">
       <span data-testid="done" className="text-emerald-500">{done}</span>
+      <span
+        data-testid="caret"
+        aria-hidden
+        className="inline-block w-0.5 h-[1em] align-middle bg-blue-500 animate-caret-blink"
+      />
       <span data-testid="todo" className="text-gray-400">{todo}</span>
     </div>
   );

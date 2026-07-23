@@ -12,6 +12,16 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@theme {
+  --animate-caret-blink: caret-blink 1s step-end infinite;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
