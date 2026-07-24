@@ -54,6 +54,21 @@ describe('useLessonSession', () => {
     expect(result.current.nextCode).toBe('KeyK'); // 다음 ㅏ
   });
 
+  it('시작/종료 시각을 노출한다 (레이스 기록용)', () => {
+    const { result } = renderHook(() =>
+      useLessonSession({ items: ['가'], now: makeNow() }),
+    );
+    expect(result.current.startedAt).toBeNull();
+    expect(result.current.finishedAt).toBeNull();
+
+    act(() => result.current.handleKey('KeyR')); // ㄱ — 첫 키에 시작 기록
+    expect(result.current.startedAt).toBe(1000);
+    expect(result.current.finishedAt).toBeNull();
+
+    act(() => result.current.handleKey('KeyK')); // ㅏ → 완료
+    expect(result.current.finishedAt).toBe(2000);
+  });
+
   it('공백이 포함된 항목을 스페이스 키로 진행한다', () => {
     const { result } = renderHook(() =>
       useLessonSession({ items: ['가 나'], now: makeNow() }),
