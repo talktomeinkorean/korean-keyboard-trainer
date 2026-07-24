@@ -54,6 +54,23 @@ describe('useLessonSession', () => {
     expect(result.current.nextCode).toBe('KeyK'); // 다음 ㅏ
   });
 
+  it('공백이 포함된 항목을 스페이스 키로 진행한다', () => {
+    const { result } = renderHook(() =>
+      useLessonSession({ items: ['가 나'], now: makeNow() }),
+    );
+    act(() => result.current.handleKey('KeyR')); // ㄱ
+    act(() => result.current.handleKey('KeyK')); // ㅏ
+    expect(result.current.nextCode).toBe('Space');
+
+    act(() => result.current.handleKey('Space'));
+    expect(result.current.typedJamoCount).toBe(3);
+
+    act(() => result.current.handleKey('KeyS')); // ㄴ
+    act(() => result.current.handleKey('KeyK')); // ㅏ
+    expect(result.current.isComplete).toBe(true);
+    expect(result.current.errorCount).toBe(0);
+  });
+
   it('targetJamos 와 typedJamoCount 를 노출한다', () => {
     const { result } = renderHook(() =>
       useLessonSession({ items: ['과'], now: makeNow() }),

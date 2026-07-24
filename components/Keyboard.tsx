@@ -1,4 +1,4 @@
-import { DUBEOLSIK } from '@/lib/keyboard/dubeolsik';
+import { DUBEOLSIK, SPACE_KEY } from '@/lib/keyboard/dubeolsik';
 import { KeyDef } from '@/lib/keyboard/types';
 
 const ROWS: string[][] = [
@@ -15,7 +15,9 @@ function keyClasses(k: KeyDef, isNext: boolean): string {
     'w-8 h-10 sm:w-11 sm:h-11 rounded-lg border flex flex-col items-center justify-center ' +
     'text-sm sm:text-base select-none touch-manipulation transition active:scale-95';
   const typeBorder =
-    k.type === 'consonant' ? 'border-b-2 border-b-amber-500' : 'border-b-2 border-b-emerald-500';
+    k.type === 'consonant' ? 'border-b-2 border-b-amber-500'
+    : k.type === 'vowel' ? 'border-b-2 border-b-emerald-500'
+    : 'border-b-2 border-b-neutral-500';
   if (isNext) return `${base} bg-blue-500 text-white border-blue-500 ring-2 ring-blue-300`;
   return `${base} bg-neutral-800 text-neutral-100 border-white/10 active:bg-neutral-700 ${typeBorder}`;
 }
@@ -50,6 +52,17 @@ export function Keyboard({ nextCode, onKeyPress }: Props) {
           })}
         </div>
       ))}
+      <div className="flex">
+        <button
+          type="button"
+          data-testid="kbd-key-Space"
+          data-kbd-key
+          onClick={() => onKeyPress?.(SPACE_KEY.code)}
+          className={`${keyClasses(SPACE_KEY, nextCode === SPACE_KEY.code)} !w-44 sm:!w-64`}
+        >
+          <span className="text-xs opacity-70">Space</span>
+        </button>
+      </div>
     </div>
   );
 }

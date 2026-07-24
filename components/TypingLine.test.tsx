@@ -26,11 +26,12 @@ describe('TypingLine', () => {
     expect(screen.getByTestId('todo')).toHaveTextContent('한국어');
   });
 
-  it('조합 중인 음절 뒤에 깜빡이는 캐럿을 표시한다', () => {
+  it('캐럿은 완성된 음절 뒤, 조합 중인 음절 앞에 위치한다', () => {
+    // 글자가 완성될 때만 캐럿이 그 글자를 지나간다
     render(<TypingLine target="안녕" typedJamoCount={1} />);
     const caret = screen.getByTestId('caret');
-    // done → current → caret → todo 순서
-    expect(screen.getByTestId('current').nextElementSibling).toBe(caret);
-    expect(caret.nextElementSibling).toBe(screen.getByTestId('todo'));
+    // done → caret → current → todo 순서
+    expect(screen.getByTestId('done').nextElementSibling).toBe(caret);
+    expect(caret.nextElementSibling).toBe(screen.getByTestId('current'));
   });
 });

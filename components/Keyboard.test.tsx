@@ -3,9 +3,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Keyboard } from './Keyboard';
 
 describe('Keyboard', () => {
-  it('26개 키를 렌더링한다', () => {
+  it('26개 자모 키와 스페이스바를 렌더링한다', () => {
     const { container } = render(<Keyboard nextCode={null} />);
-    expect(container.querySelectorAll('[data-kbd-key]')).toHaveLength(26);
+    expect(container.querySelectorAll('[data-kbd-key]')).toHaveLength(27);
+    expect(screen.getByTestId('kbd-key-Space')).toBeInTheDocument();
+  });
+
+  it('스페이스바를 탭하면 Space code로 onKeyPress를 호출한다', () => {
+    const onKeyPress = vi.fn();
+    render(<Keyboard nextCode={null} onKeyPress={onKeyPress} />);
+    fireEvent.click(screen.getByTestId('kbd-key-Space'));
+    expect(onKeyPress).toHaveBeenCalledWith('Space');
   });
 
   it('nextCode 키에 강조 표시를 한다', () => {

@@ -37,8 +37,12 @@ export const DUBEOLSIK: KeyDef[] = [
   { code: 'KeyM', jamo: 'ㅡ', type: 'vowel', finger: 'right-index' },
 ];
 
-const byCode = new Map(DUBEOLSIK.map((k) => [k.code, k]));
-const byJamo = new Map(DUBEOLSIK.map((k) => [k.jamo, k]));
+// 문장 연습용 스페이스. DUBEOLSIK(자모 26키)에는 포함하지 않고 조회 맵에만 추가한다.
+export const SPACE_KEY: KeyDef = { code: 'Space', jamo: ' ', type: 'space', finger: 'thumb' };
+
+const ALL_KEYS = [...DUBEOLSIK, SPACE_KEY];
+const byCode = new Map(ALL_KEYS.map((k) => [k.code, k]));
+const byJamo = new Map(ALL_KEYS.map((k) => [k.jamo, k]));
 
 export function keyByCode(code: string): KeyDef | undefined {
   return byCode.get(code);

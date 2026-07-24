@@ -21,7 +21,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.code.startsWith('Key')) {
+      if (e.code.startsWith('Key') || e.code === 'Space') {
         e.preventDefault();
         session.handleKey(e.code);
       }

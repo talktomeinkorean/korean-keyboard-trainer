@@ -27,6 +27,11 @@ describe('DUBEOLSIK keymap', () => {
     expect(new Set(codes).size).toBe(codes.length);
   });
 
+  it('스페이스 키를 공백 자모로 매핑한다 (문장 연습용)', () => {
+    expect(keyByCode('Space')?.jamo).toBe(' ');
+    expect(keyByJamo(' ')?.code).toBe('Space');
+  });
+
   it('shift 항목(쌍자음/ㅒㅖ)이 이음새로 채워져 있다', () => {
     expect(keyByCode('KeyR')?.shift).toBe('ㄲ');
     expect(keyByCode('KeyO')?.shift).toBe('ㅒ');

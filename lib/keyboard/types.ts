@@ -1,8 +1,9 @@
-export type KeyType = 'consonant' | 'vowel';
+export type KeyType = 'consonant' | 'vowel' | 'space';
 
 export type Finger =
   | 'left-pinky' | 'left-ring' | 'left-middle' | 'left-index'
-  | 'right-index' | 'right-middle' | 'right-ring' | 'right-pinky';
+  | 'right-index' | 'right-middle' | 'right-ring' | 'right-pinky'
+  | 'thumb';
 
 export interface KeyDef {
   /** KeyboardEvent.code, e.g. "KeyR" */
