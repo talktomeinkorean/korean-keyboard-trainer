@@ -55,8 +55,9 @@ describe('useLessonSession', () => {
   });
 
   it('시작/종료 시각을 노출한다 (레이스 기록용)', () => {
+    const now = makeNow(); // 리렌더마다 재생성되지 않도록 밖에서 1회 생성
     const { result } = renderHook(() =>
-      useLessonSession({ items: ['가'], now: makeNow() }),
+      useLessonSession({ items: ['가'], now }),
     );
     expect(result.current.startedAt).toBeNull();
     expect(result.current.finishedAt).toBeNull();
