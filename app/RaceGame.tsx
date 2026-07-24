@@ -9,6 +9,7 @@ import { TypingLine } from '@/components/TypingLine';
 import { JamoTrack } from '@/components/JamoTrack';
 import { Keyboard } from '@/components/Keyboard';
 import { NextKeyHint } from '@/components/NextKeyHint';
+import { RaceResultCard } from '@/components/RaceResultCard';
 
 function formatSeconds(ms: number): string {
   return (ms / 1000).toFixed(1);
@@ -63,30 +64,7 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
       </Link>
 
       {session.isComplete && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-neutral-900 rounded-2xl p-8 w-80 text-center flex flex-col gap-4 text-white">
-            <h2 className="text-2xl font-semibold">Finished! 🏁</h2>
-            <div>
-              <b className="block text-4xl text-blue-400 tabular-nums">
-                {formatSeconds(elapsedMs)}s
-              </b>
-              <span className="text-sm text-neutral-400">
-                accuracy {session.accuracy}%
-              </span>
-            </div>
-            <div className="flex gap-2 justify-center mt-2">
-              <button
-                onClick={onRetry}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white"
-              >
-                Retry
-              </button>
-              <Link href="/lessons" className="px-4 py-2 rounded-lg bg-neutral-700 text-white">
-                Start typing practice
-              </Link>
-            </div>
-          </div>
-        </div>
+        <RaceResultCard timeMs={elapsedMs} accuracy={session.accuracy} onRetry={onRetry} />
       )}
     </main>
   );
