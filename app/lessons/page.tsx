@@ -4,9 +4,13 @@ import { CATEGORIES } from '@/lib/curriculum/categories';
 export default function LessonsPage() {
   return (
     <main className="min-h-screen flex flex-col items-center gap-6 p-8">
+      <header className="text-center mt-8">
+        <h1 className="text-3xl font-bold">한글 타자 연습 ⌨️</h1>
+        <p className="text-neutral-400 mt-2">Learn the Korean keyboard, one key at a time.</p>
+      </header>
       <div className="flex flex-col gap-6 w-full max-w-md">
         {/* 상단 배너 슬롯 — 이벤트 배너(예: 한글날 이벤트) 자리. 현재는 비워둠. */}
-        <div data-testid="banner-slot" aria-hidden className="h-32" />
+        <div data-testid="banner-slot" aria-hidden className="h-24" />
 
         {CATEGORIES.map((category) =>
           category.stages.length > 0 ? (
