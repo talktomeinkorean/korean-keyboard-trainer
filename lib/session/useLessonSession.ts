@@ -24,6 +24,10 @@ export interface LessonSessionState {
   typedJamoCount: number;
   errorCount: number;
   keystrokes: number;
+  /** 첫 유효 키 입력 시각 (없으면 null) — 레이스 기록용 */
+  startedAt: number | null;
+  /** 마지막 항목 완성 시각 (없으면 null) — 레이스 기록용 */
+  finishedAt: number | null;
   accuracy: number; // 0~100
   wpm: number;      // 분당 타수
   isComplete: boolean;
@@ -164,6 +168,8 @@ export function useLessonSession({ items, now = () => Date.now() }: Options): Le
     typedJamoCount,
     errorCount,
     keystrokes,
+    startedAt: startRef.current,
+    finishedAt: endRef.current,
     accuracy,
     wpm,
     isComplete,
