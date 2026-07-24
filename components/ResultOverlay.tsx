@@ -17,7 +17,7 @@ export function ResultOverlay({ wpm, accuracy, onRetry }: Props) {
         </div>
         <div className="flex gap-2 justify-center mt-2">
           <button onClick={onRetry} className="px-4 py-2 rounded-lg bg-blue-500 text-white">Retry</button>
-          <Link href="/" className="px-4 py-2 rounded-lg bg-neutral-700 text-white">All lessons</Link>
+          <Link href="/lessons" className="px-4 py-2 rounded-lg bg-neutral-700 text-white">All lessons</Link>
         </div>
       </div>
     </div>
