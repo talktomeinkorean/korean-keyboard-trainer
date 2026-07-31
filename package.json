@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed:content": "node --env-file=.env.local scripts/import-content.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.8",
@@ -26,6 +27,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.3",
+    "csv-parse": "^7.0.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "jsdom": "^27.0.1",
