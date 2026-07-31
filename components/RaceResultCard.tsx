@@ -72,8 +72,8 @@ export function RaceResultCard({ timeMs, accuracy, onRetry }: Props) {
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as { bestMs: number; rank: number };
       setState({ step: 'done', bestMs: data.bestMs, rank: data.rank });
-      // 리더보드 갱신 (서버 캐시 60초 내에서는 이전 값일 수 있음)
-      const lb = await fetch('/api/leaderboard');
+      // 제출 직후에는 캐시를 우회해 방금 저장한 기록이 바로 보이게 한다
+      const lb = await fetch('/api/leaderboard?fresh=1');
       if (lb.ok) setLeaderboard(((await lb.json()) as { entries: LeaderboardEntry[] }).entries);
     } catch {
       setState({ step: 'error' });
