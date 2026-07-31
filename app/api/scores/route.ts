@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache';
 import { parseScoreSubmission } from '@/lib/game/score';
 import { getServiceClient } from '@/lib/supabase/server';
 
@@ -29,6 +30,9 @@ export async function POST(request: Request) {
   if (insertError) {
     return Response.json({ error: 'internal error' }, { status: 500 });
   }
+
+  // 새 기록 반영을 위해 리더보드 캐시 무효화 (다음 조회부터 백그라운드 갱신)
+  revalidateTag('race-leaderboard', 'max');
 
   // 내 최고 기록과 순위 (플레이어별 최고 기록 뷰 기준)
   const { data: best, error: bestError } = await supabase
