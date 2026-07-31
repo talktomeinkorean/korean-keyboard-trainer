@@ -23,6 +23,9 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // 폼 입력(닉네임/이메일 등)에 포커스가 있으면 게임 키 캡처를 하지 않는다
+      const target = e.target as HTMLElement;
+      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
       if (e.code.startsWith('Key') || e.code === 'Space') {
         e.preventDefault();
         session.handleKey(e.code);
