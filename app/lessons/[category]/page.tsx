@@ -1,11 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { CATEGORIES, getCategory, lessonsInCategory } from '@/lib/curriculum/categories';
+import { getCategory, lessonsInCategory } from '@/lib/curriculum/categories';
+import { getDbLessons } from '@/lib/content/catalog';
 import { LessonList } from './LessonList';
-
-export function generateStaticParams() {
-  return CATEGORIES.filter((c) => c.stages.length > 0).map((c) => ({ category: c.slug }));
-}
 
 export default async function CategoryPage({
   params,
@@ -14,8 +11,11 @@ export default async function CategoryPage({
 }) {
   const { category } = await params;
   const found = getCategory(category);
-  const lessons = lessonsInCategory(category);
-  if (!found || lessons.length === 0) notFound();
+  if (!found) notFound();
+
+  const lessons = found.dbKind
+    ? await getDbLessons(found.dbKind)
+    : lessonsInCategory(category);
 
   return (
     <main className="min-h-screen flex flex-col items-center gap-6 p-8">
@@ -25,7 +25,11 @@ export default async function CategoryPage({
         </Link>
         <h1 className="text-2xl font-bold">{found.title}</h1>
       </header>
-      <LessonList lessons={lessons} />
+      {lessons === null || lessons.length === 0 ? (
+        <p className="text-neutral-400">Coming soon</p>
+      ) : (
+        <LessonList lessons={lessons} />
+      )}
     </main>
   );
 }

@@ -87,6 +87,18 @@ describe('useLessonSession', () => {
     expect(result.current.errorCount).toBe(0);
   });
 
+  it('마침표가 포함된 항목을 Period 키로 완성한다', () => {
+    const { result } = renderHook(() =>
+      useLessonSession({ items: ['가.'], now: makeNow() }),
+    );
+    act(() => result.current.handleKey('KeyR')); // ㄱ
+    act(() => result.current.handleKey('KeyK')); // ㅏ
+    expect(result.current.nextCode).toBe('Period');
+    act(() => result.current.handleKey('Period'));
+    expect(result.current.isComplete).toBe(true);
+    expect(result.current.errorCount).toBe(0);
+  });
+
   it('targetJamos 와 typedJamoCount 를 노출한다', () => {
     const { result } = renderHook(() =>
       useLessonSession({ items: ['과'], now: makeNow() }),

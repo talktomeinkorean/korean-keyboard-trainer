@@ -4,7 +4,7 @@ import { KeyDef } from '@/lib/keyboard/types';
 const ROWS: string[][] = [
   ['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP'],
   ['KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL'],
-  ['KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM'],
+  ['KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period'],
 ];
 
 const byCode = new Map(DUBEOLSIK.map((k) => [k.code, k]));
@@ -17,7 +17,7 @@ function keyClasses(k: KeyDef, isNext: boolean): string {
   const typeBorder =
     k.type === 'consonant' ? 'border-b-2 border-b-amber-500'
     : k.type === 'vowel' ? 'border-b-2 border-b-emerald-500'
-    : 'border-b-2 border-b-neutral-500';
+    : 'border-b-2 border-b-neutral-500'; // space/punct — 중립
   if (isNext) return `${base} bg-blue-500 text-white border-blue-500 ring-2 ring-blue-300`;
   return `${base} bg-neutral-800 text-neutral-100 border-white/10 active:bg-neutral-700 ${typeBorder}`;
 }

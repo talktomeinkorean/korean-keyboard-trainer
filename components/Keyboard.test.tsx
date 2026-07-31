@@ -3,10 +3,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Keyboard } from './Keyboard';
 
 describe('Keyboard', () => {
-  it('26개 자모 키와 스페이스바를 렌더링한다', () => {
+  it('자모 26키 + 문장부호 2키 + 스페이스바를 렌더링한다', () => {
     const { container } = render(<Keyboard nextCode={null} />);
-    expect(container.querySelectorAll('[data-kbd-key]')).toHaveLength(27);
+    expect(container.querySelectorAll('[data-kbd-key]')).toHaveLength(29);
     expect(screen.getByTestId('kbd-key-Space')).toBeInTheDocument();
+    expect(screen.getByTestId('kbd-key-Period')).toBeInTheDocument();
   });
 
   it('스페이스바를 탭하면 Space code로 onKeyPress를 호출한다', () => {

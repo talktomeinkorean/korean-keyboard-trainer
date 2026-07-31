@@ -11,12 +11,7 @@ export const LESSONS: Lesson[] = [
   // 3. 자모 조합
   { id: 's1', stage: 'syllable', title: 'Syllables 1', items: ['가', '나', '다', '라', '마', '바', '사', '아'] },
   { id: 's2', stage: 'syllable', title: 'Syllables 2 · Batchim', items: ['간', '달', '곰', '술', '밥', '눈', '문', '발'] },
-  // 4. 단어
-  { id: 'w1', stage: 'word', title: 'Words 1', items: ['한국', '사람', '학교', '친구', '음악', '시간'] },
-  { id: 'w2', stage: 'word', title: 'Words 2', items: ['안녕', '커피', '주말', '여행', '사랑', '행복'] },
-  // 5. 짧은 문장
-  { id: 'st1', stage: 'sentence', title: 'Sentences 1', items: ['안녕하세요', '한국어 배우기', '만나서 반가워요'] },
-  { id: 'st2', stage: 'sentence', title: 'Sentences 2', items: ['오늘 날씨 좋아요', '커피 한 잔 주세요', '한국 음악 좋아해요'] },
+  // 단어/문장/지문 레슨은 DB(practice_texts) 기반 자동 생성으로 대체됨 (lib/content/catalog.ts)
 ];
 
 const byId = new Map(LESSONS.map((l) => [l.id, l]));

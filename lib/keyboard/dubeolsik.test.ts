@@ -2,12 +2,20 @@ import { describe, it, expect } from 'vitest';
 import { DUBEOLSIK, keyByCode, keyByJamo } from './dubeolsik';
 
 describe('DUBEOLSIK keymap', () => {
-  it('14개 기본 자음과 12개 기본 모음, 총 26개 기본 키를 매핑한다', () => {
+  it('14개 기본 자음, 12개 기본 모음, 문장부호 2개를 매핑한다', () => {
     const consonants = DUBEOLSIK.filter((k) => k.type === 'consonant');
     const vowels = DUBEOLSIK.filter((k) => k.type === 'vowel');
+    const puncts = DUBEOLSIK.filter((k) => k.type === 'punct');
     expect(consonants).toHaveLength(14);
     expect(vowels).toHaveLength(12);
-    expect(DUBEOLSIK).toHaveLength(26);
+    expect(puncts).toHaveLength(2);
+    expect(DUBEOLSIK).toHaveLength(28);
+  });
+
+  it('마침표/쉼표 키를 매핑한다 (문장 콘텐츠용)', () => {
+    expect(keyByCode('Period')?.jamo).toBe('.');
+    expect(keyByCode('Comma')?.jamo).toBe(',');
+    expect(keyByJamo('.')?.code).toBe('Period');
   });
 
   it('대표 키들을 올바른 자모로 매핑한다', () => {

@@ -15,6 +15,20 @@ function formatSeconds(ms: number): string {
   return (ms / 1000).toFixed(1);
 }
 
+/** DB 단어 풀(/api/race-words)에서 5개 로드. 미설정/오류 시 내장 풀로 폴백. */
+async function loadWords(): Promise<string[]> {
+  try {
+    const res = await fetch('/api/race-words');
+    if (res.ok) {
+      const data = (await res.json()) as { words: string[] };
+      if (Array.isArray(data.words) && data.words.length > 0) return data.words;
+    }
+  } catch {
+    /* 폴백으로 진행 */
+  }
+  return pickRaceWords(5);
+}
+
 function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void }) {
   const session = useLessonSession({ items: words });
   const [nowMs, setNowMs] = useState<number | null>(null);
@@ -26,7 +40,7 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
       // 폼 입력(닉네임/이메일 등)에 포커스가 있으면 게임 키 캡처를 하지 않는다
       const target = e.target as HTMLElement;
       if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
-      if (e.code.startsWith('Key') || e.code === 'Space') {
+      if (e.code.startsWith('Key') || e.code === 'Space' || e.code === 'Comma' || e.code === 'Period') {
         e.preventDefault();
         session.handleKey(e.code);
       }
@@ -76,13 +90,19 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
 export function RaceGame() {
   const [words, setWords] = useState<string[] | null>(null);
 
-  // pickRaceWords 는 Math.random 을 쓰므로 hydration 불일치를 피해 클라이언트에서 1회 실행
+  // 랜덤 선택은 hydration 불일치를 피해 클라이언트에서 실행
   useEffect(() => {
-    setWords(pickRaceWords(5));
+    void loadWords().then(setWords);
   }, []);
 
   if (!words) return <main className="min-h-screen" />;
 
   // words 배열을 key 로 사용 — Retry 시 세션 전체 리마운트
-  return <RaceRound key={words.join(',')} words={words} onRetry={() => setWords(pickRaceWords(5))} />;
+  return (
+    <RaceRound
+      key={words.join(',')}
+      words={words}
+      onRetry={() => void loadWords().then(setWords)}
+    />
+  );
 }

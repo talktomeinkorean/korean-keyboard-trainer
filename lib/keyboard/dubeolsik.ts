@@ -35,6 +35,9 @@ export const DUBEOLSIK: KeyDef[] = [
   { code: 'KeyB', jamo: 'ㅠ', type: 'vowel', finger: 'left-index' },
   { code: 'KeyN', jamo: 'ㅜ', type: 'vowel', finger: 'right-index' },
   { code: 'KeyM', jamo: 'ㅡ', type: 'vowel', finger: 'right-index' },
+  // 문장부호 — DB 문장 콘텐츠(마침표/쉼표) 입력용
+  { code: 'Comma', jamo: ',', type: 'punct', finger: 'right-middle' },
+  { code: 'Period', jamo: '.', type: 'punct', finger: 'right-ring' },
 ];
 
 // 문장 연습용 스페이스. DUBEOLSIK(자모 26키)에는 포함하지 않고 조회 맵에만 추가한다.

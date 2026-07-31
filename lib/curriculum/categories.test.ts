@@ -22,16 +22,16 @@ describe('categories', () => {
     expect(ids).toEqual(['c1', 'c2', 'c3', 'v1', 'v2', 's1', 's2']);
   });
 
-  it('단어 레슨은 Vocabulary, 문장 레슨은 Short Sentences 에 속한다', () => {
-    expect(lessonsInCategory('vocabulary').map((l) => l.id)).toEqual(['w1', 'w2']);
-    expect(lessonsInCategory('short-sentences').map((l) => l.id)).toEqual(['st1', 'st2']);
-  });
-
-  it('Long Text 는 아직 레슨이 없다', () => {
+  it('단어/문장/지문 카테고리는 DB kind 를 갖고 정적 레슨은 없다', () => {
+    expect(getCategory('vocabulary')?.dbKind).toBe('vocabulary');
+    expect(getCategory('short-sentences')?.dbKind).toBe('sentence');
+    expect(getCategory('long-text')?.dbKind).toBe('long_text');
+    expect(lessonsInCategory('vocabulary')).toEqual([]);
+    expect(lessonsInCategory('short-sentences')).toEqual([]);
     expect(lessonsInCategory('long-text')).toEqual([]);
   });
 
-  it('모든 레슨이 정확히 하나의 카테고리에 속한다', () => {
+  it('모든 정적 레슨이 정확히 하나의 카테고리에 속한다', () => {
     const all = CATEGORIES.flatMap((c) => lessonsInCategory(c.slug).map((l) => l.id));
     expect(all.sort()).toEqual(LESSONS.map((l) => l.id).sort());
     expect(new Set(all).size).toBe(all.length);
