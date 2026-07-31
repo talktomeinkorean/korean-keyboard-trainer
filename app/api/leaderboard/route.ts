@@ -7,10 +7,12 @@ export interface LeaderboardEntry {
 }
 
 // 60초 캐시 — 트래픽과 무관하게 Supabase 조회는 분당 1회 수준 (free 티어 egress 대비)
+// 주의: 미설정(503) 판단은 캐시 밖에서 한다. 캐시 안에서 null 을 반환하면
+// 환경 변수를 넣은 뒤에도 최대 60초간 미설정 응답이 캐시로 남는다.
 const getLeaderboard = unstable_cache(
-  async (): Promise<LeaderboardEntry[] | null> => {
+  async (): Promise<LeaderboardEntry[]> => {
     const supabase = getServiceClient();
-    if (!supabase) return null;
+    if (!supabase) throw new Error('not configured');
     const { data, error } = await supabase
       .from('race_best')
       .select('nickname, time_ms')
@@ -24,12 +26,11 @@ const getLeaderboard = unstable_cache(
 );
 
 export async function GET() {
+  if (!getServiceClient()) {
+    return Response.json({ error: 'not configured' }, { status: 503 });
+  }
   try {
-    const entries = await getLeaderboard();
-    if (entries === null) {
-      return Response.json({ error: 'not configured' }, { status: 503 });
-    }
-    return Response.json({ entries });
+    return Response.json({ entries: await getLeaderboard() });
   } catch {
     return Response.json({ error: 'internal error' }, { status: 500 });
   }
