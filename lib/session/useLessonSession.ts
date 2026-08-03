@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useCallback } from 'react';
 import { disassemble } from 'es-hangul';
-import { keyByCode, keyByJamo } from '@/lib/keyboard/dubeolsik';
+import { keyByCode, keyForChar } from '@/lib/keyboard/dubeolsik';
 import { createComposer } from '@/lib/hangul/composer';
 
 interface Options {
@@ -18,6 +18,8 @@ export interface LessonSessionState {
   typed: string;
   /** 다음에 눌러야 할 키 code (없으면 null) */
   nextCode: string | null;
+  /** 다음 입력에 Shift 가 필요한지 (쌍자음/ㅒㅖ/기호) */
+  nextShift: boolean;
   /** 현재 항목의 자모 시퀀스 */
   targetJamos: string[];
   /** 맞게 입력된 자모 개수 (targetJamos 의 앞 몇 개가 완료됐는지) */
@@ -31,7 +33,7 @@ export interface LessonSessionState {
   accuracy: number; // 0~100
   wpm: number;      // 분당 타수
   isComplete: boolean;
-  handleKey(code: string): void;
+  handleKey(code: string, shift?: boolean): void;
   /** 레슨을 처음부터 다시 시작 (상태 초기화) */
   reset(): void;
 }
@@ -86,13 +88,14 @@ export function useLessonSession({ items, now = () => Date.now() }: Options): Le
   // 타깃 항목을 자모 시퀀스로 분해
   const targetJamos = useMemo(() => disassemble(currentItem).split(''), [currentItem]);
 
-  const nextCode = useMemo(() => {
+  const { nextCode, nextShift } = useMemo(() => {
     const nextJamo = targetJamos[typedJamoCount];
-    if (!nextJamo) return null;
-    return keyByJamo(nextJamo)?.code ?? null;
+    if (!nextJamo) return { nextCode: null, nextShift: false };
+    const found = keyForChar(nextJamo);
+    return { nextCode: found?.key.code ?? null, nextShift: found?.shift ?? false };
   }, [targetJamos, typedJamoCount]);
 
-  const handleKey = useCallback((code: string) => {
+  const handleKey = useCallback((code: string, shift = false) => {
     if (isCompleteRef.current) return;
     const key = keyByCode(code);
     if (!key) return; // 매핑 안 된 키 무시
@@ -107,7 +110,8 @@ export function useLessonSession({ items, now = () => Date.now() }: Options): Le
     const tJamos = disassemble(target).split('');
 
     const composer = composerRef.current;
-    composer.push(key.jamo);
+    // shift 문자가 정의된 키만 shift 적용, 아니면 기본 자모 (실제 두벌식: Shift+ㅁ=ㅁ)
+    composer.push(shift && key.shift ? key.shift : key.jamo);
     const typedJamos = composer.jamos();
     const count = typedJamos.length;
 
@@ -164,6 +168,7 @@ export function useLessonSession({ items, now = () => Date.now() }: Options): Le
     currentItem,
     typed,
     nextCode,
+    nextShift,
     targetJamos,
     typedJamoCount,
     errorCount,

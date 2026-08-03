@@ -87,6 +87,34 @@ describe('useLessonSession', () => {
     expect(result.current.errorCount).toBe(0);
   });
 
+  it('쌍자음 항목을 Shift 조합으로 완성한다', () => {
+    const { result } = renderHook(() =>
+      useLessonSession({ items: ['빠'], now: makeNow() }),
+    );
+    expect(result.current.nextCode).toBe('KeyQ'); // ㅃ = Shift+Q
+    expect(result.current.nextShift).toBe(true);
+
+    act(() => result.current.handleKey('KeyQ')); // shift 없이 → ㅂ (오타)
+    expect(result.current.errorCount).toBe(1);
+
+    act(() => result.current.handleKey('KeyQ', true)); // ㅃ
+    expect(result.current.typedJamoCount).toBe(1);
+    expect(result.current.nextShift).toBe(false);
+
+    act(() => result.current.handleKey('KeyK')); // ㅏ → 완성
+    expect(result.current.isComplete).toBe(true);
+  });
+
+  it('shift 값이 없는 키에 Shift 를 눌러도 기본 자모로 입력된다', () => {
+    const { result } = renderHook(() =>
+      useLessonSession({ items: ['마'], now: makeNow() }),
+    );
+    act(() => result.current.handleKey('KeyA', true)); // Shift+ㅁ = ㅁ
+    act(() => result.current.handleKey('KeyK'));
+    expect(result.current.isComplete).toBe(true);
+    expect(result.current.errorCount).toBe(0);
+  });
+
   it('마침표가 포함된 항목을 Period 키로 완성한다', () => {
     const { result } = renderHook(() =>
       useLessonSession({ items: ['가.'], now: makeNow() }),

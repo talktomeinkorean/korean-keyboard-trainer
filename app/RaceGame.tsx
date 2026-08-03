@@ -40,9 +40,13 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
       // 폼 입력(닉네임/이메일 등)에 포커스가 있으면 게임 키 캡처를 하지 않는다
       const target = e.target as HTMLElement;
       if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
-      if (e.code.startsWith('Key') || e.code === 'Space' || e.code === 'Comma' || e.code === 'Period') {
+      if (
+        e.code.startsWith('Key') || e.code.startsWith('Digit') ||
+        e.code === 'Space' || e.code === 'Comma' || e.code === 'Period' ||
+        e.code === 'Quote' || e.code === 'Slash'
+      ) {
         e.preventDefault();
-        session.handleKey(e.code);
+        session.handleKey(e.code, e.shiftKey);
       }
     }
     window.addEventListener('keydown', onKeyDown);
@@ -74,8 +78,12 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
         typedJamoCount={session.typedJamoCount}
         errorCount={session.errorCount}
       />
-      <Keyboard nextCode={session.nextCode} onKeyPress={session.handleKey} />
-      <NextKeyHint code={session.nextCode} />
+      <Keyboard
+        nextCode={session.nextCode}
+        nextShift={session.nextShift}
+        onKeyPress={session.handleKey}
+      />
+      <NextKeyHint code={session.nextCode} shift={session.nextShift} />
       <Link href="/lessons" className="text-sm text-neutral-500 underline">
         Skip to typing practice →
       </Link>

@@ -1,4 +1,4 @@
-export type KeyType = 'consonant' | 'vowel' | 'space' | 'punct';
+export type KeyType = 'consonant' | 'vowel' | 'space' | 'punct' | 'digit';
 
 export type Finger =
   | 'left-pinky' | 'left-ring' | 'left-middle' | 'left-index'

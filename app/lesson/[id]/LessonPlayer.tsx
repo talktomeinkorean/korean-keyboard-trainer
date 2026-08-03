@@ -21,9 +21,13 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.code.startsWith('Key') || e.code === 'Space' || e.code === 'Comma' || e.code === 'Period') {
+      if (
+        e.code.startsWith('Key') || e.code.startsWith('Digit') ||
+        e.code === 'Space' || e.code === 'Comma' || e.code === 'Period' ||
+        e.code === 'Quote' || e.code === 'Slash'
+      ) {
         e.preventDefault();
-        session.handleKey(e.code);
+        session.handleKey(e.code, e.shiftKey);
       }
     }
     window.addEventListener('keydown', onKeyDown);
@@ -53,8 +57,13 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         typedJamoCount={session.typedJamoCount}
         errorCount={session.errorCount}
       />
-      <Keyboard nextCode={session.nextCode} onKeyPress={session.handleKey} />
-      <NextKeyHint code={session.nextCode} />
+      <Keyboard
+        nextCode={session.nextCode}
+        nextShift={session.nextShift}
+        layout={lesson.stage === 'sentence' || lesson.stage === 'long_text' ? 'extended' : 'basic'}
+        onKeyPress={session.handleKey}
+      />
+      <NextKeyHint code={session.nextCode} shift={session.nextShift} />
       <p className="text-xs text-neutral-600">Left hand = consonants (orange) · Right hand = vowels (green)</p>
       {/* 터치 기기(둔한 포인터)에서만 안내 — 창 너비가 아니라 실제 입력 방식 기준 */}
       <p className="text-xs text-neutral-600 hidden [@media(pointer:coarse)]:block">Tap the keys to type</p>

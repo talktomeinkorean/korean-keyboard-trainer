@@ -25,7 +25,7 @@ describe('buildSetLessons', () => {
 
   it('항목을 sanitize 하고 빈 항목은 제외한다', () => {
     const lessons = buildSetLessons(
-      rows([[1, '좋아요!'], [1, '???']]),
+      rows([[1, '좋아요~ ★'], [1, '~★~']]),
       { stage: 'sentence', chunkSize: 5, idPrefix: 'sen', titlePrefix: 'Sentences' },
     );
     expect(lessons[0].items).toEqual(['좋아요']);
