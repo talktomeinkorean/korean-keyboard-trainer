@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Lesson } from '@/lib/curriculum/types';
 import { useLessonSession } from '@/lib/session/useLessonSession';
 import { Keyboard } from '@/components/Keyboard';
 import { TypingLine } from '@/components/TypingLine';
+import { PassageView } from '@/components/PassageView';
 import { JamoTrack } from '@/components/JamoTrack';
 import { StatsBar } from '@/components/StatsBar';
 import { NextKeyHint } from '@/components/NextKeyHint';
@@ -16,6 +17,24 @@ const store = new LocalProgressStore();
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const session = useLessonSession({ items: lesson.items });
   const savedRef = useRef(false);
+  const isLongText = lesson.stage === 'long_text';
+
+  // 긴 글 연습 실시간 통계 — 500ms tick 으로 경과시간·타수/분 갱신
+  const [nowMs, setNowMs] = useState<number | null>(null);
+  useEffect(() => {
+    if (!isLongText || session.startedAt === null || session.isComplete) return;
+    const t = setInterval(() => setNowMs(Date.now()), 500);
+    return () => clearInterval(t);
+  }, [isLongText, session.startedAt, session.isComplete]);
+
+  const elapsedMs =
+    session.startedAt === null
+      ? 0
+      : (session.finishedAt ?? nowMs ?? session.startedAt) - session.startedAt;
+  const liveWpm =
+    session.isComplete || elapsedMs <= 0
+      ? session.wpm
+      : Math.round(session.keystrokes / (elapsedMs / 60000));
 
   // 키 입력 캡처 — event.code 사용, 기본 동작 차단(IME 회피)
   useEffect(() => {
@@ -50,8 +69,22 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-8 p-6">
       <h1 className="text-lg text-neutral-400">{lesson.title}</h1>
-      <StatsBar wpm={session.wpm} accuracy={session.accuracy} index={session.currentIndex} total={lesson.items.length} />
-      <TypingLine target={session.currentItem} typedJamoCount={session.typedJamoCount} />
+      <StatsBar
+        wpm={isLongText ? liveWpm : session.wpm}
+        accuracy={session.accuracy}
+        index={session.currentIndex}
+        total={lesson.items.length}
+        elapsedSec={isLongText ? elapsedMs / 1000 : undefined}
+      />
+      {isLongText ? (
+        <PassageView
+          lines={lesson.items}
+          currentIndex={session.currentIndex}
+          typedJamoCount={session.typedJamoCount}
+        />
+      ) : (
+        <TypingLine target={session.currentItem} typedJamoCount={session.typedJamoCount} />
+      )}
       <JamoTrack
         item={session.currentItem}
         typedJamoCount={session.typedJamoCount}

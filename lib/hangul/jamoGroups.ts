@@ -10,3 +10,37 @@ import { disassemble } from 'es-hangul';
 export function toJamoGroups(item: string): string[][] {
   return Array.from(item).map((ch) => disassemble(ch).split(''));
 }
+
+export interface JamoProgressSplit {
+  /** 완성된 음절들 */
+  done: string;
+  /** 조합 중인 음절 (없으면 빈 문자열) */
+  current: string;
+  /** 아직 시작하지 않은 글자들 */
+  todo: string;
+}
+
+/**
+ * 자모 소비량(typedJamoCount) 기준으로 대상 문자열을
+ * 완성 / 조합 중 / 남은 글자로 분할한다. TypingLine·PassageView 공용.
+ */
+export function splitByJamoProgress(target: string, typedJamoCount: number): JamoProgressSplit {
+  const groups = toJamoGroups(target);
+  let consumed = 0;
+  let doneChars = 0;
+  let hasCurrent = false;
+  for (const g of groups) {
+    if (consumed + g.length <= typedJamoCount) {
+      consumed += g.length;
+      doneChars++;
+    } else {
+      hasCurrent = typedJamoCount > consumed;
+      break;
+    }
+  }
+  return {
+    done: target.slice(0, doneChars),
+    current: hasCurrent ? target[doneChars] : '',
+    todo: target.slice(doneChars + (hasCurrent ? 1 : 0)),
+  };
+}
