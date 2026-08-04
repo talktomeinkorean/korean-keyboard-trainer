@@ -18,7 +18,11 @@ export function PassageView({ lines, currentIndex, typedJamoCount }: Props) {
   const windowIndices = [currentIndex - 1, currentIndex, currentIndex + 1];
 
   return (
-    <div className="w-full max-w-xl min-h-48 flex flex-col justify-center gap-2 px-2">
+    // key=currentIndex — 줄 이동 시 창 전체가 리마운트되며 슬라이드 애니메이션 재생
+    <div
+      key={currentIndex}
+      className="w-full max-w-xl min-h-48 flex flex-col justify-center gap-2 px-2 motion-safe:animate-line-slide"
+    >
       {windowIndices.map((i) => {
         if (i < 0 || i >= lines.length) {
           // 첫/마지막 줄에서도 현재 줄이 가운데 오도록 자리를 유지한다
