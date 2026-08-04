@@ -18,6 +18,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const session = useLessonSession({ items: lesson.items });
   const savedRef = useRef(false);
   const isLongText = lesson.stage === 'long_text';
+  // 문장/긴글: 확장 키보드 사용 + 자모 칩 숨김 (칩은 자모~단어 단계용 초급 가이드)
+  const isExtendedStage = lesson.stage === 'sentence' || isLongText;
 
   // 긴 글 연습 실시간 통계 — 500ms tick 으로 경과시간·타수/분 갱신
   const [nowMs, setNowMs] = useState<number | null>(null);
@@ -85,15 +87,17 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       ) : (
         <TypingLine target={session.currentItem} typedJamoCount={session.typedJamoCount} />
       )}
-      <JamoTrack
-        item={session.currentItem}
-        typedJamoCount={session.typedJamoCount}
-        errorCount={session.errorCount}
-      />
+      {!isExtendedStage && (
+        <JamoTrack
+          item={session.currentItem}
+          typedJamoCount={session.typedJamoCount}
+          errorCount={session.errorCount}
+        />
+      )}
       <Keyboard
         nextCode={session.nextCode}
         nextShift={session.nextShift}
-        layout={lesson.stage === 'sentence' || lesson.stage === 'long_text' ? 'extended' : 'basic'}
+        layout={isExtendedStage ? 'extended' : 'basic'}
         onKeyPress={session.handleKey}
       />
       <NextKeyHint code={session.nextCode} shift={session.nextShift} />
