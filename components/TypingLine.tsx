@@ -1,4 +1,4 @@
-import { toJamoGroups } from '@/lib/hangul/jamoGroups';
+import { splitByJamoProgress } from '@/lib/hangul/jamoGroups';
 
 interface Props {
   target: string;
@@ -7,24 +7,7 @@ interface Props {
 }
 
 export function TypingLine({ target, typedJamoCount }: Props) {
-  // 자모 소비량 기준으로 완성 음절 / 조합 중 음절을 나눈다.
-  const groups = toJamoGroups(target);
-  let consumed = 0;
-  let doneChars = 0;
-  let hasCurrent = false;
-  for (const g of groups) {
-    if (consumed + g.length <= typedJamoCount) {
-      consumed += g.length;
-      doneChars++;
-    } else {
-      hasCurrent = typedJamoCount > consumed;
-      break;
-    }
-  }
-
-  const done = target.slice(0, doneChars);
-  const current = hasCurrent ? target[doneChars] : '';
-  const todo = target.slice(doneChars + (hasCurrent ? 1 : 0));
+  const { done, current, todo } = splitByJamoProgress(target, typedJamoCount);
 
   return (
     <div className="text-4xl tracking-widest font-medium">

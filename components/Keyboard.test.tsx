@@ -3,17 +3,19 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Keyboard } from './Keyboard';
 
 describe('Keyboard', () => {
-  it('26개 자모 키와 스페이스바를 렌더링한다', () => {
+  it('기본 레이아웃: 자모 26 + 문장부호 2 + 스페이스 + Shift = 30키, 숫자열 없음', () => {
     const { container } = render(<Keyboard nextCode={null} />);
-    expect(container.querySelectorAll('[data-kbd-key]')).toHaveLength(27);
-    expect(screen.getByTestId('kbd-key-Space')).toBeInTheDocument();
+    expect(container.querySelectorAll('[data-kbd-key]')).toHaveLength(30);
+    expect(screen.queryByTestId('kbd-key-Digit1')).toBeNull();
+    expect(screen.getByTestId('kbd-key-Shift')).toBeInTheDocument();
   });
 
-  it('스페이스바를 탭하면 Space code로 onKeyPress를 호출한다', () => {
-    const onKeyPress = vi.fn();
-    render(<Keyboard nextCode={null} onKeyPress={onKeyPress} />);
-    fireEvent.click(screen.getByTestId('kbd-key-Space'));
-    expect(onKeyPress).toHaveBeenCalledWith('Space');
+  it('확장 레이아웃: 숫자열 10 + 따옴표/물음표 키가 추가된다', () => {
+    const { container } = render(<Keyboard nextCode={null} layout="extended" />);
+    expect(container.querySelectorAll('[data-kbd-key]')).toHaveLength(42);
+    expect(screen.getByTestId('kbd-key-Digit1')).toBeInTheDocument();
+    expect(screen.getByTestId('kbd-key-Quote')).toBeInTheDocument();
+    expect(screen.getByTestId('kbd-key-Slash')).toBeInTheDocument();
   });
 
   it('nextCode 키에 강조 표시를 한다', () => {
@@ -21,10 +23,35 @@ describe('Keyboard', () => {
     expect(screen.getByTestId('kbd-key-KeyR').className).toContain('bg-blue-500');
   });
 
-  it('키를 탭하면 해당 code로 onKeyPress를 호출한다 (모바일 입력)', () => {
+  it('nextShift 면 Shift 키도 강조한다', () => {
+    render(<Keyboard nextCode="KeyQ" nextShift />);
+    expect(screen.getByTestId('kbd-key-Shift').className).toContain('bg-blue-500');
+  });
+
+  it('키를 탭하면 (code, shift=false) 로 onKeyPress 를 호출한다', () => {
     const onKeyPress = vi.fn();
     render(<Keyboard nextCode={null} onKeyPress={onKeyPress} />);
     fireEvent.click(screen.getByTestId('kbd-key-KeyR'));
-    expect(onKeyPress).toHaveBeenCalledWith('KeyR');
+    expect(onKeyPress).toHaveBeenCalledWith('KeyR', false);
+  });
+
+  it('Shift 토글: 키캡이 shift 문자로 바뀌고, 입력 후 자동 해제된다', () => {
+    const onKeyPress = vi.fn();
+    render(<Keyboard nextCode={null} onKeyPress={onKeyPress} />);
+
+    fireEvent.click(screen.getByTestId('kbd-key-Shift'));
+    expect(screen.getByTestId('kbd-key-KeyQ')).toHaveTextContent('ㅃ');
+
+    fireEvent.click(screen.getByTestId('kbd-key-KeyQ'));
+    expect(onKeyPress).toHaveBeenCalledWith('KeyQ', true);
+    // 자동 해제 — 키캡이 기본 문자로 복귀
+    expect(screen.getByTestId('kbd-key-KeyQ')).toHaveTextContent('ㅂ');
+  });
+
+  it('스페이스바를 탭하면 Space code 로 호출한다', () => {
+    const onKeyPress = vi.fn();
+    render(<Keyboard nextCode={null} onKeyPress={onKeyPress} />);
+    fireEvent.click(screen.getByTestId('kbd-key-Space'));
+    expect(onKeyPress).toHaveBeenCalledWith('Space', false);
   });
 });

@@ -1,4 +1,4 @@
-export type Stage = 'consonant' | 'vowel' | 'syllable' | 'word' | 'sentence';
+export type Stage = 'consonant' | 'vowel' | 'syllable' | 'word' | 'sentence' | 'long_text';
 
 export interface Lesson {
   id: string;

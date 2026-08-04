@@ -6,14 +6,28 @@ const FINGER_LABEL: Record<string, string> = {
   thumb: 'thumb',
 };
 
-export function NextKeyHint({ code }: { code: string | null }) {
+interface Props {
+  code: string | null;
+  /** 다음 입력에 Shift 가 필요한지 (쌍자음/ㅒㅖ/기호) */
+  shift?: boolean;
+}
+
+export function NextKeyHint({ code, shift = false }: Props) {
   if (!code) return <div className="h-5" />;
   const key = keyByCode(code);
   if (!key) return <div className="h-5" />;
-  const letter = code.replace('Key', '');
+
+  const char = shift && key.shift ? key.shift : key.jamo;
+  const label =
+    code === 'Space' ? 'Space'
+    : code.startsWith('Key') ? code.slice(3)
+    : code.startsWith('Digit') ? code.slice(5)
+    : char;
+  const keyText = label === char ? label : `${label} (${char})`;
+
   return (
     <div className="text-sm text-gray-500">
-      Next key: <b className="text-blue-500">{letter === 'Space' ? 'Space' : `${letter} (${key.jamo})`}</b> · {FINGER_LABEL[key.finger]}
+      Next key: <b className="text-blue-500">{shift ? `Shift + ${keyText}` : keyText}</b> · {FINGER_LABEL[key.finger]}
     </div>
   );
 }

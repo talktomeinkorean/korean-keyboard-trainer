@@ -13,7 +13,7 @@ export default function LessonsPage() {
         <div data-testid="banner-slot" aria-hidden className="h-24" />
 
         {CATEGORIES.map((category) =>
-          category.stages.length > 0 ? (
+          category.stages.length > 0 || category.dbKind ? (
             <Link
               key={category.slug}
               href={`/lessons/${category.slug}`}
