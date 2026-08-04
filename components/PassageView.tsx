@@ -9,53 +9,67 @@ interface Props {
   typedJamoCount: number;
 }
 
+// 행 높이를 고정해야 translateY 슬라이드 오프셋이 정확하다
+const ROW_PX = 72;
+const GAP_PX = 8;
+const STEP_PX = ROW_PX + GAP_PX;
+
 /**
- * 긴 글 연습용 3줄 창 뷰 — 이전(완료)/현재(강조+입력 줄)/다음(대기)만 보여준다.
- * 진행하면 창이 한 줄씩 내려가므로 스크롤이 없다.
+ * 긴 글 연습용 3줄 창 뷰 — 전체 줄을 쌓아두고 컨테이너를 translateY 로 이동시켜,
+ * 줄 완성 시 이전 줄이 위로 밀려 올라가는 슬라이드 전환을 만든다.
+ * 뷰포트(3행 높이) 밖의 줄은 overflow 로 가려진다.
  */
 export function PassageView({ lines, currentIndex, typedJamoCount }: Props) {
   const { done, current } = splitByJamoProgress(lines[currentIndex] ?? '', typedJamoCount);
-  const windowIndices = [currentIndex - 1, currentIndex, currentIndex + 1];
+  // 현재 줄이 항상 가운데(2번째 행)에 오도록 창을 이동
+  const offsetPx = (currentIndex - 1) * STEP_PX;
 
   return (
-    // key=currentIndex — 줄 이동 시 창 전체가 리마운트되며 슬라이드 애니메이션 재생
     <div
-      key={currentIndex}
-      className="w-full max-w-xl min-h-48 flex flex-col justify-center gap-2 px-2 motion-safe:animate-line-slide"
+      className="w-full max-w-xl overflow-hidden px-2"
+      style={{ height: ROW_PX * 3 + GAP_PX * 2 }}
     >
-      {windowIndices.map((i) => {
-        if (i < 0 || i >= lines.length) {
-          // 첫/마지막 줄에서도 현재 줄이 가운데 오도록 자리를 유지한다
-          return <div key={i} aria-hidden className="h-9" />;
-        }
-        const state = i < currentIndex ? 'done' : i === currentIndex ? 'current' : 'todo';
-        return (
-          <div key={i} data-testid={`passage-line-${i}`} data-state={state}>
-            {state === 'done' && (
-              <p className="px-4 py-1.5 text-neutral-500 truncate">
-                {lines[i]} <span className="text-emerald-500">✓</span>
-              </p>
-            )}
-            {state === 'current' && (
-              <div className="rounded-xl bg-amber-500/10 border-l-4 border-amber-400 px-4 py-2">
-                <p className="text-xl font-medium">{lines[i]}</p>
-                <p data-testid="passage-input" className="mt-1 min-h-6 tracking-wide">
-                  <span data-testid="passage-input-done" className="text-emerald-500">{done}</span>
-                  <span
-                    data-testid="passage-caret"
-                    aria-hidden
-                    className="inline-block w-0.5 h-[1em] align-middle bg-blue-500 animate-caret-blink"
-                  />
-                  <span data-testid="passage-input-current" className="text-amber-500">{current}</span>
+      <div
+        data-testid="passage-column"
+        className="flex flex-col transition-transform duration-300 ease-out motion-reduce:transition-none"
+        style={{ gap: GAP_PX, transform: `translateY(${-offsetPx}px)` }}
+      >
+        {lines.map((line, i) => {
+          const state = i < currentIndex ? 'done' : i === currentIndex ? 'current' : 'todo';
+          return (
+            <div
+              key={i}
+              data-testid={`passage-line-${i}`}
+              data-state={state}
+              style={{ height: ROW_PX }}
+              className="flex flex-col justify-center"
+            >
+              {state === 'done' && (
+                <p className="px-4 text-neutral-500 truncate">
+                  {line} <span className="text-emerald-500">✓</span>
                 </p>
-              </div>
-            )}
-            {state === 'todo' && (
-              <p className="px-4 py-1.5 text-neutral-600 opacity-70 truncate">{lines[i]}</p>
-            )}
-          </div>
-        );
-      })}
+              )}
+              {state === 'current' && (
+                <div className="h-full rounded-xl bg-amber-500/10 border-l-4 border-amber-400 px-4 flex flex-col justify-center">
+                  <p className="text-lg font-medium leading-snug truncate">{line}</p>
+                  <p data-testid="passage-input" className="leading-snug tracking-wide truncate">
+                    <span data-testid="passage-input-done" className="text-emerald-500">{done}</span>
+                    <span
+                      data-testid="passage-caret"
+                      aria-hidden
+                      className="inline-block w-0.5 h-[1em] align-middle bg-blue-500 animate-caret-blink"
+                    />
+                    <span data-testid="passage-input-current" className="text-amber-500">{current}</span>
+                  </p>
+                </div>
+              )}
+              {state === 'todo' && (
+                <p className="px-4 text-neutral-600 opacity-70 truncate">{line}</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -14,24 +14,11 @@
 
 @theme {
   --animate-caret-blink: caret-blink 1s step-end infinite;
-  --animate-line-slide: line-slide 250ms ease-out;
 }
 
 @keyframes caret-blink {
   50% {
     opacity: 0;
-  }
-}
-
-/* 긴 글 3줄 창이 다음 줄로 이동할 때 — 아래에서 위로 슬라이드 */
-@keyframes line-slide {
-  from {
-    opacity: 0;
-    transform: translateY(0.75rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
