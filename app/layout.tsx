@@ -19,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Korean Typing Practice",
   description: "Learn the Korean keyboard, one key at a time.",
+  // Search Console 소유권 확인 — 제거하면 소유권이 해제된다.
+  // GTM/GA 방식은 스크립트가 클라이언트에서 삽입돼 검증기가 찾지 못하므로 메타 태그를 쓴다.
+  verification: { google: "zsgncQrO1UOJmG_cT-B71jCvjCfQOIFhU8cPHzO5-b4" },
 };
 
 export default function RootLayout({
