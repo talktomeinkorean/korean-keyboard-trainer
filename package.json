@@ -12,6 +12,7 @@
     "seed:content": "node --env-file=.env.local scripts/import-content.mjs"
   },
   "dependencies": {
+    "@next/third-parties": "^16.3.0",
     "@supabase/supabase-js": "^2.110.8",
     "es-hangul": "^2.3.8",
     "next": "16.2.9",
