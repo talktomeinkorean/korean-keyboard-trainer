@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 import { CATEGORIES, lessonsInCategory } from '@/lib/curriculum/categories';
 import { getDbLessons } from '@/lib/content/catalog';
 
-// 커스텀 도메인을 연결하면 이 값을 바꿔야 한다.
-const BASE_URL = 'https://korean-keyboard-trainer.vercel.app';
+// 도메인이 바뀌면 이 값을 바꿔야 한다 (사이트맵의 모든 URL이 여기서 파생됨).
+const BASE_URL = 'https://hangeultyping.talktomeinkorean.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
