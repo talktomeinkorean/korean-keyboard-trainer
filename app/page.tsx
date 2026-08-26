@@ -1,5 +1,5 @@
-import { RaceGame } from './RaceGame';
+import { HomeScreen } from './HomeScreen';
 
 export default function Home() {
-  return <RaceGame />;
+  return <HomeScreen />;
 }

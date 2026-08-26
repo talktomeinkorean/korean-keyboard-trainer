@@ -10,6 +10,17 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-dmsans: var(--font-dm-sans);
+  --font-dmmono: var(--font-dm-mono);
+  --font-pixel: "NeoDunggeunmo Pro", var(--font-dm-mono);
+}
+
+/* 홈 화면 카운터 숫자용 픽셀 폰트. 파일이 없으면 DM Mono 로 자동 폴백된다. */
+@font-face {
+  font-family: "NeoDunggeunmo Pro";
+  src: url("/fonts/NeoDunggeunmoPro-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
 }
 
 @theme {
