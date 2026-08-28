@@ -33,6 +33,17 @@
   }
 }
 
+/* 레이스 캐릭터 달리기 — 4프레임 스프라이트 시트를 한 칸씩 넘긴다.
+   끝값이 시트 전체 너비(64px * 4)여야 steps(4) 가 0/-64/-128/-192 를 짚는다. */
+@keyframes sprite-run {
+  from {
+    background-position-x: 0px;
+  }
+  to {
+    background-position-x: -256px;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
