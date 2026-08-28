@@ -6,12 +6,15 @@ import { pickRaceWords } from '@/lib/game/words';
 import { playSfx, startBgm, stopBgm } from '@/lib/audio/sounds';
 import { loadMuted, saveMuted } from '@/lib/audio/mutePreference';
 import { useLessonSession } from '@/lib/session/useLessonSession';
-import { RaceTrack } from '@/components/RaceTrack';
+import { RaceScene } from '@/components/RaceScene';
 import { TypingLine } from '@/components/TypingLine';
 import { JamoTrack } from '@/components/JamoTrack';
 import { Keyboard } from '@/components/Keyboard';
 import { NextKeyHint } from '@/components/NextKeyHint';
 import { RaceResultCard } from '@/components/RaceResultCard';
+
+/** 한 판에 출제할 단어 수 (DB 미설정 시 폴백 풀에서 뽑는 개수) */
+const RACE_WORD_COUNT = 10;
 
 function formatSeconds(ms: number): string {
   return (ms / 1000).toFixed(1);
@@ -28,7 +31,7 @@ async function loadWords(): Promise<string[]> {
   } catch {
     /* 폴백으로 진행 */
   }
-  return pickRaceWords(5);
+  return pickRaceWords(RACE_WORD_COUNT);
 }
 
 function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void }) {
@@ -103,7 +106,9 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-6 p-6">
-      <h1 className="text-lg text-neutral-400">Type 5 words to reach the finish line!</h1>
+      <h1 className="text-lg text-neutral-400">
+        Type {words.length} words to reach the finish line!
+      </h1>
       <div className="flex items-center gap-3">
         <div className="text-3xl font-bold tabular-nums" data-testid="race-timer">
           {formatSeconds(elapsedMs)}s
@@ -119,7 +124,13 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
           {muted ? '🔇' : '🔊'}
         </button>
       </div>
-      <RaceTrack progress={session.currentIndex + (session.isComplete ? 1 : 0)} total={words.length} />
+      <RaceScene
+        progress={session.currentIndex + (session.isComplete ? 1 : 0)}
+        total={words.length}
+      />
+      <p className="text-sm tabular-nums text-neutral-500" data-testid="race-progress">
+        {session.currentIndex + (session.isComplete ? 1 : 0)} / {words.length}
+      </p>
       <TypingLine target={session.currentItem} typedJamoCount={session.typedJamoCount} />
       <JamoTrack
         item={session.currentItem}
