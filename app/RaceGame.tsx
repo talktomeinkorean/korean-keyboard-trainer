@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { pickRaceWords } from '@/lib/game/words';
+import { playSfx, startBgm, stopBgm } from '@/lib/audio/sounds';
+import { loadMuted, saveMuted } from '@/lib/audio/mutePreference';
 import { useLessonSession } from '@/lib/session/useLessonSession';
 import { RaceTrack } from '@/components/RaceTrack';
 import { TypingLine } from '@/components/TypingLine';
@@ -32,6 +34,40 @@ async function loadWords(): Promise<string[]> {
 function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void }) {
   const session = useLessonSession({ items: words });
   const [nowMs, setNowMs] = useState<number | null>(null);
+
+  // 소리 설정 — 기본 켜짐. SSR 과 초기 HTML 을 맞추려 마운트 후 저장값을 읽는다.
+  const [muted, setMuted] = useState(false);
+  useEffect(() => setMuted(loadMuted()), []);
+  const toggleMuted = useCallback(() => {
+    setMuted((prev) => {
+      const next = !prev;
+      saveMuted(next);
+      return next;
+    });
+  }, []);
+
+  // BGM — 첫 키 입력 시 시작, 완주·음소거·이탈 시 정지
+  const isPlaying = session.startedAt !== null && !session.isComplete;
+  useEffect(() => {
+    if (muted || !isPlaying) {
+      stopBgm();
+      return;
+    }
+    startBgm();
+    return () => stopBgm();
+  }, [muted, isPlaying]);
+
+  // 단어 완성 효과음 (마지막 단어는 완주음이 대신하므로 currentIndex 가 오르지 않는다)
+  const prevIndexRef = useRef(session.currentIndex);
+  useEffect(() => {
+    if (session.currentIndex > prevIndexRef.current && !muted) playSfx('wordComplete');
+    prevIndexRef.current = session.currentIndex;
+  }, [session.currentIndex, muted]);
+
+  // 완주 효과음
+  useEffect(() => {
+    if (session.isComplete && !muted) playSfx('finish');
+  }, [session.isComplete, muted]);
 
   // 키 입력 캡처 — LessonPlayer 와 동일 (IME 회피)
   useEffect(() => {
@@ -68,8 +104,20 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-6 p-6">
       <h1 className="text-lg text-neutral-400">Type 5 words to reach the finish line!</h1>
-      <div className="text-3xl font-bold tabular-nums" data-testid="race-timer">
-        {formatSeconds(elapsedMs)}s
+      <div className="flex items-center gap-3">
+        <div className="text-3xl font-bold tabular-nums" data-testid="race-timer">
+          {formatSeconds(elapsedMs)}s
+        </div>
+        <button
+          type="button"
+          onClick={toggleMuted}
+          data-testid="sound-toggle"
+          aria-label={muted ? 'Turn sound on' : 'Turn sound off'}
+          aria-pressed={muted}
+          className="rounded-lg border border-neutral-300 px-2 py-1 text-lg leading-none text-neutral-600 hover:bg-neutral-100"
+        >
+          {muted ? '🔇' : '🔊'}
+        </button>
       </div>
       <RaceTrack progress={session.currentIndex + (session.isComplete ? 1 : 0)} total={words.length} />
       <TypingLine target={session.currentItem} typedJamoCount={session.typedJamoCount} />
