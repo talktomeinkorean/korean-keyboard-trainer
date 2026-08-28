@@ -12,6 +12,7 @@ import { JamoTrack } from '@/components/JamoTrack';
 import { Keyboard } from '@/components/Keyboard';
 import { NextKeyHint } from '@/components/NextKeyHint';
 import { RaceResultCard } from '@/components/RaceResultCard';
+import { StartPopup } from '@/components/StartPopup';
 
 /** 한 판에 출제할 단어 수 (DB 미설정 시 폴백 풀에서 뽑는 개수) */
 const RACE_WORD_COUNT = 10;
@@ -37,6 +38,8 @@ async function loadWords(): Promise<string[]> {
 function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void }) {
   const session = useLessonSession({ items: words });
   const [nowMs, setNowMs] = useState<number | null>(null);
+  // 시작 팝업을 닫아야 게임이 시작된다
+  const [showStartPopup, setShowStartPopup] = useState(true);
 
   // 소리 설정 — 기본 켜짐. SSR 과 초기 HTML 을 맞추려 마운트 후 저장값을 읽는다.
   const [muted, setMuted] = useState(false);
@@ -75,6 +78,7 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
   // 키 입력 캡처 — LessonPlayer 와 동일 (IME 회피)
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (showStartPopup) return; // 팝업이 떠 있는 동안은 게임 입력을 받지 않는다
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       // 폼 입력(닉네임/이메일 등)에 포커스가 있으면 게임 키 캡처를 하지 않는다
       const target = e.target as HTMLElement;
@@ -90,7 +94,7 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [session]);
+  }, [session, showStartPopup]);
 
   // 경과 타이머 — 첫 키 입력부터 완주까지 100ms 간격 갱신
   useEffect(() => {
@@ -147,6 +151,8 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
       <Link href="/lessons" className="text-sm text-neutral-500 underline">
         Skip to typing practice →
       </Link>
+
+      {showStartPopup && <StartPopup onStart={() => setShowStartPopup(false)} />}
 
       {session.isComplete && (
         <RaceResultCard timeMs={elapsedMs} accuracy={session.accuracy} onRetry={onRetry} />
