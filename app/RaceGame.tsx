@@ -127,6 +127,7 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
       <RaceScene
         progress={session.currentIndex + (session.isComplete ? 1 : 0)}
         total={words.length}
+        running={isPlaying}
       />
       <p className="text-sm tabular-nums text-neutral-500" data-testid="race-progress">
         {session.currentIndex + (session.isComplete ? 1 : 0)} / {words.length}

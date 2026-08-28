@@ -37,8 +37,19 @@ describe('RaceScene', () => {
     expect(screen.getByTestId('race-scene-bg').style.imageRendering).toBe('pixelated');
   });
 
-  it('러너를 표시한다', () => {
+  it('러너 스프라이트를 표시한다', () => {
     render(<RaceScene progress={0} total={10} />);
-    expect(screen.getByTestId('race-runner')).toBeInTheDocument();
+    const runner = screen.getByTestId('race-runner');
+    expect(runner.style.backgroundImage).toContain('run_sheet.webp');
+    expect(runner.style.imageRendering).toBe('pixelated');
+  });
+
+  it('진행 중일 때만 달리기 애니메이션을 재생한다', () => {
+    const { rerender } = render(<RaceScene progress={0} total={10} />);
+    expect(screen.getByTestId('race-runner').style.animation).toBe('');
+
+    rerender(<RaceScene progress={0} total={10} running />);
+    expect(screen.getByTestId('race-runner').style.animation).toContain('sprite-run');
+    expect(screen.getByTestId('race-runner').style.animation).toContain('steps(4)');
   });
 });
