@@ -1,15 +1,14 @@
-import { getTexts } from '@/lib/content/db';
+import { getTexts } from '@/lib/content/texts';
 import { sanitizeTypable } from '@/lib/content/sanitize';
 import { pickRandom } from '@/lib/game/words';
 
 const RACE_WORD_COUNT = 10;
 
-// 단어 풀은 getTexts 가 1시간 캐시 — 요청마다 랜덤 5개만 새로 뽑는다 (응답은 캐시 안 함)
+// 단어 풀은 빌드 산출물에 포함돼 있어 조회 비용이 없다. 요청마다 랜덤 10개만 뽑는다.
+const POOL = getTexts('vocabulary')
+  .map((t) => sanitizeTypable(t.text_korean))
+  .filter(Boolean);
+
 export async function GET() {
-  const texts = await getTexts('vocabulary');
-  if (!texts) {
-    return Response.json({ error: 'not configured' }, { status: 503 });
-  }
-  const pool = texts.map((t) => sanitizeTypable(t.text_korean)).filter(Boolean);
-  return Response.json({ words: pickRandom(pool, RACE_WORD_COUNT) });
+  return Response.json({ words: pickRandom(POOL, RACE_WORD_COUNT) });
 }

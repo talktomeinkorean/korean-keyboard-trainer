@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { CATEGORIES, lessonsInCategory } from '@/lib/curriculum/categories';
-import { getDbLessons } from '@/lib/content/catalog';
+import { getContentLessons } from '@/lib/content/catalog';
 
 // 도메인이 바뀌면 이 값을 바꿔야 한다 (사이트맵의 모든 URL이 여기서 파생됨).
 const BASE_URL = 'https://hangeultyping.talktomeinkorean.com';
@@ -17,7 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const category of CATEGORIES) {
     // 카테고리별 레슨 목록 — DB 미설정/오류 시 null 이면 정적 레슨만 사용
     const lessons = category.dbKind
-      ? ((await getDbLessons(category.dbKind)) ?? [])
+      ? getContentLessons(category.dbKind)
       : lessonsInCategory(category.slug);
     if (lessons.length === 0) continue; // 콘텐츠 없는 카테고리는 색인하지 않는다
 

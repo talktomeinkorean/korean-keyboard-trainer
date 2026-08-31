@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getCategory, lessonsInCategory } from '@/lib/curriculum/categories';
-import { getDbLessons } from '@/lib/content/catalog';
+import { CATEGORIES, getCategory, lessonsInCategory } from '@/lib/curriculum/categories';
+import { getContentLessons } from '@/lib/content/catalog';
 import { LessonList } from './LessonList';
+
+export function generateStaticParams() {
+  return CATEGORIES.map((c) => ({ category: c.slug }));
+}
 
 export default async function CategoryPage({
   params,
@@ -14,7 +18,7 @@ export default async function CategoryPage({
   if (!found) notFound();
 
   const lessons = found.dbKind
-    ? await getDbLessons(found.dbKind)
+    ? getContentLessons(found.dbKind)
     : lessonsInCategory(category);
 
   return (
