@@ -51,6 +51,15 @@
   }
 }
 
+/* PC·모바일 UI 를 동일하게 유지하는 기준 폭 (Figma 시안 393px).
+   화면이 더 좁으면 키 크기가 비율대로 줄어들 뿐 레이아웃은 그대로다. */
+:root {
+  --app-width: 393px;
+  --key-gap: 4px;
+  /* 한 줄에 자모 키 10개 + 간격 9개 + 좌우 여백이 들어가는 최대 키 폭 */
+  --key-w: min(34px, calc((100vw - 53px) / 10));
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

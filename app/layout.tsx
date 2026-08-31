@@ -48,7 +48,12 @@ export default function RootLayout({
     >
       {/* 로컬 개발 트래픽이 집계에 섞이지 않도록 프로덕션에서만 로드 */}
       {process.env.NODE_ENV === "production" && <GoogleTagManager gtmId={GTM_ID} />}
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {/* PC 에서도 모바일과 같은 화면을 보여주기 위해 시안 폭으로 고정한다 */}
+        <div className="mx-auto flex w-full max-w-[var(--app-width)] flex-1 flex-col">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }
