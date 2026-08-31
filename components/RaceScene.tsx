@@ -5,6 +5,8 @@ interface Props {
   total: number;
   /** 달리기 애니메이션 재생 여부 (게임 진행 중) */
   running?: boolean;
+  /** 씬 위에 겹쳐 놓을 내용 (단어 카드) */
+  overlay?: React.ReactNode;
 }
 
 const BG_SRC = '/race/bg_hanriver.webp';
@@ -19,7 +21,7 @@ const CHAR_PX = 64;
  * backgroundPosition 을 % 로 다루면 실제 렌더 크기를 재지 않아도
  * 0% = 장면 시작, 100% = 장면 끝(결승선)이 되어 반응형에서 그대로 동작한다.
  */
-export function RaceScene({ progress, total, running = false }: Props) {
+export function RaceScene({ progress, total, running = false, overlay }: Props) {
   const ratio = total > 0 ? Math.min(Math.max(progress / total, 0), 1) : 0;
   const positionX = `${ratio * 100}%`;
 
@@ -28,7 +30,7 @@ export function RaceScene({ progress, total, running = false }: Props) {
     // 창 너비의 약 2.1배가 보이지 않는 영역으로 남아 전진 여유가 생긴다.
     <div
       data-testid="race-scene"
-      className="relative w-full max-w-md aspect-[7/6] overflow-hidden rounded-xl border-2 border-sky-300 bg-sky-300"
+      className="relative w-full aspect-[7/6] max-h-[435px] overflow-hidden bg-sky-300"
     >
       <div
         data-testid="race-scene-bg"
@@ -41,6 +43,10 @@ export function RaceScene({ progress, total, running = false }: Props) {
           imageRendering: 'pixelated',
         }}
       />
+      {overlay && (
+        <div className="absolute inset-x-0 top-0 flex justify-center">{overlay}</div>
+      )}
+
       {/* 캐릭터 — 4프레임 스프라이트. 진행 중에만 달리고, 멈추면 첫 프레임으로 선다. */}
       <div
         data-testid="race-runner"

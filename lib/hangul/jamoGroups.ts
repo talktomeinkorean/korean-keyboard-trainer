@@ -44,3 +44,31 @@ export function splitByJamoProgress(target: string, typedJamoCount: number): Jam
     todo: target.slice(doneChars + (hasCurrent ? 1 : 0)),
   };
 }
+
+export interface CurrentSyllable {
+  /** 현재 입력 중인 음절의 자모들 (모두 입력했거나 아직 시작 전이면 다음 음절) */
+  jamos: string[];
+  /** 그중 이미 입력한 개수 */
+  typedCount: number;
+}
+
+/**
+ * 지금 화면에 칩으로 보여줄 음절의 자모와 진행 상태를 구한다.
+ * 단어 전체가 아니라 "지금 치고 있는 글자"만 보여주기 위한 것.
+ */
+export function currentSyllableJamos(
+  target: string,
+  typedJamoCount: number,
+): CurrentSyllable {
+  const groups = toJamoGroups(target);
+  let consumed = 0;
+  for (const group of groups) {
+    if (typedJamoCount < consumed + group.length) {
+      return { jamos: group, typedCount: typedJamoCount - consumed };
+    }
+    consumed += group.length;
+  }
+  // 전부 입력함 — 마지막 음절을 완료 상태로 보여준다
+  const last = groups[groups.length - 1] ?? [];
+  return { jamos: last, typedCount: last.length };
+}

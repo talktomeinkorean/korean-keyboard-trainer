@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { disassemble } from 'es-hangul';
-import { toJamoGroups, splitByJamoProgress } from './jamoGroups';
+import { toJamoGroups, splitByJamoProgress, currentSyllableJamos } from './jamoGroups';
 
 describe('toJamoGroups', () => {
   it('단어를 음절별 자모 그룹으로 분해한다', () => {
@@ -57,5 +57,26 @@ describe('splitByJamoProgress', () => {
   it('공백·문장부호 항목도 자모 인덱스와 정합한다', () => {
     // "가 나." = ㄱㅏ ' ' ㄴㅏ '.' → 3개 소비 시 "가 " 완료
     expect(splitByJamoProgress('가 나.', 3)).toEqual({ done: '가 ', current: '', todo: '나.' });
+  });
+});
+
+describe('currentSyllableJamos', () => {
+  it('현재 입력 중인 음절의 자모만 돌려준다', () => {
+    // 한글: ㅎㅏㄴ / ㄱㅡㄹ — 0개 입력이면 첫 음절
+    expect(currentSyllableJamos('한글', 0)).toEqual({ jamos: ['ㅎ', 'ㅏ', 'ㄴ'], typedCount: 0 });
+    expect(currentSyllableJamos('한글', 2)).toEqual({ jamos: ['ㅎ', 'ㅏ', 'ㄴ'], typedCount: 2 });
+  });
+
+  it('음절을 넘기면 다음 음절로 이동한다', () => {
+    expect(currentSyllableJamos('한글', 3)).toEqual({ jamos: ['ㄱ', 'ㅡ', 'ㄹ'], typedCount: 0 });
+    expect(currentSyllableJamos('한글', 4)).toEqual({ jamos: ['ㄱ', 'ㅡ', 'ㄹ'], typedCount: 1 });
+  });
+
+  it('전부 입력하면 마지막 음절을 완료 상태로 보여준다', () => {
+    expect(currentSyllableJamos('한글', 6)).toEqual({ jamos: ['ㄱ', 'ㅡ', 'ㄹ'], typedCount: 3 });
+  });
+
+  it('빈 문자열도 안전하다', () => {
+    expect(currentSyllableJamos('', 0)).toEqual({ jamos: [], typedCount: 0 });
   });
 });

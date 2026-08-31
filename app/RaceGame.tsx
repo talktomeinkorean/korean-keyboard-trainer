@@ -1,42 +1,40 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { pickRaceWords } from '@/lib/game/words';
 import { playSfx, startBgm, stopBgm } from '@/lib/audio/sounds';
 import { loadMuted, saveMuted } from '@/lib/audio/mutePreference';
 import { useLessonSession } from '@/lib/session/useLessonSession';
 import { RaceScene } from '@/components/RaceScene';
-import { TypingLine } from '@/components/TypingLine';
-import { JamoTrack } from '@/components/JamoTrack';
 import { Keyboard } from '@/components/Keyboard';
-import { NextKeyHint } from '@/components/NextKeyHint';
 import { RaceResultCard } from '@/components/RaceResultCard';
 import { StartPopup } from '@/components/StartPopup';
+import { GameTopBar } from '@/components/game/GameTopBar';
+import { WordCard } from '@/components/game/WordCard';
+import { KeyGuideToggle } from '@/components/game/KeyGuideToggle';
+import type { RaceWord } from '@/lib/game/raceWord';
 
 /** 한 판에 출제할 단어 수 (DB 미설정 시 폴백 풀에서 뽑는 개수) */
 const RACE_WORD_COUNT = 10;
 
-function formatSeconds(ms: number): string {
-  return (ms / 1000).toFixed(1);
-}
-
-/** DB 단어 풀(/api/race-words)에서 5개 로드. 미설정/오류 시 내장 풀로 폴백. */
-async function loadWords(): Promise<string[]> {
+/** 단어 로드 (/api/race-words). 실패 시 내장 풀로 폴백 — 영어 뜻은 없다. */
+async function loadWords(): Promise<RaceWord[]> {
   try {
     const res = await fetch('/api/race-words');
     if (res.ok) {
-      const data = (await res.json()) as { words: string[] };
+      const data = (await res.json()) as { words: RaceWord[] };
       if (Array.isArray(data.words) && data.words.length > 0) return data.words;
     }
   } catch {
     /* 폴백으로 진행 */
   }
-  return pickRaceWords(RACE_WORD_COUNT);
+  return pickRaceWords(RACE_WORD_COUNT).map((korean) => ({ korean, english: null }));
 }
 
-function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void }) {
-  const session = useLessonSession({ items: words });
+function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void }) {
+  const session = useLessonSession({ items: words.map((w) => w.korean) });
+  // Key Guide — 기본 켜짐
+  const [keyGuide, setKeyGuide] = useState(true);
   const [nowMs, setNowMs] = useState<number | null>(null);
   // 시작 팝업을 닫아야 게임이 시작된다
   const [showStartPopup, setShowStartPopup] = useState(true);
@@ -109,48 +107,30 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
       : (session.finishedAt ?? nowMs ?? session.startedAt) - session.startedAt;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-6 p-6">
-      <h1 className="text-lg text-neutral-400">
-        Type {words.length} words to reach the finish line!
-      </h1>
-      <div className="flex items-center gap-3">
-        <div className="text-3xl font-bold tabular-nums" data-testid="race-timer">
-          {formatSeconds(elapsedMs)}s
-        </div>
-        <button
-          type="button"
-          onClick={toggleMuted}
-          data-testid="sound-toggle"
-          aria-label={muted ? 'Turn sound on' : 'Turn sound off'}
-          aria-pressed={muted}
-          className="rounded-lg border border-neutral-300 px-2 py-1 text-lg leading-none text-neutral-600 hover:bg-neutral-100"
-        >
-          {muted ? '🔇' : '🔊'}
-        </button>
-      </div>
+    <main className="flex min-h-screen flex-col items-center gap-4 pt-[30px]">
+      <GameTopBar elapsedMs={elapsedMs} muted={muted} onToggleMuted={toggleMuted} />
+
       <RaceScene
         progress={session.currentIndex + (session.isComplete ? 1 : 0)}
         total={words.length}
         running={isPlaying}
+        overlay={
+          <WordCard
+            word={words[session.currentIndex] ?? words[words.length - 1]}
+            typedJamoCount={session.typedJamoCount}
+            index={Math.min(session.currentIndex + 1, words.length)}
+            total={words.length}
+          />
+        }
       />
-      <p className="text-sm tabular-nums text-neutral-500" data-testid="race-progress">
-        {session.currentIndex + (session.isComplete ? 1 : 0)} / {words.length}
-      </p>
-      <TypingLine target={session.currentItem} typedJamoCount={session.typedJamoCount} />
-      <JamoTrack
-        item={session.currentItem}
-        typedJamoCount={session.typedJamoCount}
-        errorCount={session.errorCount}
-      />
+
       <Keyboard
         nextCode={session.nextCode}
         nextShift={session.nextShift}
+        keyGuide={keyGuide}
         onKeyPress={session.handleKey}
       />
-      <NextKeyHint code={session.nextCode} shift={session.nextShift} />
-      <Link href="/lessons" className="text-sm text-neutral-500 underline">
-        Skip to typing practice →
-      </Link>
+      <KeyGuideToggle on={keyGuide} onToggle={() => setKeyGuide((v) => !v)} />
 
       {showStartPopup && <StartPopup onStart={() => setShowStartPopup(false)} />}
 
@@ -162,7 +142,7 @@ function RaceRound({ words, onRetry }: { words: string[]; onRetry: () => void })
 }
 
 export function RaceGame() {
-  const [words, setWords] = useState<string[] | null>(null);
+  const [words, setWords] = useState<RaceWord[] | null>(null);
 
   // 랜덤 선택은 hydration 불일치를 피해 클라이언트에서 실행
   useEffect(() => {
@@ -174,7 +154,7 @@ export function RaceGame() {
   // words 배열을 key 로 사용 — Retry 시 세션 전체 리마운트
   return (
     <RaceRound
-      key={words.join(',')}
+      key={words.map((w) => w.korean).join(',')}
       words={words}
       onRetry={() => void loadWords().then(setWords)}
     />
