@@ -29,7 +29,7 @@ export default function LessonsPage() {
         bg-origin-content: 배경 위치 기준을 padding 아래(content box)로 옮긴다.
       */}
       <div
-        className="relative flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-origin-content bg-no-repeat pt-[26.7176%]"
+        className="relative flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-origin-content bg-no-repeat pt-[15%]"
         style={{ backgroundImage: `url(${BG_SRC})`, backgroundSize: '100% auto' }}
       >
         {/* 이벤트 배너 — 배경 위에 겹쳐 띄운다. 누르면 홈(레이스)으로 */}
