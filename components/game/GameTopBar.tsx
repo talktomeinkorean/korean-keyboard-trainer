@@ -23,12 +23,21 @@ export function GameTopBar({ elapsedMs, muted, onToggleMuted }: Props) {
         aria-pressed={muted}
         className={ROUND_BTN}
       >
-        <span className="relative flex items-center gap-[4px]" aria-hidden>
-          <img src="/race/icons/sound-body.svg" alt="" className="h-[15px] w-[9px]" />
-          {!muted && (
+        {/* 음소거는 별도 아이콘(스피커+X), 켜짐은 스피커+음파 조합 */}
+        {muted ? (
+          <img
+            src="/race/icons/sound-off.svg"
+            alt=""
+            aria-hidden
+            data-testid="sound-icon-off"
+            className="h-[15px] w-[20px]"
+          />
+        ) : (
+          <span className="flex items-center gap-[4px]" aria-hidden data-testid="sound-icon-on">
+            <img src="/race/icons/sound-body.svg" alt="" className="h-[15px] w-[9px]" />
             <img src="/race/icons/sound-waves.svg" alt="" className="h-[10px] w-[5px]" />
-          )}
-        </span>
+          </span>
+        )}
       </button>
 
       <div className="flex items-center gap-[13px]">
