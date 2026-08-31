@@ -9,6 +9,7 @@ import { RaceScene } from '@/components/RaceScene';
 import { Keyboard } from '@/components/Keyboard';
 import { RaceResultCard } from '@/components/RaceResultCard';
 import { StartPopup } from '@/components/StartPopup';
+import { ExitPopup } from '@/components/game/ExitPopup';
 import { GameTopBar } from '@/components/game/GameTopBar';
 import { WordCard } from '@/components/game/WordCard';
 import { KeyGuideToggle } from '@/components/game/KeyGuideToggle';
@@ -38,6 +39,8 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
   const [nowMs, setNowMs] = useState<number | null>(null);
   // 시작 팝업을 닫아야 게임이 시작된다
   const [showStartPopup, setShowStartPopup] = useState(true);
+  // 나가기 확인 팝업
+  const [showExitPopup, setShowExitPopup] = useState(false);
 
   // 소리 설정 — 기본 켜짐. SSR 과 초기 HTML 을 맞추려 마운트 후 저장값을 읽는다.
   const [muted, setMuted] = useState(false);
@@ -76,7 +79,7 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
   // 키 입력 캡처 — LessonPlayer 와 동일 (IME 회피)
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (showStartPopup) return; // 팝업이 떠 있는 동안은 게임 입력을 받지 않는다
+      if (showStartPopup || showExitPopup) return; // 팝업이 떠 있는 동안은 게임 입력을 받지 않는다
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       // 폼 입력(닉네임/이메일 등)에 포커스가 있으면 게임 키 캡처를 하지 않는다
       const target = e.target as HTMLElement;
@@ -92,7 +95,7 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [session, showStartPopup]);
+  }, [session, showStartPopup, showExitPopup]);
 
   // 경과 타이머 — 첫 키 입력부터 완주까지 100ms 간격 갱신
   useEffect(() => {
@@ -115,7 +118,12 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
         running={isPlaying}
       >
         <div className="absolute inset-x-0 top-[29.55px] flex justify-center">
-          <GameTopBar elapsedMs={elapsedMs} muted={muted} onToggleMuted={toggleMuted} />
+          <GameTopBar
+            elapsedMs={elapsedMs}
+            muted={muted}
+            onToggleMuted={toggleMuted}
+            onExit={() => setShowExitPopup(true)}
+          />
         </div>
         <div className="absolute inset-x-0 top-[104.3px] flex justify-center">
           <WordCard
@@ -137,6 +145,16 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
       <KeyGuideToggle on={keyGuide} onToggle={() => setKeyGuide((v) => !v)} />
 
       {showStartPopup && <StartPopup onStart={() => setShowStartPopup(false)} />}
+
+      {showExitPopup && (
+        <ExitPopup
+          onClose={() => setShowExitPopup(false)}
+          onRestart={() => {
+            setShowExitPopup(false);
+            onRetry();
+          }}
+        />
+      )}
 
       {session.isComplete && (
         <RaceResultCard timeMs={elapsedMs} accuracy={session.accuracy} onRetry={onRetry} />
