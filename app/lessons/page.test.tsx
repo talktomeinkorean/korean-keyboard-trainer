@@ -25,4 +25,11 @@ describe('타자연습 홈', () => {
     render(<LessonsPage />);
     expect(screen.getByRole('heading', { name: /hangeul typing practice/i })).toBeInTheDocument();
   });
+
+  it('상단 이벤트 배너를 홈으로 연결한다', () => {
+    render(<LessonsPage />);
+    const banner = screen.getByTestId('promotion-banner');
+    expect(banner).toHaveAttribute('href', '/');
+    expect(banner.querySelector('img')).toHaveAttribute('alt', expect.stringMatching(/hangeul day typing race/i));
+  });
 });
