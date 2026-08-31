@@ -20,12 +20,12 @@ describe('Keyboard', () => {
 
   it('nextCode 키에 강조 표시를 한다', () => {
     render(<Keyboard nextCode="KeyR" />);
-    expect(screen.getByTestId('kbd-key-KeyR').className).toContain('bg-blue-500');
+    expect(screen.getByTestId('kbd-key-KeyR').className).toContain('bg-[#8ceb97]');
   });
 
   it('nextShift 면 Shift 키도 강조한다', () => {
     render(<Keyboard nextCode="KeyQ" nextShift />);
-    expect(screen.getByTestId('kbd-key-Shift').className).toContain('bg-blue-500');
+    expect(screen.getByTestId('kbd-key-Shift').className).toContain('bg-[#8ceb97]');
   });
 
   it('키를 탭하면 (code, shift=false) 로 onKeyPress 를 호출한다', () => {
@@ -53,5 +53,10 @@ describe('Keyboard', () => {
     render(<Keyboard nextCode={null} onKeyPress={onKeyPress} />);
     fireEvent.click(screen.getByTestId('kbd-key-Space'));
     expect(onKeyPress).toHaveBeenCalledWith('Space', false);
+  });
+
+  it('Key Guide 를 끄면 다음 키를 강조하지 않는다', () => {
+    render(<Keyboard nextCode="KeyR" keyGuide={false} />);
+    expect(screen.getByTestId('kbd-key-KeyR').className).not.toContain('bg-[#8ceb97]');
   });
 });

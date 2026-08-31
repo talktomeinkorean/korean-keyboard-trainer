@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { DUBEOLSIK, SPACE_KEY } from '@/lib/keyboard/dubeolsik';
-import { KeyDef } from '@/lib/keyboard/types';
 
 const BASIC_ROWS: string[][] = [
   ['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP'],
@@ -20,17 +19,14 @@ const EXTENDED_ROWS: string[][] = [
 
 const byCode = new Map(DUBEOLSIK.map((k) => [k.code, k]));
 
-function keyClasses(k: KeyDef, isNext: boolean): string {
-  // 모바일에서 한 줄(키 10개)이 넘치지 않도록 작은 화면에선 키/글자를 축소한다.
-  const base =
-    'w-8 h-10 sm:w-11 sm:h-11 rounded-lg border flex flex-col items-center justify-center ' +
-    'text-sm sm:text-base select-none touch-manipulation transition active:scale-95';
-  const typeBorder =
-    k.type === 'consonant' ? 'border-b-2 border-b-amber-500'
-    : k.type === 'vowel' ? 'border-b-2 border-b-emerald-500'
-    : 'border-b-2 border-b-neutral-500'; // space/punct/digit — 중립
-  if (isNext) return `${base} bg-blue-500 text-white border-blue-500 ring-2 ring-blue-300`;
-  return `${base} bg-neutral-800 text-neutral-100 border-white/10 active:bg-neutral-700 ${typeBorder}`;
+// 시안 기준 흰 키 + 진한 테두리. 다음에 칠 키만 연두로 강조한다.
+const KEY_BASE =
+  'w-8 h-[40px] sm:w-[34px] rounded-[5px] border-[0.75px] border-[#36454d] ' +
+  'flex flex-col items-center justify-center select-none touch-manipulation ' +
+  'transition active:scale-95';
+
+function keyClasses(isNext: boolean): string {
+  return `${KEY_BASE} ${isNext ? 'bg-[#8ceb97]' : 'bg-white active:bg-neutral-100'}`;
 }
 
 interface Props {
@@ -39,11 +35,13 @@ interface Props {
   nextShift?: boolean;
   /** basic: 자모/단어 연습용, extended: 문장/긴글용(숫자·따옴표·물음표 포함) */
   layout?: 'basic' | 'extended';
+  /** 끄면 다음에 칠 키를 강조하지 않는다 (게임의 Key Guide 토글) */
+  keyGuide?: boolean;
   /** 키 탭/클릭 시 호출 (모바일 입력). 데스크톱은 물리 키보드를 쓰므로 선택적. */
   onKeyPress?: (code: string, shift: boolean) => void;
 }
 
-export function Keyboard({ nextCode, nextShift = false, layout = 'basic', onKeyPress }: Props) {
+export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGuide = true, onKeyPress }: Props) {
   // 화면 키보드 전용 Shift 토글 (모바일 탭 입력용). 키 입력 후 자동 해제.
   const [shiftOn, setShiftOn] = useState(false);
   const rows = layout === 'extended' ? EXTENDED_ROWS : BASIC_ROWS;
@@ -53,11 +51,11 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', onKeyP
     setShiftOn(false);
   }
 
-  const shiftButtonClass = nextShift
-    ? 'bg-blue-500 text-white border-blue-500 ring-2 ring-blue-300'
+  const shiftButtonClass = keyGuide && nextShift
+    ? 'bg-[#8ceb97]'
     : shiftOn
-      ? 'bg-neutral-600 text-white border-white/30'
-      : 'bg-neutral-800 text-neutral-100 border-white/10 active:bg-neutral-700';
+      ? 'bg-[#36454d] text-white'
+      : 'bg-white active:bg-neutral-100';
 
   return (
     <div className="flex flex-col gap-1 sm:gap-1.5 items-center">
@@ -65,7 +63,7 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', onKeyP
         <div key={ri} className="flex gap-1 sm:gap-1.5">
           {row.map((code) => {
             const k = byCode.get(code)!;
-            const isNext = code === nextCode;
+            const isNext = keyGuide && code === nextCode;
             const cap = shiftOn && k.shift ? k.shift : k.jamo;
             return (
               <button
@@ -74,10 +72,10 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', onKeyP
                 data-testid={`kbd-key-${code}`}
                 data-kbd-key
                 onClick={() => press(code)}
-                className={keyClasses(k, isNext)}
+                className={keyClasses(isNext)}
               >
-                <span>{cap}</span>
-                <span className="text-[9px] opacity-40">
+                <span className="text-[14px] font-bold text-[#36454d]">{cap}</span>
+                <span className="text-[10px] font-bold text-[#5c8499]">
                   {code.startsWith('Key') ? code.slice(3) : code.startsWith('Digit') ? code.slice(5) : ''}
                 </span>
               </button>
@@ -91,18 +89,18 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', onKeyP
           data-testid="kbd-key-Shift"
           data-kbd-key
           onClick={() => setShiftOn((s) => !s)}
-          className={`h-10 sm:h-11 w-16 sm:w-20 rounded-lg border flex items-center justify-center text-xs select-none touch-manipulation transition active:scale-95 border-b-2 border-b-neutral-500 ${shiftButtonClass}`}
+          className={`h-[40px] w-[70px] rounded-[5px] border-[0.75px] border-[#36454d] flex items-center justify-center gap-[4px] text-[14px] font-semibold text-[#36454d] select-none touch-manipulation transition active:scale-95 ${shiftButtonClass}`}
         >
-          ⇧ Shift
+          shift ⇧
         </button>
         <button
           type="button"
           data-testid="kbd-key-Space"
           data-kbd-key
           onClick={() => press(SPACE_KEY.code)}
-          className={`${keyClasses(SPACE_KEY, nextCode === SPACE_KEY.code)} !w-36 sm:!w-56`}
+          className={`${keyClasses(keyGuide && nextCode === SPACE_KEY.code)} !w-[130px] sm:!w-[150px]`}
         >
-          <span className="text-xs opacity-70">Space</span>
+          <span className="text-[14px] font-semibold text-[#36454d]">Space</span>
         </button>
       </div>
     </div>
