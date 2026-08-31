@@ -107,22 +107,25 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
       : (session.finishedAt ?? nowMs ?? session.startedAt) - session.startedAt;
 
   return (
-    <main className="flex min-h-screen flex-col items-center gap-4 pt-[30px]">
-      <GameTopBar elapsedMs={elapsedMs} muted={muted} onToggleMuted={toggleMuted} />
-
+    <main className="flex min-h-screen flex-col items-center gap-4">
+      {/* 시안: 상단 바와 단어 카드가 배경 씬 안에 겹쳐 들어간다 */}
       <RaceScene
         progress={session.currentIndex + (session.isComplete ? 1 : 0)}
         total={words.length}
         running={isPlaying}
-        overlay={
+      >
+        <div className="absolute inset-x-0 top-[29.55px] flex justify-center">
+          <GameTopBar elapsedMs={elapsedMs} muted={muted} onToggleMuted={toggleMuted} />
+        </div>
+        <div className="absolute inset-x-0 top-[104.3px] flex justify-center">
           <WordCard
             word={words[session.currentIndex] ?? words[words.length - 1]}
             typedJamoCount={session.typedJamoCount}
             index={Math.min(session.currentIndex + 1, words.length)}
             total={words.length}
           />
-        }
-      />
+        </div>
+      </RaceScene>
 
       <Keyboard
         nextCode={session.nextCode}
