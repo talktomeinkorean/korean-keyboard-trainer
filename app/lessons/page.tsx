@@ -23,8 +23,13 @@ export default function LessonsPage() {
     <main className="flex min-h-screen flex-col">
       <h1 className="sr-only">Hangeul Typing Practice</h1>
 
+      {/*
+        배경을 배너(393x105) 높이만큼 아래에서 시작시켜 로고가 가려지지 않게 한다.
+        pt 와 배너 높이가 둘 다 폭에 비례하므로 393px 보다 좁은 화면에서도 정확히 맞는다.
+        bg-origin-content: 배경 위치 기준을 padding 아래(content box)로 옮긴다.
+      */}
       <div
-        className="relative flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-no-repeat"
+        className="relative flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-origin-content bg-no-repeat pt-[26.7176%]"
         style={{ backgroundImage: `url(${BG_SRC})`, backgroundSize: '100% auto' }}
       >
         {/* 이벤트 배너 — 배경 위에 겹쳐 띄운다. 누르면 홈(레이스)으로 */}
