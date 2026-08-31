@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
 import { splitByJamoProgress, currentSyllableJamos } from '@/lib/hangul/jamoGroups';
 import type { RaceWord } from '@/lib/game/raceWord';
 
@@ -7,15 +10,37 @@ interface Props {
   /** 현재 문제 번호 (1부터) */
   index: number;
   total: number;
+  /** 누적 오타 수 — 늘어나면 지금 칠 자모를 '틀렸을 때'로 표시한다 */
+  errorCount?: number;
 }
+
+/** 시안의 자모음 블럭 3가지 상태 */
+const CHIP_STATE = {
+  correct: 'bg-[#eae5ff] border-[#8166ff] text-[#8166ff]',
+  wrong: 'bg-[#ffece5] border-[#ff5e23] text-[#ff5e23]',
+  todo: 'bg-white border-[#8166ff] text-[#8166ff]',
+} as const;
+
+type ChipState = keyof typeof CHIP_STATE;
 
 /**
  * 배경 씬 위에 겹치는 단어 카드 — 문제 번호, 한글 단어(입력 진행에 따라 진하기 구분),
  * 영어 뜻, 그리고 지금 치고 있는 음절의 자모 칩을 보여준다.
  */
-export function WordCard({ word, typedJamoCount, index, total }: Props) {
+export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }: Props) {
   const { done, current, todo } = splitByJamoProgress(word.korean, typedJamoCount);
   const { jamos, typedCount } = currentSyllableJamos(word.korean, typedJamoCount);
+
+  // 오타가 나면 표시했다가, 올바른 입력으로 진행하면 해제한다.
+  const [wrong, setWrong] = useState(false);
+  const prevError = useRef(errorCount);
+  const prevTyped = useRef(typedJamoCount);
+  useEffect(() => {
+    if (errorCount > prevError.current) setWrong(true);
+    else if (typedJamoCount !== prevTyped.current) setWrong(false);
+    prevError.current = errorCount;
+    prevTyped.current = typedJamoCount;
+  }, [errorCount, typedJamoCount]);
 
   return (
     <div
@@ -41,17 +66,16 @@ export function WordCard({ word, typedJamoCount, index, total }: Props) {
         </p>
       )}
 
-      <div className="mt-[10px] flex items-center justify-center gap-[7px]">
+      <div className="mt-[10px] flex items-center justify-center gap-[5px]">
         {jamos.map((jamo, i) => {
-          const typed = i < typedCount;
+          const state: ChipState =
+            i < typedCount ? 'correct' : i === typedCount && wrong ? 'wrong' : 'todo';
           return (
             <span
               key={i}
               data-testid={`syllable-jamo-${i}`}
-              data-typed={typed}
-              className={`flex h-[29px] w-[25px] items-center justify-center rounded-[5px] border-[0.75px] bg-white text-[16px] font-bold ${
-                typed ? 'border-[#ff5e23] text-[#ff5e23]' : 'border-[#36454d] text-[#36454d]'
-              }`}
+              data-state={state}
+              className={`flex h-[29px] w-[25px] items-center justify-center rounded-[5px] border-[0.75px] text-[16px] font-bold ${CHIP_STATE[state]}`}
             >
               {jamo}
             </span>

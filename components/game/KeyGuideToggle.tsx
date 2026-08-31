@@ -28,17 +28,19 @@ export function KeyGuideToggle({ on, onToggle }: Props) {
         data-testid="key-guide-toggle"
         onClick={onToggle}
         className={`relative h-[18px] w-[42px] rounded-full border-[0.75px] border-[#36454d] transition-colors ${
-          on ? 'bg-[#8ceb97]' : 'bg-[#d9d9d9]'
+          on ? 'bg-[#8ceb97]' : 'bg-[#b8c5cc]'
         }`}
       >
         <span
+          data-testid="key-guide-knob"
           className={`absolute top-1/2 size-[18px] -translate-y-1/2 rounded-full border-[0.75px] border-[#36454d] bg-white transition-[left] ${
             on ? 'left-[24px]' : 'left-0'
           }`}
         />
+        {/* 라벨은 손잡이 반대편에 — 시안 좌표(ON 11.5px / OFF 30.5px 중심) */}
         <span
-          className={`absolute top-1/2 -translate-y-1/2 text-[8px] font-bold text-[#36454d]/40 ${
-            on ? 'left-[6px]' : 'right-[5px]'
+          className={`absolute top-[4px] -translate-x-1/2 text-[8px] font-bold leading-none text-[#36454d] opacity-40 ${
+            on ? 'left-[11.5px]' : 'left-[30.5px]'
           }`}
         >
           {on ? 'ON' : 'OFF'}
