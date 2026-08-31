@@ -20,13 +20,15 @@ const EXTENDED_ROWS: string[][] = [
 const byCode = new Map(DUBEOLSIK.map((k) => [k.code, k]));
 
 // 시안 기준 흰 키 + 진한 테두리. 다음에 칠 키만 연두로 강조한다.
+// 폭은 --key-w (시안 34px, 좁은 화면에선 비율대로 축소). 브레이크포인트를 쓰지 않아
+// PC 와 모바일이 같은 레이아웃을 유지한다.
 const KEY_BASE =
-  'w-8 h-[40px] sm:w-[34px] rounded-[5px] border-[0.75px] border-[#36454d] ' +
+  'h-[40px] rounded-[5px] border-[0.75px] border-[#36454d] ' +
   'flex flex-col items-center justify-center select-none touch-manipulation ' +
   'transition active:scale-95';
 
-function keyClasses(isNext: boolean): string {
-  return `${KEY_BASE} ${isNext ? 'bg-[#8ceb97]' : 'bg-white active:bg-neutral-100'}`;
+function keyClasses(isNext: boolean, widthClass = 'w-[var(--key-w)]'): string {
+  return `${KEY_BASE} ${widthClass} ${isNext ? 'bg-[#8ceb97]' : 'bg-white active:bg-neutral-100'}`;
 }
 
 interface Props {
@@ -58,9 +60,9 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
       : 'bg-white active:bg-neutral-100';
 
   return (
-    <div className="flex flex-col gap-1 sm:gap-1.5 items-center">
+    <div className="flex flex-col gap-[var(--key-gap)] items-center">
       {rows.map((row, ri) => (
-        <div key={ri} className="flex gap-1 sm:gap-1.5">
+        <div key={ri} className="flex gap-[var(--key-gap)]">
           {row.map((code) => {
             const k = byCode.get(code)!;
             const isNext = keyGuide && code === nextCode;
@@ -83,13 +85,14 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
           })}
         </div>
       ))}
-      <div className="flex gap-1 sm:gap-1.5">
+      <div className="flex gap-[var(--key-gap)]">
         <button
           type="button"
           data-testid="kbd-key-Shift"
           data-kbd-key
           onClick={() => setShiftOn((s) => !s)}
-          className={`h-[40px] w-[70px] rounded-[5px] border-[0.75px] border-[#36454d] flex items-center justify-center gap-[4px] text-[14px] font-semibold text-[#36454d] select-none touch-manipulation transition active:scale-95 ${shiftButtonClass}`}
+          style={{ width: 'calc(var(--key-w) * 2 + var(--key-gap))' }}
+          className={`h-[40px] rounded-[5px] border-[0.75px] border-[#36454d] flex items-center justify-center gap-[4px] text-[14px] font-semibold text-[#36454d] select-none touch-manipulation transition active:scale-95 ${shiftButtonClass}`}
         >
           shift ⇧
         </button>
@@ -98,7 +101,8 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
           data-testid="kbd-key-Space"
           data-kbd-key
           onClick={() => press(SPACE_KEY.code)}
-          className={`${keyClasses(keyGuide && nextCode === SPACE_KEY.code)} !w-[130px] sm:!w-[150px]`}
+          style={{ width: 'calc(var(--key-w) * 4 + var(--key-gap) * 3)' }}
+          className={keyClasses(keyGuide && nextCode === SPACE_KEY.code, '')}
         >
           <span className="text-[14px] font-semibold text-[#36454d]">Space</span>
         </button>
