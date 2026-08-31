@@ -59,4 +59,11 @@ describe('Keyboard', () => {
     render(<Keyboard nextCode="KeyR" keyGuide={false} />);
     expect(screen.getByTestId('kbd-key-KeyR').className).not.toContain('bg-[#8ceb97]');
   });
+
+  it('shift 키에 시안 아이콘을 쓴다 (유니코드 문자가 아님)', () => {
+    render(<Keyboard nextCode={null} />);
+    const arrow = screen.getByTestId('shift-arrow');
+    expect(arrow).toHaveAttribute('src', '/race/icons/shift-arrow.svg');
+    expect(screen.getByTestId('kbd-key-Shift')).not.toHaveTextContent('⇧');
+  });
 });

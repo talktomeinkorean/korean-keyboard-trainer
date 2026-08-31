@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다. */
 'use client';
 
 import { useState } from 'react';
@@ -92,9 +93,17 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
           data-kbd-key
           onClick={() => setShiftOn((s) => !s)}
           style={{ width: 'calc(var(--key-w) * 2 + var(--key-gap))' }}
-          className={`h-[40px] rounded-[5px] border-[0.75px] border-[#36454d] flex items-center justify-center gap-[4px] text-[14px] font-semibold text-[#36454d] select-none touch-manipulation transition active:scale-95 ${shiftButtonClass}`}
+          className={`h-[40px] rounded-[5px] border-[0.75px] border-[#36454d] flex items-center justify-center gap-[7px] text-[14px] font-semibold text-[#36454d] select-none touch-manipulation transition active:scale-95 ${shiftButtonClass}`}
         >
-          shift ⇧
+          shift
+          {/* 시안에서 내보낸 아이콘 — 유니코드 ⇧ 로 대체하면 모양이 달라진다 */}
+          <img
+            src="/race/icons/shift-arrow.svg"
+            alt=""
+            aria-hidden
+            data-testid="shift-arrow"
+            className="size-[12px]"
+          />
         </button>
         <button
           type="button"
