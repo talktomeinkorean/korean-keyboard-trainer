@@ -24,11 +24,34 @@ describe('WordCard', () => {
     expect(chips.map((c) => c.textContent)).toEqual(['ㅎ', 'ㅏ', 'ㄴ']);
   });
 
-  it('입력한 자모 칩을 구분한다', () => {
+  it('맞은 자모와 아직 안 친 자모를 구분한다', () => {
     render(<WordCard word={word} typedJamoCount={2} index={1} total={10} />);
-    expect(screen.getByTestId('syllable-jamo-0')).toHaveAttribute('data-typed', 'true');
-    expect(screen.getByTestId('syllable-jamo-1')).toHaveAttribute('data-typed', 'true');
-    expect(screen.getByTestId('syllable-jamo-2')).toHaveAttribute('data-typed', 'false');
+    expect(screen.getByTestId('syllable-jamo-0')).toHaveAttribute('data-state', 'correct');
+    expect(screen.getByTestId('syllable-jamo-1')).toHaveAttribute('data-state', 'correct');
+    expect(screen.getByTestId('syllable-jamo-2')).toHaveAttribute('data-state', 'todo');
+  });
+
+  it('오타가 나면 지금 칠 자모를 틀렸을 때로 표시한다', () => {
+    const { rerender } = render(
+      <WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={0} />,
+    );
+    expect(screen.getByTestId('syllable-jamo-1')).toHaveAttribute('data-state', 'todo');
+
+    rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={1} />);
+    expect(screen.getByTestId('syllable-jamo-1')).toHaveAttribute('data-state', 'wrong');
+    // 맞은 자모는 영향받지 않는다
+    expect(screen.getByTestId('syllable-jamo-0')).toHaveAttribute('data-state', 'correct');
+  });
+
+  it('올바르게 입력해 진행하면 틀림 표시가 풀린다', () => {
+    const { rerender } = render(
+      <WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={1} />,
+    );
+    rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={2} />);
+    expect(screen.getByTestId('syllable-jamo-1')).toHaveAttribute('data-state', 'wrong');
+
+    rerender(<WordCard word={word} typedJamoCount={2} index={1} total={10} errorCount={2} />);
+    expect(screen.getByTestId('syllable-jamo-2')).toHaveAttribute('data-state', 'todo');
   });
 
   it('영어 뜻이 없으면 생략한다', () => {

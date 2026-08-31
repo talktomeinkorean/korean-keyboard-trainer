@@ -123,6 +123,7 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
             typedJamoCount={session.typedJamoCount}
             index={Math.min(session.currentIndex + 1, words.length)}
             total={words.length}
+            errorCount={session.errorCount}
           />
         </div>
       </RaceScene>
