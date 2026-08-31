@@ -3,6 +3,10 @@ export interface ScoreSubmission {
   nickname: string;
   timeMs: number;
   accuracy: number;
+  /** (필수) 추첨을 위한 이름·이메일 수집 동의. 없으면 저장하지 않는다. */
+  consentRequired: true;
+  /** (선택) 마케팅 정보 수신 동의 */
+  consentMarketing: boolean;
 }
 
 export type ParseResult =
@@ -19,7 +23,8 @@ export function parseScoreSubmission(body: unknown): ParseResult {
   if (typeof body !== 'object' || body === null) {
     return { ok: false, error: 'invalid body' };
   }
-  const { email, nickname, timeMs, accuracy } = body as Record<string, unknown>;
+  const { email, nickname, timeMs, accuracy, consentRequired, consentMarketing } =
+    body as Record<string, unknown>;
 
   if (typeof email !== 'string' || !EMAIL_RE.test(email)) {
     return { ok: false, error: 'invalid email' };
@@ -41,8 +46,20 @@ export function parseScoreSubmission(body: unknown): ParseResult {
     return { ok: false, error: 'invalid accuracy' };
   }
 
+  // 필수 동의는 정확히 true 여야 한다 ('yes', 1 같은 truthy 값으로 우회되면 안 됨)
+  if (consentRequired !== true) {
+    return { ok: false, error: 'consent required' };
+  }
+
   return {
     ok: true,
-    value: { email: email.toLowerCase(), nickname: trimmedNickname, timeMs, accuracy },
+    value: {
+      email: email.toLowerCase(),
+      nickname: trimmedNickname,
+      timeMs,
+      accuracy,
+      consentRequired: true,
+      consentMarketing: consentMarketing === true,
+    },
   };
 }

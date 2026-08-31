@@ -40,6 +40,9 @@ export function RaceResultCard({ timeMs, accuracy, onRetry }: Props) {
   const [email, setEmail] = useState('');
   const [nickname, setNickname] = useState('');
   const [state, setState] = useState<SubmitState>({ step: 'form' });
+  // 동의는 매번 새로 받는다 (저장했다가 자동 체크하면 동의 기록의 의미가 없다)
+  const [consentRequired, setConsentRequired] = useState(false);
+  const [consentMarketing, setConsentMarketing] = useState(false);
   // null = 로딩/미설정(저장 기능 숨김), [] = 아직 기록 없음
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[] | null>(null);
   const [scoringEnabled, setScoringEnabled] = useState(false);
@@ -67,7 +70,14 @@ export function RaceResultCard({ timeMs, accuracy, onRetry }: Props) {
       const res = await fetch('/api/scores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, nickname, timeMs, accuracy }),
+        body: JSON.stringify({
+          email,
+          nickname,
+          timeMs,
+          accuracy,
+          consentRequired,
+          consentMarketing,
+        }),
       });
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as { bestMs: number; rank: number };
@@ -108,9 +118,36 @@ export function RaceResultCard({ timeMs, accuracy, onRetry }: Props) {
               onChange={(e) => setEmail(e.target.value)}
               className="rounded-lg bg-neutral-800 px-3 py-2 text-sm"
             />
+            <label className="flex items-start gap-2 text-xs text-neutral-300">
+              <input
+                type="checkbox"
+                required
+                data-testid="consent-required"
+                checked={consentRequired}
+                onChange={(e) => setConsentRequired(e.target.checked)}
+                className="mt-0.5 shrink-0"
+              />
+              <span>
+                (Required) I agree to have my name and email collected for the Hangeul Day
+                drawing.
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-xs text-neutral-300">
+              <input
+                type="checkbox"
+                data-testid="consent-marketing"
+                checked={consentMarketing}
+                onChange={(e) => setConsentMarketing(e.target.checked)}
+                className="mt-0.5 shrink-0"
+              />
+              <span>
+                (Optional) I&apos;d love to receive Korean learning tips and exclusive discounts
+                from TTMIK!
+              </span>
+            </label>
             <button
               type="submit"
-              disabled={state.step === 'submitting'}
+              disabled={state.step === 'submitting' || !consentRequired}
               className="rounded-lg bg-emerald-600 px-4 py-2 text-white disabled:opacity-50"
             >
               {state.step === 'submitting' ? 'Saving…' : 'Save my score'}

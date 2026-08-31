@@ -6,6 +6,8 @@ const valid = {
   nickname: 'racer',
   timeMs: 15000,
   accuracy: 97,
+  consentRequired: true,
+  consentMarketing: false,
 };
 
 describe('parseScoreSubmission', () => {
@@ -40,5 +42,29 @@ describe('parseScoreSubmission', () => {
     expect(parseScoreSubmission(null).ok).toBe(false);
     expect(parseScoreSubmission('str').ok).toBe(false);
     expect(parseScoreSubmission({ ...valid, timeMs: '15000' }).ok).toBe(false);
+  });
+
+  it('필수 동의가 없으면 거부한다', () => {
+    expect(parseScoreSubmission({ ...valid, consentRequired: false }).ok).toBe(false);
+    const { consentRequired: _omit, ...withoutConsent } = valid;
+    expect(parseScoreSubmission(withoutConsent).ok).toBe(false);
+  });
+
+  it('필수 동의는 true 여야 한다 (truthy 값으로 우회 불가)', () => {
+    expect(parseScoreSubmission({ ...valid, consentRequired: 'yes' }).ok).toBe(false);
+    expect(parseScoreSubmission({ ...valid, consentRequired: 1 }).ok).toBe(false);
+  });
+
+  it('마케팅 동의를 그대로 보존한다', () => {
+    const yes = parseScoreSubmission({ ...valid, consentMarketing: true });
+    expect(yes.ok && yes.value.consentMarketing).toBe(true);
+    const no = parseScoreSubmission({ ...valid, consentMarketing: false });
+    expect(no.ok && no.value.consentMarketing).toBe(false);
+  });
+
+  it('마케팅 동의가 없으면 미동의로 처리한다', () => {
+    const { consentMarketing: _omit, ...withoutMarketing } = valid;
+    const r = parseScoreSubmission(withoutMarketing);
+    expect(r.ok && r.value.consentMarketing).toBe(false);
   });
 });

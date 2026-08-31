@@ -19,13 +19,15 @@ export async function POST(request: Request) {
   if (!parsed.ok) {
     return Response.json({ error: parsed.error }, { status: 400 });
   }
-  const { email, nickname, timeMs, accuracy } = parsed.value;
+  const { email, nickname, timeMs, accuracy, consentRequired, consentMarketing } = parsed.value;
 
   const { error: insertError } = await supabase.from('race_scores').insert({
     email,
     nickname,
     time_ms: timeMs,
     accuracy,
+    consent_required: consentRequired,
+    consent_marketing: consentMarketing,
   });
   if (insertError) {
     return Response.json({ error: 'internal error' }, { status: 500 });
