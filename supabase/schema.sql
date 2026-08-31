@@ -7,6 +7,11 @@ create table race_scores (
   nickname text not null,
   time_ms integer not null check (time_ms between 3000 and 3600000),
   accuracy integer not null check (accuracy between 0 and 100),
+  -- (필수) 추첨을 위한 이름·이메일 수집 동의. 동의 없이는 저장할 수 없다.
+  consent_required boolean not null check (consent_required),
+  -- (선택) 학습 팁·할인 정보 수신 동의. 마케팅 발송 대상 구분에 사용.
+  consent_marketing boolean not null default false,
+  -- 동의 시각은 저장 시각과 같으므로 created_at 을 그대로 근거로 쓴다.
   created_at timestamptz not null default now()
 );
 
