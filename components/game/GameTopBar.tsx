@@ -1,18 +1,19 @@
 /* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다. */
-import Link from 'next/link';
 import { formatRaceTime } from '@/lib/game/raceWord';
 
 interface Props {
   elapsedMs: number;
   muted: boolean;
   onToggleMuted: () => void;
+  /** 나가기 — 바로 이동하지 않고 확인 팝업을 연다 */
+  onExit: () => void;
 }
 
 const ROUND_BTN =
   'flex size-[50px] shrink-0 items-center justify-center rounded-full border-[0.75px] ' +
   'border-[#36454d] bg-white shadow-[0px_2.5px_5px_-2.5px_rgba(0,0,0,0.1)]';
 
-export function GameTopBar({ elapsedMs, muted, onToggleMuted }: Props) {
+export function GameTopBar({ elapsedMs, muted, onToggleMuted, onExit }: Props) {
   return (
     <div className="flex w-full max-w-[347px] items-center justify-between">
       <button
@@ -50,9 +51,9 @@ export function GameTopBar({ elapsedMs, muted, onToggleMuted }: Props) {
         </span>
       </div>
 
-      <Link href="/" aria-label="Exit game" className={ROUND_BTN}>
+      <button type="button" onClick={onExit} aria-label="Exit game" data-testid="exit-button" className={ROUND_BTN}>
         <img src="/race/icons/exit.svg" alt="" className="h-[12px] w-[13px]" aria-hidden />
-      </Link>
+      </button>
     </div>
   );
 }
