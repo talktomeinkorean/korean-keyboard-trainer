@@ -24,9 +24,10 @@ export default function LessonsPage() {
       <h1 className="sr-only">Hangeul Typing Practice</h1>
 
       {/*
-        배경을 배너(393x105) 높이만큼 아래에서 시작시켜 로고가 가려지지 않게 한다.
-        pt 와 배너 높이가 둘 다 폭에 비례하므로 393px 보다 좁은 화면에서도 정확히 맞는다.
+        배경 시작점을 아래로 내려 배너가 로고를 가리지 않게 한다.
         bg-origin-content: 배경 위치 기준을 padding 아래(content box)로 옮긴다.
+        pt 를 % 로 잡은 건 배너 높이(w-full 이라 폭에 비례)와 같이 움직이게
+        하기 위해서다 — 고정 px 이면 393px 보다 좁은 화면에서 간격이 틀어진다.
       */}
       <div
         className="relative flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-origin-content bg-no-repeat pt-[15%]"
