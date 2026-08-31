@@ -23,45 +23,44 @@ export default function LessonsPage() {
     <main className="flex min-h-screen flex-col">
       <h1 className="sr-only">Hangeul Typing Practice</h1>
 
-      {/* 이벤트 배너 — 누르면 홈(레이스)으로 */}
-      <Link href="/" data-testid="promotion-banner" className="block w-full shrink-0">
-        <img
-          src={BANNER_SRC}
-          alt="Hangeul Day Typing Race, until Oct 11th. More records, more chances to win!"
-          className="w-full"
-        />
-      </Link>
-
       <div
-        className="flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-no-repeat"
+        className="relative flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-no-repeat"
         style={{ backgroundImage: `url(${BG_SRC})`, backgroundSize: '100% auto' }}
       >
+        {/* 이벤트 배너 — 배경 위에 겹쳐 띄운다. 누르면 홈(레이스)으로 */}
+        <Link href="/" data-testid="promotion-banner" className="absolute inset-x-0 top-0 z-10">
+          <img
+            src={BANNER_SRC}
+            alt="Hangeul Day Typing Race, until Oct 11th. More records, more chances to win!"
+            className="w-full"
+          />
+        </Link>
 
-      {/* 배경 이미지의 로고·문구 영역. 폭에 비례해 함께 줄어들도록 비율로 잡는다. */}
-      <div aria-hidden className="w-full shrink-0 aspect-[393/420]" />
+        {/* 배경 이미지의 로고·문구 영역. 폭에 비례해 함께 줄어들도록 비율로 잡는다. */}
+        <div aria-hidden className="w-full shrink-0 aspect-[393/420]" />
 
         <nav className="flex w-full flex-col items-center gap-[10px] px-4">
-        {CATEGORIES.map((category) => {
-          const hasContent = category.stages.length > 0 || category.dbKind;
-          return hasContent ? (
-            <Link
-              key={category.slug}
-              href={`/lessons/${category.slug}`}
-              data-testid={`category-${category.slug}`}
-              className={CATEGORY_BUTTON}
-            >
-              {category.title}
-            </Link>
-          ) : (
-            <span
-              key={category.slug}
-              data-testid={`category-${category.slug}`}
-              className={`${CATEGORY_BUTTON} cursor-not-allowed opacity-50`}
-            >
-              {category.title}
-            </span>
-          );
-        })}
+          {CATEGORIES.map((category) => {
+            const hasContent = category.stages.length > 0 || category.dbKind;
+            return hasContent ? (
+              <Link
+                key={category.slug}
+                href={`/lessons/${category.slug}`}
+                data-testid={`category-${category.slug}`}
+                className={CATEGORY_BUTTON}
+              >
+                {category.title}
+              </Link>
+            ) : (
+              <span
+                key={category.slug}
+                data-testid={`category-${category.slug}`}
+                className={`${CATEGORY_BUTTON} cursor-not-allowed opacity-50`}
+              >
+                {category.title}
+              </span>
+            );
+          })}
         </nav>
       </div>
     </main>
