@@ -14,6 +14,8 @@ describe('categories', () => {
 
   it('slug 로 카테고리를 조회한다', () => {
     expect(getCategory('vocabulary')?.title).toBe('Vocabulary');
+    expect(getCategory('consonants-vowels')?.title).toBe('Basics');
+    expect(getCategory('short-sentences')?.title).toBe('Sentences');
     expect(getCategory('nope')).toBeUndefined();
   });
 
