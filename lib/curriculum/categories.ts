@@ -12,9 +12,10 @@ export interface Category {
 
 /** /lessons 메뉴의 4개 연습 타입 (표시 순서대로) */
 export const CATEGORIES: Category[] = [
-  { slug: 'consonants-vowels', title: 'Consonants & Vowels', stages: ['consonant', 'vowel', 'syllable'] },
+  // 표시 이름은 시안 기준. slug 는 이미 색인·사이트맵에 쓰이고 있어 유지한다.
+  { slug: 'consonants-vowels', title: 'Basics', stages: ['consonant', 'vowel', 'syllable'] },
   { slug: 'vocabulary', title: 'Vocabulary', stages: [], dbKind: 'vocabulary' },
-  { slug: 'short-sentences', title: 'Short Sentences', stages: [], dbKind: 'sentence' },
+  { slug: 'short-sentences', title: 'Sentences', stages: [], dbKind: 'sentence' },
   { slug: 'long-text', title: 'Long Text', stages: [], dbKind: 'long_text' },
 ];
 
