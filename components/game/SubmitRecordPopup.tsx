@@ -1,17 +1,19 @@
 'use client';
 
+/* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다. */
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { PIXEL_BUTTON } from './pixelButton';
+import { formatRaceTime } from '@/lib/game/rank';
+
+export interface LeaderboardEntry {
+  nickname: string;
+  timeMs: number;
+}
 
 interface Props {
   timeMs: number;
   accuracy: number;
-  onRetry: () => void;
-}
-
-interface LeaderboardEntry {
-  nickname: string;
-  timeMs: number;
+  onClose: () => void;
 }
 
 type SubmitState =
@@ -21,10 +23,6 @@ type SubmitState =
   | { step: 'error' };
 
 const PLAYER_KEY = 'race-player';
-
-function formatSeconds(ms: number): string {
-  return (ms / 1000).toFixed(1);
-}
 
 function loadPlayer(): { email: string; nickname: string } {
   try {
@@ -36,30 +34,26 @@ function loadPlayer(): { email: string; nickname: string } {
   return { email: '', nickname: '' };
 }
 
-export function RaceResultCard({ timeMs, accuracy, onRetry }: Props) {
+const FIELD =
+  'rounded-[2px] border border-[#36454d] px-[10px] py-[7px] font-dmsans text-[13px] text-[#36454d] placeholder:text-[#8ba1ab]';
+
+/**
+ * 기록 저장 폼. 시안에는 "Submit This Record" 버튼만 있고 폼 화면이 없어서
+ * 게임의 다른 팝업(ExitPopup)과 같은 껍데기를 쓴다.
+ */
+export function SubmitRecordPopup({ timeMs, accuracy, onClose }: Props) {
   const [email, setEmail] = useState('');
   const [nickname, setNickname] = useState('');
   const [state, setState] = useState<SubmitState>({ step: 'form' });
   // 동의는 매번 새로 받는다 (저장했다가 자동 체크하면 동의 기록의 의미가 없다)
   const [consentRequired, setConsentRequired] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
-  // null = 로딩/미설정(저장 기능 숨김), [] = 아직 기록 없음
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[] | null>(null);
-  const [scoringEnabled, setScoringEnabled] = useState(false);
 
   useEffect(() => {
     const saved = loadPlayer();
     setEmail(saved.email);
     setNickname(saved.nickname);
-
-    void fetch('/api/leaderboard')
-      .then(async (res) => {
-        if (!res.ok) return; // 503(미설정) 등 — 저장 UI 숨김 유지
-        const data = (await res.json()) as { entries: LeaderboardEntry[] };
-        setLeaderboard(data.entries);
-        setScoringEnabled(true);
-      })
-      .catch(() => {});
   }, []);
 
   async function submit(e: React.FormEvent) {
@@ -91,16 +85,47 @@ export function RaceResultCard({ timeMs, accuracy, onRetry }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div className="bg-neutral-900 rounded-2xl p-8 w-96 max-w-[calc(100vw-2rem)] text-center flex flex-col gap-4 text-white">
-        <h2 className="text-2xl font-semibold">Finished! 🏁</h2>
-        <div>
-          <b className="block text-4xl text-blue-400 tabular-nums">{formatSeconds(timeMs)}s</b>
-          <span className="text-sm text-neutral-400">accuracy {accuracy}%</span>
+    <div
+      data-testid="submit-popup"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-[#36454d]/70 p-4 backdrop-blur-[10px]"
+    >
+      <div className="relative w-[290px] max-w-full overflow-hidden rounded-[2px] border border-[#36454d] bg-white">
+        <div className="flex h-[40px] items-center justify-between bg-[#36454d] pl-[15px]">
+          <span className="font-dmmono text-[13px] text-white">Submit This Record</span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            data-testid="submit-popup-close"
+            className="flex size-[40px] items-center justify-center"
+          >
+            <img src="/race/icons/close.svg" alt="" aria-hidden className="size-[9px]" />
+          </button>
         </div>
 
-        {scoringEnabled && state.step !== 'done' && (
-          <form onSubmit={submit} className="flex flex-col gap-2 text-left">
+        {state.step === 'done' ? (
+          <div className="flex flex-col gap-[10px] px-[20px] py-[20px] text-[#36454d]">
+            <p className="font-dmsans text-[14px] font-bold">
+              Saved! Your best is {formatRaceTime(state.bestMs)} · Rank #{state.rank}
+            </p>
+            {leaderboard !== null && leaderboard.length > 0 && (
+              <ol className="flex flex-col gap-[2px] font-dmsans text-[13px]">
+                {leaderboard.map((entry, i) => (
+                  <li key={i} className="flex justify-between tabular-nums">
+                    <span>
+                      {i + 1}. {entry.nickname}
+                    </span>
+                    <span className="text-[#6b8999]">{formatRaceTime(entry.timeMs)}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+            <button type="button" onClick={onClose} className={`${PIXEL_BUTTON} mt-[5px] w-full`}>
+              Done
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={submit} className="flex flex-col gap-[10px] px-[20px] py-[20px]">
             <input
               type="text"
               required
@@ -108,7 +133,7 @@ export function RaceResultCard({ timeMs, accuracy, onRetry }: Props) {
               placeholder="Nickname"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              className="rounded-lg bg-neutral-800 px-3 py-2 text-sm"
+              className={FIELD}
             />
             <input
               type="email"
@@ -116,29 +141,28 @@ export function RaceResultCard({ timeMs, accuracy, onRetry }: Props) {
               placeholder="Email (not shown publicly)"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="rounded-lg bg-neutral-800 px-3 py-2 text-sm"
+              className={FIELD}
             />
-            <label className="flex items-start gap-2 text-xs text-neutral-300">
+            <label className="flex items-start gap-[6px] font-dmsans text-[11px] leading-[1.4] text-[#36454d]">
               <input
                 type="checkbox"
                 required
                 data-testid="consent-required"
                 checked={consentRequired}
                 onChange={(e) => setConsentRequired(e.target.checked)}
-                className="mt-0.5 shrink-0"
+                className="mt-[2px] shrink-0"
               />
               <span>
-                (Required) I agree to have my name and email collected for the Hangeul Day
-                drawing.
+                (Required) I agree to have my name and email collected for the Hangeul Day drawing.
               </span>
             </label>
-            <label className="flex items-start gap-2 text-xs text-neutral-300">
+            <label className="flex items-start gap-[6px] font-dmsans text-[11px] leading-[1.4] text-[#36454d]">
               <input
                 type="checkbox"
                 data-testid="consent-marketing"
                 checked={consentMarketing}
                 onChange={(e) => setConsentMarketing(e.target.checked)}
-                className="mt-0.5 shrink-0"
+                className="mt-[2px] shrink-0"
               />
               <span>
                 (Optional) I&apos;d love to receive Korean learning tips and exclusive discounts
@@ -148,50 +172,17 @@ export function RaceResultCard({ timeMs, accuracy, onRetry }: Props) {
             <button
               type="submit"
               disabled={state.step === 'submitting' || !consentRequired}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-white disabled:opacity-50"
+              className={`${PIXEL_BUTTON} w-full disabled:opacity-50`}
             >
               {state.step === 'submitting' ? 'Saving…' : 'Save my score'}
             </button>
             {state.step === 'error' && (
-              <p className="text-xs text-red-400">Failed to save. Please try again.</p>
+              <p className="font-dmsans text-[11px] text-[#ff5e23]">
+                Failed to save. Please try again.
+              </p>
             )}
           </form>
         )}
-
-        {state.step === 'done' && (
-          <p className="text-emerald-400">
-            Your best: {formatSeconds(state.bestMs)}s · Rank #{state.rank}
-          </p>
-        )}
-
-        {leaderboard !== null && (
-          <div className="text-left">
-            <h3 className="text-sm text-neutral-400 mb-1">Leaderboard</h3>
-            {leaderboard.length === 0 ? (
-              <p className="text-xs text-neutral-500">No records yet — be the first!</p>
-            ) : (
-              <ol className="text-sm flex flex-col gap-0.5">
-                {leaderboard.map((entry, i) => (
-                  <li key={i} className="flex justify-between tabular-nums">
-                    <span>
-                      {i + 1}. {entry.nickname}
-                    </span>
-                    <span className="text-neutral-400">{formatSeconds(entry.timeMs)}s</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-        )}
-
-        <div className="flex gap-2 justify-center mt-2">
-          <button onClick={onRetry} className="px-4 py-2 rounded-lg bg-blue-500 text-white">
-            Retry
-          </button>
-          <Link href="/lessons" className="px-4 py-2 rounded-lg bg-neutral-700 text-white">
-            Start typing practice
-          </Link>
-        </div>
       </div>
     </div>
   );

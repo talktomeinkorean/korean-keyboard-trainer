@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { pickRaceWords } from '@/lib/game/words';
+import { keysPerMinute } from '@/lib/game/rank';
 import { playSfx, startBgm, stopBgm } from '@/lib/audio/sounds';
 import { loadMuted, saveMuted } from '@/lib/audio/mutePreference';
 import { useLessonSession } from '@/lib/session/useLessonSession';
 import { RaceScene } from '@/components/RaceScene';
 import { Keyboard } from '@/components/Keyboard';
-import { RaceResultCard } from '@/components/RaceResultCard';
+import { ResultScreen } from '@/components/game/ResultScreen';
 import { StartPopup } from '@/components/StartPopup';
 import { ExitPopup } from '@/components/game/ExitPopup';
 import { GameTopBar } from '@/components/game/GameTopBar';
@@ -157,7 +158,13 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
       )}
 
       {session.isComplete && (
-        <RaceResultCard timeMs={elapsedMs} accuracy={session.accuracy} onRetry={onRetry} />
+        <ResultScreen
+          timeMs={elapsedMs}
+          accuracy={session.accuracy}
+          // 오타를 뺀 자모 수가 곧 타수다
+          keysPerMin={keysPerMinute(session.keystrokes - session.errorCount, elapsedMs)}
+          onRetry={onRetry}
+        />
       )}
     </main>
   );
