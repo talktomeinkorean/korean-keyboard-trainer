@@ -22,6 +22,8 @@ const BUTTON = 'w-[265px] max-w-full';
 
 export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
   const [showSubmit, setShowSubmit] = useState(false);
+  // 이번 기록을 이미 저장했는지 — 한 판에 한 번만 등록되게 한다
+  const [submitted, setSubmitted] = useState(false);
   // null = 아직 확인 전/미설정 — 저장 버튼을 숨긴다
   const [scoringEnabled, setScoringEnabled] = useState(false);
   const [shared, setShared] = useState(false);
@@ -66,15 +68,22 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
 
           <div className="flex flex-col items-center gap-[10px]">
             {scoringEnabled && (
+              // 저장 후에는 잠기고 문구가 바뀐다. 새 판을 시작하면 화면이 다시
+              // 마운트되므로 자동으로 원래 상태로 돌아간다.
               <button
                 type="button"
+                disabled={submitted}
                 onClick={() => setShowSubmit(true)}
                 data-testid="result-submit"
-                className={`${PIXEL_BUTTON_BASE} ${BUTTON} h-[60px] flex-col bg-[#48dd59]`}
+                className={`${PIXEL_BUTTON_BASE} ${BUTTON} h-[60px] flex-col disabled:hover:brightness-100 ${
+                  submitted ? 'bg-[#8ceb97]' : 'bg-[#48dd59]'
+                }`}
               >
-                <span className="leading-[1.2]">Submit This Record</span>
+                <span className="leading-[1.2]">
+                  {submitted ? '✓ Record Submitted' : 'Submit This Record'}
+                </span>
                 <span className="font-dmsans text-[14px] font-bold leading-[1.2] text-[#277830]">
-                  More entries, more chances to win
+                  {submitted ? 'Play again for another entry' : 'More entries, more chances to win'}
                 </span>
               </button>
             )}
@@ -123,6 +132,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
           timeMs={timeMs}
           accuracy={accuracy}
           onClose={() => setShowSubmit(false)}
+          onSubmitted={() => setSubmitted(true)}
         />
       )}
     </div>
