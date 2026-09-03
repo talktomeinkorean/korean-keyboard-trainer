@@ -34,13 +34,17 @@ function loadPlayer(): { email: string; nickname: string } {
   return { email: '', nickname: '' };
 }
 
-const FIELD =
-  'rounded-[2px] border border-[#36454d] px-[10px] py-[7px] font-dmsans text-[13px] text-[#36454d] placeholder:text-[#8ba1ab]';
+// 시안: 테두리 박스 안에 작은 라벨과 입력값이 한 줄로 들어간다
+const FIELD_ROW =
+  'flex items-center gap-[5px] rounded-[2px] border border-[#36454d] p-[10px] font-dmmono leading-[1.5]';
+const FIELD_LABEL = 'shrink-0 text-[10px] tracking-[-0.19px] text-[#6b8999]';
+const FIELD_INPUT =
+  'min-w-0 flex-1 text-[12px] tracking-[-0.228px] text-[#36454d] outline-none placeholder:text-[#b8c5cc]';
+// 시안 체크박스: 20x20 영역 안의 11.5px 사각형
+const CHECKBOX =
+  'size-[11.557px] shrink-0 appearance-none border-[1.111px] border-[#6b8999] checked:border-[#36454d] checked:bg-[#36454d]';
 
-/**
- * 기록 저장 폼. 시안에는 "Submit This Record" 버튼만 있고 폼 화면이 없어서
- * 게임의 다른 팝업(ExitPopup)과 같은 껍데기를 쓴다.
- */
+/** 기록 저장 폼 (시안 519:14583). */
 export function SubmitRecordPopup({ timeMs, accuracy, onClose }: Props) {
   const [email, setEmail] = useState('');
   const [nickname, setNickname] = useState('');
@@ -87,11 +91,10 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose }: Props) {
   return (
     <div
       data-testid="submit-popup"
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-[#36454d]/70 p-4 backdrop-blur-[10px]"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-[#36454d]/50 p-4 backdrop-blur-[5px]"
     >
-      <div className="relative w-[290px] max-w-full overflow-hidden rounded-[2px] border border-[#36454d] bg-white">
-        <div className="flex h-[40px] items-center justify-between bg-[#36454d] pl-[15px]">
-          <span className="font-dmmono text-[13px] text-white">Submit This Record</span>
+      <div className="relative w-[320px] max-w-full overflow-hidden rounded-[2px] border border-[#36454d] bg-white">
+        <div className="flex h-[40px] items-center justify-end bg-[#36454d]">
           <button
             type="button"
             onClick={onClose}
@@ -99,17 +102,20 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose }: Props) {
             data-testid="submit-popup-close"
             className="flex size-[40px] items-center justify-center"
           >
-            <img src="/race/icons/close.svg" alt="" aria-hidden className="size-[9px]" />
+            <img src="/race/icons/close.svg" alt="" aria-hidden className="size-[9.2px]" />
           </button>
         </div>
 
         {state.step === 'done' ? (
-          <div className="flex flex-col gap-[10px] px-[20px] py-[20px] text-[#36454d]">
-            <p className="font-dmsans text-[14px] font-bold">
-              Saved! Your best is {formatRaceTime(state.bestMs)} · Rank #{state.rank}
+          <div className="flex flex-col items-center gap-[20px] px-[30px] pt-[27px] pb-[30px] text-center">
+            <p className="font-dmsans text-[20px] font-extrabold leading-[1.3] text-[#36454d]">
+              Record saved!
+            </p>
+            <p className="font-dmsans text-[14px] font-semibold leading-[1.2] text-[#9680ff]">
+              Your best is {formatRaceTime(state.bestMs)} · Rank #{state.rank}
             </p>
             {leaderboard !== null && leaderboard.length > 0 && (
-              <ol className="flex flex-col gap-[2px] font-dmsans text-[13px]">
+              <ol className="flex w-[260px] flex-col gap-[4px] font-dmsans text-[13px] text-[#36454d]">
                 {leaderboard.map((entry, i) => (
                   <li key={i} className="flex justify-between tabular-nums">
                     <span>
@@ -120,64 +126,98 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose }: Props) {
                 ))}
               </ol>
             )}
-            <button type="button" onClick={onClose} className={`${PIXEL_BUTTON} mt-[5px] w-full`}>
+            <button type="button" onClick={onClose} className={`${PIXEL_BUTTON} w-[200px]`}>
               Done
             </button>
           </div>
         ) : (
-          <form onSubmit={submit} className="flex flex-col gap-[10px] px-[20px] py-[20px]">
-            <input
-              type="text"
-              required
-              maxLength={20}
-              placeholder="Nickname"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              className={FIELD}
-            />
-            <input
-              type="email"
-              required
-              placeholder="Email (not shown publicly)"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={FIELD}
-            />
-            <label className="flex items-start gap-[6px] font-dmsans text-[11px] leading-[1.4] text-[#36454d]">
-              <input
-                type="checkbox"
-                required
-                data-testid="consent-required"
-                checked={consentRequired}
-                onChange={(e) => setConsentRequired(e.target.checked)}
-                className="mt-[2px] shrink-0"
-              />
-              <span>
-                (Required) I agree to have my name and email collected for the Hangeul Day drawing.
-              </span>
-            </label>
-            <label className="flex items-start gap-[6px] font-dmsans text-[11px] leading-[1.4] text-[#36454d]">
-              <input
-                type="checkbox"
-                data-testid="consent-marketing"
-                checked={consentMarketing}
-                onChange={(e) => setConsentMarketing(e.target.checked)}
-                className="mt-[2px] shrink-0"
-              />
-              <span>
-                (Optional) I&apos;d love to receive Korean learning tips and exclusive discounts
-                from TTMIK!
-              </span>
-            </label>
+          <form
+            onSubmit={submit}
+            className="flex flex-col items-center gap-[20px] px-[30px] pt-[27px] pb-[30px]"
+          >
+            <div className="flex flex-col items-center gap-[25px]">
+              <div className="flex flex-col gap-[10px] text-center">
+                {/* 줄바꿈 위치는 시안 그대로 */}
+                <h2 className="font-dmsans text-[20px] font-extrabold leading-[1.3] text-[#36454d]">
+                  Save your Record
+                  <br />
+                  for a Chance to Win!
+                </h2>
+                <p className="font-dmsans text-[14px] font-semibold leading-[1.2] text-[#9680ff]">
+                  The more you play,
+                  <br />
+                  the more chances to win!
+                </p>
+              </div>
+
+              <div className="flex w-[260px] max-w-full flex-col gap-[10px]">
+                <label className={FIELD_ROW}>
+                  <span className={FIELD_LABEL}>Name:</span>
+                  <input
+                    type="text"
+                    required
+                    maxLength={20}
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    className={FIELD_INPUT}
+                  />
+                </label>
+                <label className={FIELD_ROW}>
+                  <span className={FIELD_LABEL}>Email:</span>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={FIELD_INPUT}
+                  />
+                </label>
+              </div>
+
+              <div className="flex w-[250px] max-w-full flex-col gap-[10px]">
+                <label className="flex items-start gap-[10px]">
+                  <span className="flex size-[20px] shrink-0 items-center justify-center">
+                    <input
+                      type="checkbox"
+                      required
+                      data-testid="consent-required"
+                      checked={consentRequired}
+                      onChange={(e) => setConsentRequired(e.target.checked)}
+                      className={CHECKBOX}
+                    />
+                  </span>
+                  <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
+                    (Required) I agree to have my name and email collected for the Hangeul Day
+                    drawing.
+                  </span>
+                </label>
+                <label className="flex items-start gap-[10px]">
+                  <span className="flex size-[20px] shrink-0 items-center justify-center">
+                    <input
+                      type="checkbox"
+                      data-testid="consent-marketing"
+                      checked={consentMarketing}
+                      onChange={(e) => setConsentMarketing(e.target.checked)}
+                      className={CHECKBOX}
+                    />
+                  </span>
+                  <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
+                    (Optional) I&apos;d love to receive Korean learning tips and exclusive
+                    discounts from TTMIK!
+                  </span>
+                </label>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={state.step === 'submitting' || !consentRequired}
-              className={`${PIXEL_BUTTON} w-full disabled:opacity-50`}
+              className={`${PIXEL_BUTTON} w-[200px] disabled:opacity-50`}
             >
-              {state.step === 'submitting' ? 'Saving…' : 'Save my score'}
+              {state.step === 'submitting' ? 'Saving…' : 'Submit Record'}
             </button>
             {state.step === 'error' && (
-              <p className="font-dmsans text-[11px] text-[#ff5e23]">
+              <p className="font-dmsans text-[12px] text-[#ff5e23]">
                 Failed to save. Please try again.
               </p>
             )}

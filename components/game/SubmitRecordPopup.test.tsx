@@ -32,7 +32,7 @@ describe('SubmitRecordPopup 동의 항목', () => {
   it('필수 동의 전에는 저장 버튼이 비활성이다', () => {
     stubFetch();
     open();
-    const submit = screen.getByRole('button', { name: /save my score/i });
+    const submit = screen.getByRole('button', { name: /submit record/i });
     expect(submit).toBeDisabled();
 
     fireEvent.click(screen.getByTestId('consent-required'));
@@ -46,11 +46,11 @@ describe('SubmitRecordPopup 동의 항목', () => {
     });
     open();
 
-    fireEvent.change(screen.getByPlaceholderText(/nickname/i), { target: { value: 'racer' } });
-    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'a@b.co' } });
+    fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
     fireEvent.click(screen.getByTestId('consent-marketing'));
-    fireEvent.click(screen.getByRole('button', { name: /save my score/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     await waitFor(() => expect(sent).toBeDefined());
     expect(sent).toMatchObject({ consentRequired: true, consentMarketing: true });
@@ -71,10 +71,10 @@ describe('SubmitRecordPopup 동의 항목', () => {
   it('저장에 성공하면 최고 기록과 순위를 보여준다', async () => {
     stubFetch();
     open();
-    fireEvent.change(screen.getByPlaceholderText(/nickname/i), { target: { value: 'racer' } });
-    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'a@b.co' } });
+    fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
-    fireEvent.click(screen.getByRole('button', { name: /save my score/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     expect(await screen.findByText(/00:15\.00/)).toBeInTheDocument();
     expect(screen.getByText(/Rank #1/)).toBeInTheDocument();
