@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { CATEGORIES, lessonsInCategory } from '@/lib/curriculum/categories';
 import { getContentLessons } from '@/lib/content/catalog';
+import { SITE_URL } from '@/lib/site';
 
-// 도메인이 바뀌면 이 값을 바꿔야 한다 (사이트맵의 모든 URL이 여기서 파생됨).
-const BASE_URL = 'https://hangeultyping.talktomeinkorean.com';
+const BASE_URL = SITE_URL;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
