@@ -7,6 +7,7 @@ import { ResultCard } from './ResultCard';
 import { SubmitRecordPopup } from './SubmitRecordPopup';
 import { PIXEL_BUTTON, PIXEL_BUTTON_BASE } from './pixelButton';
 import { formatRaceTime, rankFor } from '@/lib/game/rank';
+import { encodeResultCode } from '@/lib/game/resultCode';
 
 interface Props {
   timeMs: number;
@@ -35,7 +36,8 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
   async function share() {
     const rank = rankFor(timeMs);
     const text = `I finished the Hangeul Typing Race in ${formatRaceTime(timeMs)} — ${rank.emoji} ${rank.korean} (${rank.english})!`;
-    const url = window.location.origin;
+    // 이 주소를 열면 결과 카드가 보이고, 링크 미리보기에도 카드 이미지가 뜬다
+    const url = `${window.location.origin}/result/${encodeResultCode({ timeMs, keysPerMin })}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: 'Hangeul Typing Race', text, url });

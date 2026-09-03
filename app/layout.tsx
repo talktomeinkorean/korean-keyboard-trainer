@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, DM_Sans, DM_Mono } from "next/font/google";
 import { GoogleTagManager } from "@next/third-parties/google";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 // GTM 컨테이너. GA4·픽셀 등 실제 태그는 GTM 웹 화면에서 관리한다.
@@ -29,6 +30,8 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
+  // OG 이미지 등 상대 경로를 절대 URL 로 바꿀 기준
+  metadataBase: new URL(SITE_URL),
   title: "Korean Typing Practice",
   description: "Learn the Korean keyboard, one key at a time.",
   // Search Console 소유권 확인 — 제거하면 소유권이 해제된다.
