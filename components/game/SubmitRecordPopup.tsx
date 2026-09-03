@@ -14,6 +14,8 @@ interface Props {
   timeMs: number;
   accuracy: number;
   onClose: () => void;
+  /** 저장에 성공한 순간 알린다 — 결과 화면의 제출 버튼을 잠그는 데 쓴다 */
+  onSubmitted?: () => void;
 }
 
 type SubmitState =
@@ -45,7 +47,7 @@ const CHECKBOX =
   'size-[11.557px] shrink-0 appearance-none border-[1.111px] border-[#6b8999] checked:border-[#36454d] checked:bg-[#36454d]';
 
 /** 기록 저장 폼 (시안 519:14583). */
-export function SubmitRecordPopup({ timeMs, accuracy, onClose }: Props) {
+export function SubmitRecordPopup({ timeMs, accuracy, onClose, onSubmitted }: Props) {
   const [email, setEmail] = useState('');
   const [nickname, setNickname] = useState('');
   const [state, setState] = useState<SubmitState>({ step: 'form' });
@@ -80,6 +82,7 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose }: Props) {
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as { bestMs: number; rank: number };
       setState({ step: 'done', bestMs: data.bestMs, rank: data.rank });
+      onSubmitted?.();
       // 제출 직후에는 캐시를 우회해 방금 저장한 기록이 바로 보이게 한다
       const lb = await fetch('/api/leaderboard?fresh=1');
       if (lb.ok) setLeaderboard(((await lb.json()) as { entries: LeaderboardEntry[] }).entries);

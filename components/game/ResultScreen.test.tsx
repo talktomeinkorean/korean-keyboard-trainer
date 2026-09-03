@@ -58,6 +58,40 @@ describe('ResultScreen', () => {
     expect(screen.getByTestId('consent-required')).toBeInTheDocument();
   });
 
+  it('저장에 성공하면 제출 버튼이 잠기고 문구가 바뀐다', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) =>
+        String(url).startsWith('/api/scores')
+          ? ({ ok: true, json: async () => ({ bestMs: 33_120, rank: 3 }) } as Response)
+          : ({ ok: true, json: async () => ({ entries: [] }) } as Response),
+      ),
+    );
+    open();
+    fireEvent.click(await screen.findByTestId('result-submit'));
+    fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
+    fireEvent.click(screen.getByTestId('consent-required'));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
+
+    const submit = screen.getByTestId('result-submit');
+    await waitFor(() => expect(submit).toBeDisabled());
+    expect(submit).toHaveTextContent('✓ Record Submitted');
+    expect(submit).toHaveTextContent('Play again for another entry');
+  });
+
+  it('새 판을 시작하면 제출 버튼이 원래대로 돌아온다', async () => {
+    stubLeaderboard();
+    // RaceGame 은 새 단어를 받으면 판 전체를 다시 마운트한다 — 그 상황을 흉내낸다
+    const { unmount } = open();
+    unmount();
+
+    open();
+    const submit = await screen.findByTestId('result-submit');
+    expect(submit).toBeEnabled();
+    expect(submit).toHaveTextContent('Submit This Record');
+  });
+
   it('공유 API 가 없으면 링크를 클립보드에 복사한다', async () => {
     stubLeaderboard();
     const writeText = vi.fn(async () => {});
