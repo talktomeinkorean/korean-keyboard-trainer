@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { pickRaceWords } from '@/lib/game/words';
 import { keysPerMinute } from '@/lib/game/rank';
-import { playSfx, startBgm, stopBgm } from '@/lib/audio/sounds';
+import { playSfx, startBgm, pauseBgm, stopBgm } from '@/lib/audio/sounds';
 import { loadMuted, saveMuted } from '@/lib/audio/mutePreference';
 import { useLessonSession } from '@/lib/session/useLessonSession';
 import { RaceScene } from '@/components/RaceScene';
@@ -54,16 +54,18 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
     });
   }, []);
 
-  // BGM — 첫 키 입력 시 시작, 완주·음소거·이탈 시 정지
+  // BGM — 첫 키 입력 시 시작, 나가기 팝업 중에는 그 지점에서 멈췄다가 이어서, 완주·음소거 시 정지.
+  // 정리(stopBgm)를 여기서 반환하지 않는 건, 팝업을 열 때 이 효과가 다시 실행되면서
+  // 정리가 먼저 돌아 재생 위치를 0 으로 되돌려 버리기 때문이다.
   const isPlaying = session.startedAt !== null && !session.isComplete;
   useEffect(() => {
-    if (muted || !isPlaying) {
-      stopBgm();
-      return;
-    }
-    startBgm();
-    return () => stopBgm();
-  }, [muted, isPlaying]);
+    if (muted || !isPlaying) stopBgm();
+    else if (showExitPopup) pauseBgm();
+    else startBgm();
+  }, [muted, isPlaying, showExitPopup]);
+
+  // 화면을 벗어날 때는 처음으로 되돌리며 끈다
+  useEffect(() => () => stopBgm(), []);
 
   // 단어 완성 효과음 (마지막 단어는 완주음이 대신하므로 currentIndex 가 오르지 않는다)
   const prevIndexRef = useRef(session.currentIndex);
@@ -98,17 +100,34 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [session, showStartPopup, showExitPopup]);
 
-  // 경과 타이머 — 첫 키 입력부터 완주까지 100ms 간격 갱신
+  // 나가기 팝업이 떠 있는 동안 흐른 시간의 합 — 기록에서 빼야 시간이 멈춘 것처럼 보인다
+  const [pausedMs, setPausedMs] = useState(0);
+  const pauseStartedAtRef = useRef<number | null>(null);
   useEffect(() => {
-    if (session.startedAt === null || session.isComplete) return;
+    if (showExitPopup) {
+      pauseStartedAtRef.current = Date.now();
+      return;
+    }
+    const startedAt = pauseStartedAtRef.current;
+    if (startedAt === null) return; // 첫 렌더 — 아직 멈춘 적이 없다
+    pauseStartedAtRef.current = null;
+    setPausedMs((ms) => ms + (Date.now() - startedAt));
+  }, [showExitPopup]);
+
+  // 경과 타이머 — 첫 키 입력부터 완주까지 100ms 간격 갱신 (팝업 중에는 멈춘다)
+  useEffect(() => {
+    if (session.startedAt === null || session.isComplete || showExitPopup) return;
     const t = setInterval(() => setNowMs(Date.now()), 100);
     return () => clearInterval(t);
-  }, [session.startedAt, session.isComplete]);
+  }, [session.startedAt, session.isComplete, showExitPopup]);
 
   const elapsedMs =
     session.startedAt === null
       ? 0
-      : (session.finishedAt ?? nowMs ?? session.startedAt) - session.startedAt;
+      : Math.max(
+          0,
+          (session.finishedAt ?? nowMs ?? session.startedAt) - session.startedAt - pausedMs,
+        );
 
   return (
     <main className="flex min-h-screen flex-col items-center gap-4">
