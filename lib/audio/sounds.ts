@@ -56,6 +56,11 @@ export function startBgm(): void {
   });
 }
 
+/** 재생 위치를 남긴 채 멈춘다. 다시 startBgm 하면 그 지점부터 이어진다. */
+export function pauseBgm(): void {
+  bgmEl?.pause();
+}
+
 export function stopBgm(): void {
   if (!bgmEl) return;
   bgmEl.pause();
