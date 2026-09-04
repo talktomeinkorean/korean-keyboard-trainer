@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { lessonDescription, pageMetadata } from '@/lib/seo';
 import { getLesson, LESSONS } from '@/lib/curriculum/lessons';
 import { CATEGORIES } from '@/lib/curriculum/categories';
 import { getContentLesson, getContentLessons } from '@/lib/content/catalog';
@@ -10,6 +12,21 @@ export function generateStaticParams() {
     c.dbKind ? getContentLessons(c.dbKind).map((l) => l.id) : [],
   );
   return [...LESSONS.map((l) => l.id), ...contentIds].map((id) => ({ id }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const lesson = getLesson(id) ?? getContentLesson(id);
+  if (!lesson) return {};
+  return pageMetadata({
+    title: `${lesson.title} — Korean Typing Practice`,
+    description: lessonDescription(lesson),
+    path: `/lesson/${lesson.id}`,
+  });
 }
 
 export default async function LessonPage({ params }: { params: Promise<{ id: string }> }) {

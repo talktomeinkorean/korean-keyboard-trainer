@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, DM_Sans, DM_Mono } from "next/font/google";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { SITE_URL } from "@/lib/site";
+import { SITE_NAME } from "@/lib/seo";
 import "./globals.css";
 
 // GTM 컨테이너. GA4·픽셀 등 실제 태그는 GTM 웹 화면에서 관리한다.
@@ -32,7 +33,9 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   // OG 이미지 등 상대 경로를 절대 URL 로 바꿀 기준
   metadataBase: new URL(SITE_URL),
-  title: "Korean Typing Practice",
+  // 아래 값은 자체 메타데이터가 없는 페이지(404 등)의 폴백이다.
+  // 실제 페이지는 각자 lib/seo 의 pageMetadata 로 고유한 제목을 붙인다.
+  title: SITE_NAME,
   description: "Learn the Korean keyboard, one key at a time.",
   // Search Console 소유권 확인 — 제거하면 소유권이 해제된다.
   // GTM/GA 방식은 스크립트가 클라이언트에서 삽입돼 검증기가 찾지 못하므로 메타 태그를 쓴다.

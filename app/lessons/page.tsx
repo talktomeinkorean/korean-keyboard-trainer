@@ -1,6 +1,14 @@
 /* eslint-disable @next/next/no-img-element -- 시안 그대로의 고정 크기 배너라 최적화 파이프라인이 필요 없다. */
 import Link from 'next/link';
 import { CATEGORIES } from '@/lib/curriculum/categories';
+import { pageMetadata } from '@/lib/seo';
+
+export const metadata = pageMetadata({
+  title: 'Korean Typing Practice — Hangeul Keyboard Lessons',
+  description:
+    'Free Korean typing practice: consonants and vowels, vocabulary, sentences, and long passages, with feedback on every consonant and vowel you type.',
+  path: '/lessons',
+});
 
 /**
  * 시안의 배경(그라디언트·로고·장식)은 한 장의 이미지로 깐다.
