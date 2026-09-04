@@ -1,11 +1,28 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { pageMetadata } from '@/lib/seo';
 import { CATEGORIES, getCategory, lessonsInCategory } from '@/lib/curriculum/categories';
 import { getContentLessons } from '@/lib/content/catalog';
 import { LessonList } from './LessonList';
 
 export function generateStaticParams() {
   return CATEGORIES.map((c) => ({ category: c.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}): Promise<Metadata> {
+  const { category } = await params;
+  const found = getCategory(category);
+  if (!found) return {};
+  return pageMetadata({
+    title: `${found.title} — Korean Typing Practice`,
+    description: found.description,
+    path: `/lessons/${found.slug}`,
+  });
 }
 
 export default async function CategoryPage({
