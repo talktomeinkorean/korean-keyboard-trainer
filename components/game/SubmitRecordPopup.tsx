@@ -12,7 +12,11 @@ interface Props {
   onSubmitted?: () => void;
 }
 
-type SubmitState = { step: 'form' } | { step: 'submitting' } | { step: 'error' };
+type SubmitState =
+  | { step: 'form' }
+  | { step: 'submitting' }
+  /** unavailable: 저장 기능이 아직 켜지지 않음(503) — 다시 눌러도 소용없다 */
+  | { step: 'error'; reason: 'failed' | 'unavailable' };
 
 const PLAYER_KEY = 'race-player';
 
@@ -68,12 +72,17 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose, onSubmitted }: Pr
           consentMarketing,
         }),
       });
+      // 503 은 서버에 저장소가 설정되지 않은 상태 — 재시도해도 같으므로 따로 안내한다
+      if (res.status === 503) {
+        setState({ step: 'error', reason: 'unavailable' });
+        return;
+      }
       if (!res.ok) throw new Error(String(res.status));
       // 저장 결과 화면 없이 바로 닫는다 — 결과 화면의 제출 버튼이 잠긴 모습으로 알린다
       onSubmitted?.();
       onClose();
     } catch {
-      setState({ step: 'error' });
+      setState({ step: 'error', reason: 'failed' });
     }
   }
 
@@ -181,8 +190,10 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose, onSubmitted }: Pr
             {state.step === 'submitting' ? 'Saving…' : 'Submit Record'}
           </button>
           {state.step === 'error' && (
-            <p className="font-dmsans text-[12px] text-[#ff5e23]">
-              Failed to save. Please try again.
+            <p data-testid="submit-error" className="font-dmsans text-[12px] text-[#ff5e23]">
+              {state.reason === 'unavailable'
+                ? "Saving isn't open yet. Your time still counts — try again once the event starts!"
+                : 'Failed to save. Please try again.'}
             </p>
           )}
         </form>

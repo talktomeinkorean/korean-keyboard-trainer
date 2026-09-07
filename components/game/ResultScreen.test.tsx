@@ -2,9 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ResultScreen } from './ResultScreen';
 
-/** 저장 기능이 켜지려면 /api/leaderboard 가 200 이어야 한다. */
-function stubLeaderboard(ok = true) {
-  vi.stubGlobal('fetch', vi.fn(async () => ({ ok, json: async () => ({ entries: [] }) }) as Response));
+function stubFetch(status = 200) {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => ({ ok: status < 400, status, json: async () => ({}) }) as Response),
+  );
 }
 
 function open(props: Partial<Parameters<typeof ResultScreen>[0]> = {}) {
@@ -18,42 +20,51 @@ describe('ResultScreen', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('시안의 버튼 3개와 연습 유도를 보여준다', async () => {
-    stubLeaderboard();
+    stubFetch();
     open();
-    expect(await screen.findByTestId('result-submit')).toHaveTextContent('Submit This Record');
+    expect(screen.getByTestId('result-submit')).toHaveTextContent('Submit This Record');
     expect(screen.getByTestId('result-share')).toHaveTextContent('Save & Share');
     expect(screen.getByTestId('result-retry')).toHaveTextContent('Try Again');
     expect(screen.getByTestId('result-practice')).toHaveAttribute('href', '/lessons');
   });
 
   it('결과 카드에 기록과 등급을 넘긴다', async () => {
-    stubLeaderboard();
+    stubFetch();
     open();
-    await screen.findByTestId('result-submit'); // 저장 기능 확인이 끝날 때까지 기다린다
     expect(screen.getByTestId('result-time')).toHaveTextContent('00:33.12');
     expect(screen.getByTestId('result-speed')).toHaveTextContent('112 keys/min');
     expect(screen.getByTestId('result-rank')).toHaveTextContent('토끼');
   });
 
   it('Try Again 은 콜백을 호출한다', async () => {
-    stubLeaderboard();
+    stubFetch();
     const onRetry = vi.fn();
     open({ onRetry });
-    await screen.findByTestId('result-submit');
     fireEvent.click(screen.getByTestId('result-retry'));
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
-  it('저장 기능이 꺼져 있으면 제출 버튼을 숨긴다', async () => {
-    stubLeaderboard(false);
+  it('저장 기능이 꺼져 있어도 제출 버튼은 보이고, 누르면 안내가 뜬다', async () => {
+    stubFetch(503);
     open();
-    await waitFor(() => expect(screen.queryByTestId('result-submit')).not.toBeInTheDocument());
+    const submit = screen.getByTestId('result-submit');
+    expect(submit).toBeEnabled();
+
+    fireEvent.click(submit);
+    fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
+    fireEvent.click(screen.getByTestId('consent-required'));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
+
+    expect(await screen.findByTestId('submit-error')).toHaveTextContent(/isn't open yet/);
+    // 실패했으므로 버튼은 잠기지 않는다
+    expect(screen.getByTestId('result-submit')).toBeEnabled();
   });
 
   it('Submit This Record 를 누르면 저장 폼이 열린다', async () => {
-    stubLeaderboard();
+    stubFetch();
     open();
-    fireEvent.click(await screen.findByTestId('result-submit'));
+    fireEvent.click(screen.getByTestId('result-submit'));
     expect(screen.getByTestId('submit-popup')).toBeInTheDocument();
     expect(screen.getByTestId('consent-required')).toBeInTheDocument();
   });
@@ -68,7 +79,7 @@ describe('ResultScreen', () => {
       ),
     );
     open();
-    fireEvent.click(await screen.findByTestId('result-submit'));
+    fireEvent.click(screen.getByTestId('result-submit'));
     fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
@@ -83,19 +94,19 @@ describe('ResultScreen', () => {
   });
 
   it('새 판을 시작하면 제출 버튼이 원래대로 돌아온다', async () => {
-    stubLeaderboard();
+    stubFetch();
     // RaceGame 은 새 단어를 받으면 판 전체를 다시 마운트한다 — 그 상황을 흉내낸다
     const { unmount } = open();
     unmount();
 
     open();
-    const submit = await screen.findByTestId('result-submit');
+    const submit = screen.getByTestId('result-submit');
     expect(submit).toBeEnabled();
     expect(submit).toHaveTextContent('Submit This Record');
   });
 
   it('공유 API 가 없으면 링크를 클립보드에 복사한다', async () => {
-    stubLeaderboard();
+    stubFetch();
     const writeText = vi.fn(async () => {});
     vi.stubGlobal('navigator', { clipboard: { writeText } });
     open();
