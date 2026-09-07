@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { pageMetadata } from '@/lib/seo';
+import { PracticeBackground } from '@/components/PracticeBackground';
 import { CATEGORIES, getCategory, lessonsInCategory } from '@/lib/curriculum/categories';
 import { getContentLessons } from '@/lib/content/catalog';
 import { LessonList } from './LessonList';
@@ -39,7 +40,9 @@ export default async function CategoryPage({
     : lessonsInCategory(category);
 
   return (
-    <main className="min-h-screen flex flex-col items-center gap-6 p-8">
+    // 배경이 밝아서 글자색을 고정한다 — 다크 모드에서 body 색을 물려받으면 안 보인다
+    <main className="min-h-screen flex flex-col items-center gap-6 p-8 text-[#36454d]">
+      <PracticeBackground />
       <header className="text-center mt-8 w-full max-w-md">
         <Link href="/lessons" className="block text-left text-sm text-neutral-500 mb-4">
           ← Back
