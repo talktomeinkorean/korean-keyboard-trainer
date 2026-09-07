@@ -74,8 +74,10 @@ describe('ResultScreen', () => {
     fireEvent.click(screen.getByTestId('consent-required'));
     fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
+    // 팝업은 바로 닫히고 결과 화면으로 돌아온다
+    await waitFor(() => expect(screen.queryByTestId('submit-popup')).not.toBeInTheDocument());
     const submit = screen.getByTestId('result-submit');
-    await waitFor(() => expect(submit).toBeDisabled());
+    expect(submit).toBeDisabled();
     expect(submit).toHaveTextContent('✓ Record Submitted');
     expect(submit).toHaveTextContent('Play again for another entry');
   });
