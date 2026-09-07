@@ -7,13 +7,14 @@ interface Props {
   errorCount: number;
 }
 
+// 배경이 흰 카드로 바뀌면서 어두운 테마 색을 쓸 수 없다. 레이스 단어 카드와 같은 팔레트.
 const STATE_CLASS = {
-  done: 'border-emerald-600 text-emerald-500',
-  current: 'border-amber-400 text-amber-300',
-  todo: 'border-neutral-700 text-neutral-600',
+  done: 'bg-[#eae5ff] border-[#8166ff] text-[#8166ff]',
+  current: 'bg-white border-[#ff5e23] text-[#ff5e23]',
+  todo: 'bg-white border-[#b8c5cc] text-[#6b8999]',
 } as const;
 
-const FLASH_CLASS = 'border-red-500 bg-red-500/20 text-red-400';
+const FLASH_CLASS = 'bg-[#ffece5] border-[#ff5e23] text-[#ff5e23]';
 const FLASH_MS = 300;
 
 export function JamoTrack({ item, typedJamoCount, errorCount }: Props) {

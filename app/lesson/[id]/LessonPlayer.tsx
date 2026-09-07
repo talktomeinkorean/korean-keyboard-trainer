@@ -9,6 +9,10 @@ import { PassageView } from '@/components/PassageView';
 import { JamoTrack } from '@/components/JamoTrack';
 import { StatsBar } from '@/components/StatsBar';
 import { NextKeyHint } from '@/components/NextKeyHint';
+import { PracticeNav } from '@/components/lessons/PracticeNav';
+import { PracticeProgress } from '@/components/lessons/PracticeProgress';
+import { PracticeCard } from '@/components/lessons/PracticeCard';
+import { KeyGuideToggle } from '@/components/game/KeyGuideToggle';
 import { PracticeResult } from '@/components/PracticeResult';
 import { PracticeBackground } from '@/components/PracticeBackground';
 import { LocalProgressStore } from '@/lib/progress/localStore';
@@ -23,6 +27,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const isLongText = lesson.stage === 'long_text';
   // 문장/긴글: 확장 키보드 사용 + 자모 칩 숨김 (칩은 자모~단어 단계용 초급 가이드)
   const isExtendedStage = lesson.stage === 'sentence' || isLongText;
+  // Basics 만 새 시안(250:3669) 으로 그린다. 나머지 단계는 시안 반영 전까지 기존 화면.
+  const isBasics = !isExtendedStage && lesson.stage !== 'word';
+  const [keyGuide, setKeyGuide] = useState(true);
 
   // 긴 글 연습 실시간 통계 — 500ms tick 으로 경과시간·타수/분 갱신
   const [nowMs, setNowMs] = useState<number | null>(null);
@@ -71,6 +78,62 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     }
   }, [session.isComplete, session.wpm, session.accuracy, lesson.id]);
 
+  const result = session.isComplete && (
+    <PracticeResult
+      category={categoryForStage(lesson.stage)?.title ?? ''}
+      title={lesson.title}
+      timeMs={elapsedMs}
+      // 레이스와 같은 기준 — 오타를 뺀 자모 수를 분당으로 환산한다
+      keysPerMin={keysPerMinute(session.keystrokes - session.errorCount, elapsedMs)}
+      onRetry={() => {
+        savedRef.current = false;
+        session.reset();
+      }}
+    />
+  );
+
+  if (isBasics) {
+    return (
+      // 배경이 밝아서 글자색을 고정한다 — 다크 모드에서 body 색을 물려받으면 안 보인다
+      <main className="flex min-h-screen flex-col items-center text-[#36454d]">
+        <PracticeBackground />
+        <PracticeNav title={lesson.title} backHref="/lessons/consonants-vowels" />
+
+        <PracticeProgress
+          done={session.currentIndex}
+          total={lesson.items.length}
+          running={session.startedAt !== null && !session.isComplete}
+        />
+
+        <PracticeCard className="mt-[19px] h-[200px]">
+          <p className="text-center text-[50px] tracking-[5px] text-[#36454d]">
+            {session.currentItem}
+          </p>
+          {lesson.stage === 'syllable' && (
+            <JamoTrack
+              item={session.currentItem}
+              typedJamoCount={session.typedJamoCount}
+              errorCount={session.errorCount}
+            />
+          )}
+        </PracticeCard>
+
+        {/* 시안: 카드(~342) 아래로 121px 띄워 키보드가 463 에서 시작한다 */}
+        <div className="mt-[121px] flex w-full flex-col items-center gap-[15px] pb-[30px]">
+          <Keyboard
+            nextCode={session.nextCode}
+            nextShift={session.nextShift}
+            keyGuide={keyGuide}
+            onKeyPress={session.handleKey}
+          />
+          <KeyGuideToggle on={keyGuide} onToggle={() => setKeyGuide((v) => !v)} />
+        </div>
+
+        {result}
+      </main>
+    );
+  }
+
   return (
     // 배경이 밝아서 글자색을 고정한다 — 다크 모드에서 body 색을 물려받으면 안 보인다
     <main className="min-h-screen flex flex-col items-center justify-center gap-8 p-6 text-[#36454d]">
@@ -110,19 +173,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       {/* 터치 기기(둔한 포인터)에서만 안내 — 창 너비가 아니라 실제 입력 방식 기준 */}
       <p className="text-xs text-neutral-600 hidden [@media(pointer:coarse)]:block">Tap the keys to type</p>
 
-      {session.isComplete && (
-        <PracticeResult
-          category={categoryForStage(lesson.stage)?.title ?? ''}
-          title={lesson.title}
-          timeMs={elapsedMs}
-          // 레이스와 같은 기준 — 오타를 뺀 자모 수를 분당으로 환산한다
-          keysPerMin={keysPerMinute(session.keystrokes - session.errorCount, elapsedMs)}
-          onRetry={() => {
-            savedRef.current = false;
-            session.reset();
-          }}
-        />
-      )}
+      {result}
     </main>
   );
 }
