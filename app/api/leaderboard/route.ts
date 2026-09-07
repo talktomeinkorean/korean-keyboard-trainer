@@ -1,3 +1,10 @@
+/**
+ * 상위 기록 조회 — 운영용으로만 남겨둔 엔드포인트다.
+ *
+ * 기획에서 리더보드가 빠지면서 앱 화면에서는 더 이상 호출하지 않는다 (2026-09-04).
+ * 이벤트 당첨자를 뽑을 때 기록을 확인하는 용도라 지우지 않았으니, 호출하는 곳이
+ * 없다고 해서 죽은 코드로 보고 삭제하지 말 것.
+ */
 import { unstable_cache } from 'next/cache';
 import { getServiceClient } from '@/lib/supabase/server';
 
