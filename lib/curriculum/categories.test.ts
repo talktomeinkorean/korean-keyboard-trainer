@@ -38,4 +38,9 @@ describe('categories', () => {
     expect(all.sort()).toEqual(LESSONS.map((l) => l.id).sort());
     expect(new Set(all).size).toBe(all.length);
   });
+
+  it('Vocabulary·Sentences 만 목록 없이 바로 연습으로 들어간다', () => {
+    const direct = CATEGORIES.filter((c) => c.startsDirectly).map((c) => c.slug);
+    expect(direct).toEqual(['vocabulary', 'short-sentences']);
+  });
 });
