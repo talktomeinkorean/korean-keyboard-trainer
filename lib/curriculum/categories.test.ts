@@ -19,9 +19,9 @@ describe('categories', () => {
     expect(getCategory('nope')).toBeUndefined();
   });
 
-  it('자음/모음/조합 레슨은 Consonants & Vowels 에 속한다', () => {
+  it('Basics 는 시안대로 자음·모음·조합 세 레슨이다', () => {
     const ids = lessonsInCategory('consonants-vowels').map((l) => l.id);
-    expect(ids).toEqual(['c1', 'c2', 'c3', 'v1', 'v2', 's1', 's2']);
+    expect(ids).toEqual(['consonants', 'vowels', 'syllables']);
   });
 
   it('단어/문장/지문 카테고리는 DB kind 를 갖고 정적 레슨은 없다', () => {

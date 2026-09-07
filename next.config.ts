@@ -11,6 +11,19 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/result/**': ['./assets/**'],
   },
+  // Basics 를 시안대로 3개 레슨으로 합치면서 예전 레슨 주소 7개가 사라졌다.
+  // 이미 색인됐을 수 있어 합쳐진 레슨으로 영구 이동시킨다.
+  async redirects() {
+    return [
+      { source: '/lesson/c1', destination: '/lesson/consonants', permanent: true },
+      { source: '/lesson/c2', destination: '/lesson/consonants', permanent: true },
+      { source: '/lesson/c3', destination: '/lesson/consonants', permanent: true },
+      { source: '/lesson/v1', destination: '/lesson/vowels', permanent: true },
+      { source: '/lesson/v2', destination: '/lesson/vowels', permanent: true },
+      { source: '/lesson/s1', destination: '/lesson/syllables', permanent: true },
+      { source: '/lesson/s2', destination: '/lesson/syllables', permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

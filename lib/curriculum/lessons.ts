@@ -1,17 +1,46 @@
 import { Lesson } from './types';
 
+/**
+ * Basics 커리큘럼 — 시안(179:6625)의 버튼 3개와 1:1 로 맞춘다.
+ *
+ * 예전에는 자음을 Home/Top/Bottom Row 세 레슨으로 쪼갰지만, 시안에서 Basics 는
+ * Consonants / Vowels / Syllables 세 버튼이고 누르면 바로 연습으로 들어간다.
+ * 항목 순서는 쪼개져 있던 때의 순서(홈로우 → 윗줄 → 아랫줄)를 그대로 이어붙였다.
+ */
 export const LESSONS: Lesson[] = [
-  // 1. 기초 자음 (홈로우 우선)
-  { id: 'c1', stage: 'consonant', title: 'Consonants 1 · Home Row', items: ['ㅁ', 'ㄴ', 'ㅇ', 'ㄹ', 'ㅎ', 'ㅁ', 'ㄴ', 'ㅇ'] },
-  { id: 'c2', stage: 'consonant', title: 'Consonants 2 · Top Row', items: ['ㅂ', 'ㅈ', 'ㄷ', 'ㄱ', 'ㅅ', 'ㄱ', 'ㄷ', 'ㅂ'] },
-  { id: 'c3', stage: 'consonant', title: 'Consonants 3 · Bottom Row', items: ['ㅋ', 'ㅌ', 'ㅊ', 'ㅍ', 'ㅋ', 'ㅊ', 'ㅌ', 'ㅍ'] },
-  // 2. 기초 모음
-  { id: 'v1', stage: 'vowel', title: 'Vowels 1 · Basics', items: ['ㅏ', 'ㅓ', 'ㅗ', 'ㅜ', 'ㅡ', 'ㅣ', 'ㅏ', 'ㅗ'] },
-  { id: 'v2', stage: 'vowel', title: 'Vowels 2 · Y-Vowels', items: ['ㅑ', 'ㅕ', 'ㅛ', 'ㅠ', 'ㅐ', 'ㅔ', 'ㅑ', 'ㅔ'] },
-  // 3. 자모 조합
-  { id: 's1', stage: 'syllable', title: 'Syllables 1', items: ['가', '나', '다', '라', '마', '바', '사', '아'] },
-  { id: 's2', stage: 'syllable', title: 'Syllables 2 · Batchim', items: ['간', '달', '곰', '술', '밥', '눈', '문', '발'] },
-  // 단어/문장/지문 레슨은 DB(practice_texts) 기반 자동 생성으로 대체됨 (lib/content/catalog.ts)
+  {
+    id: 'consonants',
+    stage: 'consonant',
+    title: 'Consonants',
+    items: [
+      // 홈로우
+      'ㅁ', 'ㄴ', 'ㅇ', 'ㄹ', 'ㅎ', 'ㅁ', 'ㄴ', 'ㅇ',
+      // 윗줄
+      'ㅂ', 'ㅈ', 'ㄷ', 'ㄱ', 'ㅅ', 'ㄱ', 'ㄷ', 'ㅂ',
+      // 아랫줄
+      'ㅋ', 'ㅌ', 'ㅊ', 'ㅍ', 'ㅋ', 'ㅊ', 'ㅌ', 'ㅍ',
+    ],
+  },
+  {
+    id: 'vowels',
+    stage: 'vowel',
+    title: 'Vowels',
+    items: [
+      'ㅏ', 'ㅓ', 'ㅗ', 'ㅜ', 'ㅡ', 'ㅣ', 'ㅏ', 'ㅗ',
+      'ㅑ', 'ㅕ', 'ㅛ', 'ㅠ', 'ㅐ', 'ㅔ', 'ㅑ', 'ㅔ',
+    ],
+  },
+  {
+    id: 'syllables',
+    stage: 'syllable',
+    title: 'Syllables',
+    items: [
+      '가', '나', '다', '라', '마', '바', '사', '아',
+      // 받침
+      '간', '달', '곰', '술', '밥', '눈', '문', '발',
+    ],
+  },
+  // 단어/문장/지문 레슨은 콘텐츠 데이터 기반 자동 생성 (lib/content/catalog.ts)
 ];
 
 const byId = new Map(LESSONS.map((l) => [l.id, l]));

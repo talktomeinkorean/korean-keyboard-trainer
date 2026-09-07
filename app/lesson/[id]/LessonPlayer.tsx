@@ -10,6 +10,7 @@ import { JamoTrack } from '@/components/JamoTrack';
 import { StatsBar } from '@/components/StatsBar';
 import { NextKeyHint } from '@/components/NextKeyHint';
 import { ResultOverlay } from '@/components/ResultOverlay';
+import { PracticeBackground } from '@/components/PracticeBackground';
 import { LocalProgressStore } from '@/lib/progress/localStore';
 
 const store = new LocalProgressStore();
@@ -69,7 +70,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   }, [session.isComplete, session.wpm, session.accuracy, lesson.id]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-8 p-6">
+    // 배경이 밝아서 글자색을 고정한다 — 다크 모드에서 body 색을 물려받으면 안 보인다
+    <main className="min-h-screen flex flex-col items-center justify-center gap-8 p-6 text-[#36454d]">
+      <PracticeBackground />
       <h1 className="text-lg text-neutral-400">{lesson.title}</h1>
       <StatsBar
         wpm={isLongText ? liveWpm : session.wpm}
