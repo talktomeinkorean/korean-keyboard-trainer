@@ -7,6 +7,12 @@ import { LocalProgressStore } from '@/lib/progress/localStore';
 
 const store = new LocalProgressStore();
 
+// 시안 179:6625 의 목록 버튼 — 300x55, 연초록 채움에 진한 테두리
+const ITEM =
+  'relative flex h-[55px] w-[300px] max-w-full items-center justify-center rounded-[2px] ' +
+  'border border-[#36454d] bg-[#e5ffe8] px-[30px] text-center font-dmsans text-[20px] ' +
+  'font-bold text-[#36454d] transition hover:brightness-97 active:translate-y-px';
+
 export function LessonList({ lessons }: { lessons: Lesson[] }) {
   const [done, setDone] = useState<Set<string>>(new Set());
 
@@ -15,17 +21,17 @@ export function LessonList({ lessons }: { lessons: Lesson[] }) {
   }, []);
 
   return (
-    <div className="flex flex-col gap-2 w-full max-w-md">
+    <nav className="flex flex-col items-center gap-[15px]">
       {lessons.map((l) => (
-        <Link
-          key={l.id}
-          href={`/lesson/${l.id}`}
-          className="flex items-center justify-between px-4 py-3 rounded-xl bg-white text-neutral-900 border border-neutral-200 hover:bg-neutral-100"
-        >
-          <span>{l.title}</span>
-          {done.has(l.id) && <span className="text-emerald-500">✓</span>}
+        <Link key={l.id} href={`/lesson/${l.id}`} data-testid={`lesson-${l.id}`} className={ITEM}>
+          <span className="truncate">{l.title}</span>
+          {done.has(l.id) && (
+            <span aria-label="completed" className="absolute right-[12px] text-[16px]">
+              ✓
+            </span>
+          )}
         </Link>
       ))}
-    </div>
+    </nav>
   );
 }
