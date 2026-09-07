@@ -10,6 +10,8 @@ export interface Category {
   stages: Stage[];
   /** DB(practice_texts) 기반 자동 생성 레슨의 kind */
   dbKind?: 'vocabulary' | 'sentence' | 'long_text';
+  /** 목록 없이 곧바로 연습을 시작하는 카테고리 (시안 214:2403) */
+  startsDirectly?: boolean;
 }
 
 /** 콘텐츠 기반 레슨의 stage 와 카테고리 dbKind 대응 */
@@ -36,6 +38,7 @@ export const CATEGORIES: Category[] = [
       'Type real Korean words by level, from everyday basics upward, with the English meaning alongside.',
     stages: [],
     dbKind: 'vocabulary',
+    startsDirectly: true,
   },
   {
     slug: 'short-sentences',
@@ -44,6 +47,7 @@ export const CATEGORIES: Category[] = [
       'Type full Korean sentences, including spacing and punctuation, with feedback on every consonant and vowel.',
     stages: [],
     dbKind: 'sentence',
+    startsDirectly: true,
   },
   {
     slug: 'long-text',
