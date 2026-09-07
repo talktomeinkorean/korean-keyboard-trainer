@@ -7,31 +7,29 @@ interface Props {
   errorCount: number;
 }
 
-// 배경이 흰 카드로 바뀌면서 어두운 테마 색을 쓸 수 없다. 레이스 단어 카드와 같은 팔레트.
-const STATE_CLASS = {
-  done: 'bg-[#eae5ff] border-[#8166ff] text-[#8166ff]',
-  current: 'bg-white border-[#ff5e23] text-[#ff5e23]',
-  todo: 'bg-white border-[#b8c5cc] text-[#6b8999]',
+/**
+ * 자모 칩 — 레이스의 단어 카드와 같은 3가지 상태다.
+ * 맞음(보라 채움) / 틀림(주황 채움) / 아직 안 침(흰 바탕에 보라 테두리).
+ */
+const CHIP_STATE = {
+  correct: 'bg-[#eae5ff] border-[#8166ff] text-[#8166ff]',
+  wrong: 'bg-[#ffece5] border-[#ff5e23] text-[#ff5e23]',
+  todo: 'bg-white border-[#8166ff] text-[#8166ff]',
 } as const;
 
-const FLASH_CLASS = 'bg-[#ffece5] border-[#ff5e23] text-[#ff5e23]';
-const FLASH_MS = 300;
-
 export function JamoTrack({ item, typedJamoCount, errorCount }: Props) {
-  // 오타 플래시: errorCount 증가를 감지해 현재 칩을 잠깐 빨갛게.
-  // 마운트 시점의 누적 errorCount 로는 플래시하지 않는다 (ref 초기값 = 첫 errorCount).
-  const [flashing, setFlashing] = useState(false);
-  const prevErrorRef = useRef(errorCount);
+  // 오타가 나면 지금 칠 칩을 틀림으로 두고, 올바른 입력으로 넘어가면 해제한다.
+  // 마운트 시점의 누적 errorCount 로는 표시하지 않는다 (ref 초기값 = 첫 errorCount).
+  const [wrong, setWrong] = useState(false);
+  const prevError = useRef(errorCount);
+  const prevTyped = useRef(typedJamoCount);
 
   useEffect(() => {
-    if (errorCount > prevErrorRef.current) {
-      setFlashing(true);
-      const t = setTimeout(() => setFlashing(false), FLASH_MS);
-      prevErrorRef.current = errorCount;
-      return () => clearTimeout(t);
-    }
-    prevErrorRef.current = errorCount;
-  }, [errorCount]);
+    if (errorCount > prevError.current) setWrong(true);
+    else if (typedJamoCount !== prevTyped.current) setWrong(false);
+    prevError.current = errorCount;
+    prevTyped.current = typedJamoCount;
+  }, [errorCount, typedJamoCount]);
 
   const groups = toJamoGroups(item);
   let jamoIndex = 0;
@@ -43,17 +41,13 @@ export function JamoTrack({ item, typedJamoCount, errorCount }: Props) {
           {group.map((jamo) => {
             const idx = jamoIndex++;
             const state =
-              idx < typedJamoCount ? 'done' : idx === typedJamoCount ? 'current' : 'todo';
-            const flash = state === 'current' && flashing;
+              idx < typedJamoCount ? 'correct' : idx === typedJamoCount && wrong ? 'wrong' : 'todo';
             return (
               <span
                 key={idx}
                 data-testid={`jamo-${idx}`}
                 data-state={state}
-                data-flash={flash}
-                className={`inline-flex h-8 w-7 items-center justify-center rounded border text-base transition-colors ${
-                  flash ? FLASH_CLASS : STATE_CLASS[state]
-                }`}
+                className={`inline-flex h-8 w-7 items-center justify-center rounded border text-base transition-colors ${CHIP_STATE[state]}`}
               >
                 {jamo}
               </span>
