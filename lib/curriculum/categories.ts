@@ -12,6 +12,13 @@ export interface Category {
   dbKind?: 'vocabulary' | 'sentence' | 'long_text';
 }
 
+/** 콘텐츠 기반 레슨의 stage 와 카테고리 dbKind 대응 */
+const STAGE_TO_KIND: Partial<Record<Stage, Category['dbKind']>> = {
+  word: 'vocabulary',
+  sentence: 'sentence',
+  long_text: 'long_text',
+};
+
 /** /lessons 메뉴의 4개 연습 타입 (표시 순서대로) */
 export const CATEGORIES: Category[] = [
   // 표시 이름은 시안 기준. slug 는 이미 색인·사이트맵에 쓰이고 있어 유지한다.
@@ -47,6 +54,11 @@ export const CATEGORIES: Category[] = [
     dbKind: 'long_text',
   },
 ];
+
+/** 레슨이 속한 카테고리 — 결과 화면에서 어디서 왔는지 보여주는 데 쓴다. */
+export function categoryForStage(stage: Stage): Category | undefined {
+  return CATEGORIES.find((c) => c.stages.includes(stage) || STAGE_TO_KIND[stage] === c.dbKind);
+}
 
 export function getCategory(slug: string): Category | undefined {
   return CATEGORIES.find((c) => c.slug === slug);

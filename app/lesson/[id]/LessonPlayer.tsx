@@ -9,9 +9,11 @@ import { PassageView } from '@/components/PassageView';
 import { JamoTrack } from '@/components/JamoTrack';
 import { StatsBar } from '@/components/StatsBar';
 import { NextKeyHint } from '@/components/NextKeyHint';
-import { ResultOverlay } from '@/components/ResultOverlay';
+import { PracticeResult } from '@/components/PracticeResult';
 import { PracticeBackground } from '@/components/PracticeBackground';
 import { LocalProgressStore } from '@/lib/progress/localStore';
+import { categoryForStage } from '@/lib/curriculum/categories';
+import { keysPerMinute } from '@/lib/game/rank';
 
 const store = new LocalProgressStore();
 
@@ -109,9 +111,12 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       <p className="text-xs text-neutral-600 hidden [@media(pointer:coarse)]:block">Tap the keys to type</p>
 
       {session.isComplete && (
-        <ResultOverlay
-          wpm={session.wpm}
-          accuracy={session.accuracy}
+        <PracticeResult
+          category={categoryForStage(lesson.stage)?.title ?? ''}
+          title={lesson.title}
+          timeMs={elapsedMs}
+          // 레이스와 같은 기준 — 오타를 뺀 자모 수를 분당으로 환산한다
+          keysPerMin={keysPerMinute(session.keystrokes - session.errorCount, elapsedMs)}
           onRetry={() => {
             savedRef.current = false;
             session.reset();
