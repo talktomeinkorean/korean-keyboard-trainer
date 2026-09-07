@@ -3,12 +3,6 @@
 /* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다. */
 import { useEffect, useState } from 'react';
 import { PIXEL_BUTTON } from './pixelButton';
-import { formatRaceTime } from '@/lib/game/rank';
-
-export interface LeaderboardEntry {
-  nickname: string;
-  timeMs: number;
-}
 
 interface Props {
   timeMs: number;
@@ -21,8 +15,8 @@ interface Props {
 type SubmitState =
   | { step: 'form' }
   | { step: 'submitting' }
-  | { step: 'done'; bestMs: number; rank: number }
-  | { step: 'error' };
+  /** unavailable: 저장 기능이 아직 켜지지 않음(503) — 다시 눌러도 소용없다 */
+  | { step: 'error'; reason: 'failed' | 'unavailable' };
 
 const PLAYER_KEY = 'race-player';
 
@@ -54,7 +48,6 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose, onSubmitted }: Pr
   // 동의는 매번 새로 받는다 (저장했다가 자동 체크하면 동의 기록의 의미가 없다)
   const [consentRequired, setConsentRequired] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[] | null>(null);
 
   useEffect(() => {
     const saved = loadPlayer();
@@ -79,15 +72,17 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose, onSubmitted }: Pr
           consentMarketing,
         }),
       });
+      // 503 은 서버에 저장소가 설정되지 않은 상태 — 재시도해도 같으므로 따로 안내한다
+      if (res.status === 503) {
+        setState({ step: 'error', reason: 'unavailable' });
+        return;
+      }
       if (!res.ok) throw new Error(String(res.status));
-      const data = (await res.json()) as { bestMs: number; rank: number };
-      setState({ step: 'done', bestMs: data.bestMs, rank: data.rank });
+      // 저장 결과 화면 없이 바로 닫는다 — 결과 화면의 제출 버튼이 잠긴 모습으로 알린다
       onSubmitted?.();
-      // 제출 직후에는 캐시를 우회해 방금 저장한 기록이 바로 보이게 한다
-      const lb = await fetch('/api/leaderboard?fresh=1');
-      if (lb.ok) setLeaderboard(((await lb.json()) as { entries: LeaderboardEntry[] }).entries);
+      onClose();
     } catch {
-      setState({ step: 'error' });
+      setState({ step: 'error', reason: 'failed' });
     }
   }
 
@@ -109,123 +104,99 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose, onSubmitted }: Pr
           </button>
         </div>
 
-        {state.step === 'done' ? (
-          <div className="flex flex-col items-center gap-[20px] px-[30px] pt-[27px] pb-[30px] text-center">
-            <p className="font-dmsans text-[20px] font-extrabold leading-[1.3] text-[#36454d]">
-              Record saved!
-            </p>
-            <p className="font-dmsans text-[14px] font-semibold leading-[1.2] text-[#9680ff]">
-              Your best is {formatRaceTime(state.bestMs)} · Rank #{state.rank}
-            </p>
-            {leaderboard !== null && leaderboard.length > 0 && (
-              <ol className="flex w-[260px] flex-col gap-[4px] font-dmsans text-[13px] text-[#36454d]">
-                {leaderboard.map((entry, i) => (
-                  <li key={i} className="flex justify-between tabular-nums">
-                    <span>
-                      {i + 1}. {entry.nickname}
-                    </span>
-                    <span className="text-[#6b8999]">{formatRaceTime(entry.timeMs)}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-            <button type="button" onClick={onClose} className={`${PIXEL_BUTTON} w-[200px]`}>
-              Done
-            </button>
-          </div>
-        ) : (
-          <form
-            onSubmit={submit}
-            className="flex flex-col items-center gap-[20px] px-[30px] pt-[27px] pb-[30px]"
-          >
-            <div className="flex flex-col items-center gap-[25px]">
-              <div className="flex flex-col gap-[10px] text-center">
-                {/* 줄바꿈 위치는 시안 그대로 */}
-                <h2 className="font-dmsans text-[20px] font-extrabold leading-[1.3] text-[#36454d]">
-                  Save your Record
-                  <br />
-                  for a Chance to Win!
-                </h2>
-                <p className="font-dmsans text-[14px] font-semibold leading-[1.2] text-[#9680ff]">
-                  The more you play,
-                  <br />
-                  the more chances to win!
-                </p>
-              </div>
-
-              <div className="flex w-[260px] max-w-full flex-col gap-[10px]">
-                <label className={FIELD_ROW}>
-                  <span className={FIELD_LABEL}>Name:</span>
-                  <input
-                    type="text"
-                    required
-                    maxLength={20}
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    className={FIELD_INPUT}
-                  />
-                </label>
-                <label className={FIELD_ROW}>
-                  <span className={FIELD_LABEL}>Email:</span>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={FIELD_INPUT}
-                  />
-                </label>
-              </div>
-
-              <div className="flex w-[250px] max-w-full flex-col gap-[10px]">
-                <label className="flex items-start gap-[10px]">
-                  <span className="flex size-[20px] shrink-0 items-center justify-center">
-                    <input
-                      type="checkbox"
-                      required
-                      data-testid="consent-required"
-                      checked={consentRequired}
-                      onChange={(e) => setConsentRequired(e.target.checked)}
-                      className={CHECKBOX}
-                    />
-                  </span>
-                  <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
-                    (Required) I agree to have my name and email collected for the Hangeul Day
-                    drawing.
-                  </span>
-                </label>
-                <label className="flex items-start gap-[10px]">
-                  <span className="flex size-[20px] shrink-0 items-center justify-center">
-                    <input
-                      type="checkbox"
-                      data-testid="consent-marketing"
-                      checked={consentMarketing}
-                      onChange={(e) => setConsentMarketing(e.target.checked)}
-                      className={CHECKBOX}
-                    />
-                  </span>
-                  <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
-                    (Optional) I&apos;d love to receive Korean learning tips and exclusive
-                    discounts from TTMIK!
-                  </span>
-                </label>
-              </div>
+        <form
+          onSubmit={submit}
+          className="flex flex-col items-center gap-[20px] px-[30px] pt-[27px] pb-[30px]"
+        >
+          <div className="flex flex-col items-center gap-[25px]">
+            <div className="flex flex-col gap-[10px] text-center">
+              {/* 줄바꿈 위치는 시안 그대로 */}
+              <h2 className="font-dmsans text-[20px] font-extrabold leading-[1.3] text-[#36454d]">
+                Save your Record
+                <br />
+                for a Chance to Win!
+              </h2>
+              <p className="font-dmsans text-[14px] font-semibold leading-[1.2] text-[#9680ff]">
+                The more you play,
+                <br />
+                the more chances to win!
+              </p>
             </div>
 
-            <button
-              type="submit"
-              disabled={state.step === 'submitting' || !consentRequired}
-              className={`${PIXEL_BUTTON} w-[200px] disabled:opacity-50`}
-            >
-              {state.step === 'submitting' ? 'Saving…' : 'Submit Record'}
-            </button>
-            {state.step === 'error' && (
-              <p className="font-dmsans text-[12px] text-[#ff5e23]">
-                Failed to save. Please try again.
-              </p>
-            )}
-          </form>
-        )}
+            <div className="flex w-[260px] max-w-full flex-col gap-[10px]">
+              <label className={FIELD_ROW}>
+                <span className={FIELD_LABEL}>Name:</span>
+                <input
+                  type="text"
+                  required
+                  maxLength={20}
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  className={FIELD_INPUT}
+                />
+              </label>
+              <label className={FIELD_ROW}>
+                <span className={FIELD_LABEL}>Email:</span>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={FIELD_INPUT}
+                />
+              </label>
+            </div>
+
+            <div className="flex w-[250px] max-w-full flex-col gap-[10px]">
+              <label className="flex items-start gap-[10px]">
+                <span className="flex size-[20px] shrink-0 items-center justify-center">
+                  <input
+                    type="checkbox"
+                    required
+                    data-testid="consent-required"
+                    checked={consentRequired}
+                    onChange={(e) => setConsentRequired(e.target.checked)}
+                    className={CHECKBOX}
+                  />
+                </span>
+                <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
+                  (Required) I agree to have my name and email collected for the Hangeul Day
+                  drawing.
+                </span>
+              </label>
+              <label className="flex items-start gap-[10px]">
+                <span className="flex size-[20px] shrink-0 items-center justify-center">
+                  <input
+                    type="checkbox"
+                    data-testid="consent-marketing"
+                    checked={consentMarketing}
+                    onChange={(e) => setConsentMarketing(e.target.checked)}
+                    className={CHECKBOX}
+                  />
+                </span>
+                <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
+                  (Optional) I&apos;d love to receive Korean learning tips and exclusive
+                  discounts from TTMIK!
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={state.step === 'submitting' || !consentRequired}
+            className={`${PIXEL_BUTTON} w-[200px] disabled:opacity-50`}
+          >
+            {state.step === 'submitting' ? 'Saving…' : 'Submit Record'}
+          </button>
+          {state.step === 'error' && (
+            <p data-testid="submit-error" className="font-dmsans text-[12px] text-[#ff5e23]">
+              {state.reason === 'unavailable'
+                ? "Saving isn't open yet. Your time still counts — try again once the event starts!"
+                : 'Failed to save. Please try again.'}
+            </p>
+          )}
+        </form>
       </div>
     </div>
   );
