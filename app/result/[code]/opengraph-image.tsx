@@ -98,13 +98,23 @@ export default async function Image({ params }: { params: Promise<{ code: string
             }}
           >
             <div style={{ display: 'flex', alignItems: 'baseline', gap: s(4) }}>
-              <span style={{ fontFamily: 'DM Mono', fontSize: s(12) }}>{rank.emoji}</span>
               <span style={{ fontFamily: 'Noto Sans KR', fontSize: s(16) }}>{rank.korean}</span>
               <span style={{ fontFamily: 'DM Mono', fontSize: s(14) }}>{rank.romaja}</span>
             </div>
-            <span style={{ fontFamily: 'DM Mono', fontSize: s(12), color: '#7d9fb2' }}>
-              {rank.english}
-            </span>
+            {/* 이모지는 아랫줄 영어 이름 앞에 */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: s(4),
+                fontFamily: 'DM Mono',
+                fontSize: s(12),
+                color: '#7d9fb2',
+              }}
+            >
+              <span>{rank.emoji}</span>
+              <span>{rank.english}</span>
+            </div>
           </div>
 
           {/* 등급별 문구 */}
