@@ -14,12 +14,19 @@ const ITEM =
   'border border-[#36454d] px-[30px] text-center font-dmsans text-[20px] ' +
   'font-bold text-[#36454d] transition hover:brightness-97 active:translate-y-px';
 
-export function LessonList({ lessons }: { lessons: Lesson[] }) {
+interface Props {
+  lessons: Lesson[];
+  /** 끝낸 항목을 회색으로 칠할지 (Basics 는 완료 여부를 따지지 않는다) */
+  showCompletion?: boolean;
+}
+
+export function LessonList({ lessons, showCompletion = false }: Props) {
   const [done, setDone] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    if (!showCompletion) return;
     void store.getCompletedLessonIds().then((ids) => setDone(new Set(ids)));
-  }, []);
+  }, [showCompletion]);
 
   return (
     <nav className="flex flex-col items-center gap-[15px]">
