@@ -14,7 +14,7 @@ interface Options {
 export interface LessonSessionState {
   currentIndex: number;
   currentItem: string;
-  /** 현재 항목에서 사용자가 입력한 표시 문자열 (진행 중인 음절은 대상 글자로 표시) */
+  /** 지금까지 실제로 조합된 입력 문자열 — 친 만큼만 보인다 (ㄱ → 가 → 감) */
   typed: string;
   /** 다음에 눌러야 할 키 code (없으면 null) */
   nextCode: string | null;
@@ -36,30 +36,6 @@ export interface LessonSessionState {
   handleKey(code: string, shift?: boolean): void;
   /** 레슨을 처음부터 다시 시작 (상태 초기화) */
   reset(): void;
-}
-
-/**
- * 현재까지 올바르게 입력된 자모 개수를 바탕으로 target 항목에서 몇 글자까지
- * 표시할지 계산한다.
- * 진행 중인 음절은 target 글자 전체를 보여준다 (IME 미리보기 방식).
- */
-function computeTyped(target: string, typedJamoCount: number): string {
-  if (typedJamoCount === 0) return '';
-  let completedChars = 0;
-  let consumedJamos = 0;
-  for (let i = 0; i < target.length; i++) {
-    const charJamos = disassemble(target[i]).split('');
-    const nextConsumed = consumedJamos + charJamos.length;
-    if (nextConsumed <= typedJamoCount) {
-      consumedJamos = nextConsumed;
-      completedChars = i + 1;
-    } else {
-      // This char is partially typed — show it as in-progress
-      return target.slice(0, completedChars) + target[i];
-    }
-  }
-  // All chars completed
-  return target.slice(0, completedChars);
 }
 
 export function useLessonSession({ items, now = () => Date.now() }: Options): LessonSessionState {
@@ -120,8 +96,9 @@ export function useLessonSession({ items, now = () => Date.now() }: Options): Le
 
     if (isPrefix) {
       setTypedJamoCount(count);
-      // Show in-progress syllable as the full target character (IME preview style)
-      setTyped(computeTyped(target, count));
+      // 조합기가 들고 있는 실제 입력을 그대로 보여준다.
+      // 대상 글자를 미리 채워 넣으면 아직 안 친 자모까지 완성돼 보인다.
+      setTyped(composer.text());
       if (count === tJamos.length) {
         // 항목 완성
         composer.reset();

@@ -46,4 +46,20 @@ describe('createComposer', () => {
     c.reset();
     expect(c.text()).toBe('');
   });
+
+  it('공백과 문장부호가 섞여도 조합한다 (assemble 은 자모만 받는다)', () => {
+    const c = createComposer();
+    for (const j of ['ㄱ', 'ㅏ', 'ㅁ', 'ㅅ', 'ㅏ', '.']) c.push(j);
+    expect(c.text()).toBe('감사.');
+  });
+
+  it('조합 중인 음절은 친 만큼만 보인다', () => {
+    const c = createComposer();
+    c.push('ㄱ');
+    expect(c.text()).toBe('ㄱ');
+    c.push('ㅏ');
+    expect(c.text()).toBe('가');
+    c.push('ㅁ');
+    expect(c.text()).toBe('감');
+  });
 });

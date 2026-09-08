@@ -32,7 +32,7 @@ describe('useLessonSession', () => {
     act(() => result.current.handleKey('KeyS')); // ㄴ (가→간, 기대 '가' 와 불일치)
     expect(result.current.errorCount).toBe(1);
     // 잘못된 입력은 롤백되어 typed 가 여전히 '가' 진행 상태
-    expect(result.current.typed).toBe('가');
+    expect(result.current.typed).toBe('ㄱ'); // 친 만큼만 보인다
   });
 
   it('모든 항목 완성 시 isComplete 와 정확도를 계산한다', () => {
