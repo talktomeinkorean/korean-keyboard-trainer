@@ -74,7 +74,7 @@ export default async function CategoryPage({
         {lessons.length === 0 ? (
           <p className="text-[#6b8999]">Coming soon</p>
         ) : (
-          <LessonList lessons={lessons} />
+          <LessonList lessons={lessons} showCompletion={found.showsCompletion} />
         )}
       </div>
     </main>

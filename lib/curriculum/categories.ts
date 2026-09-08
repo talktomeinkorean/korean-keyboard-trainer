@@ -12,6 +12,8 @@ export interface Category {
   dbKind?: 'vocabulary' | 'sentence' | 'long_text';
   /** 목록 없이 곧바로 연습을 시작하는 카테고리 (시안 214:2403) */
   startsDirectly?: boolean;
+  /** 목록에서 끝낸 항목을 회색으로 표시할지. Basics 는 완료 여부를 따지지 않는다. */
+  showsCompletion?: boolean;
 }
 
 /** 콘텐츠 기반 레슨의 stage 와 카테고리 dbKind 대응 */
@@ -56,6 +58,7 @@ export const CATEGORIES: Category[] = [
       'Type Korean passages line by line — the closest thing to real writing practice on the Hangeul keyboard.',
     stages: [],
     dbKind: 'long_text',
+    showsCompletion: true,
   },
 ];
 
