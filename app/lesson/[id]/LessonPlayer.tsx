@@ -111,6 +111,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         running={session.startedAt !== null && !session.isComplete}
       />
 
+      {/* 진행 바(123) 아래 325px 를 이 덩어리가 차지해 키보드가 늘 463 에서 시작한다.
+          문장이 길어지면 늘어나면서 아래를 밀어낸다. */}
+      <div className="flex min-h-[325px] w-full flex-col items-center">
       {isExtendedStage ? (
         <>
           {/* 문장·긴글: 칠 문장 위, 친 내용 아래 (시안 519:15861) */}
@@ -157,22 +160,21 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         </PracticeCard>
       )}
 
-      {/* 시안: 카드 아래 여백을 두고 키보드가 463 에서 시작한다 */}
-      <div
-        className={`flex w-full flex-col items-center gap-[15px] pb-[30px] ${
-          isExtendedStage ? 'mt-auto' : 'mt-[121px]'
-        }`}
-      >
-        {/* 긴 글은 다음 줄을 미리 보여준다 (시안 413:9472) */}
-        {isLongText && nextLine && (
-          <p
-            data-testid="next-line"
-            className="w-[330px] max-w-full truncate rounded-[2px] bg-[#36454d]/8 px-[15px] py-[12px] text-[14px] text-[#36454d]/45"
-          >
-            {nextLine}
-          </p>
-        )}
-        {source && <SourceBadge source={source} />}
+        {/* 다음 줄 미리보기와 출처 배지는 키보드 바로 위에 붙는다 */}
+        <div className="mt-auto flex w-full flex-col items-center gap-[15px]">
+          {isLongText && nextLine && (
+            <p
+              data-testid="next-line"
+              className="w-[330px] max-w-full truncate rounded-[2px] bg-[#36454d]/8 px-[15px] py-[12px] text-[14px] text-[#36454d]/45"
+            >
+              {nextLine}
+            </p>
+          )}
+          {source && <SourceBadge source={source} />}
+        </div>
+      </div>
+
+      <div className="mt-[15px] flex w-full flex-col items-center gap-[15px] pb-[30px]">
         <Keyboard
           nextCode={session.nextCode}
           nextShift={session.nextShift}
