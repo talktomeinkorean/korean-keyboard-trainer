@@ -43,4 +43,9 @@ describe('categories', () => {
     const direct = CATEGORIES.filter((c) => c.startsDirectly).map((c) => c.slug);
     expect(direct).toEqual(['vocabulary', 'short-sentences']);
   });
+
+  it('완료 표시는 Long Text 에서만 한다 (Basics 는 완료 여부를 따지지 않는다)', () => {
+    const shown = CATEGORIES.filter((c) => c.showsCompletion).map((c) => c.slug);
+    expect(shown).toEqual(['long-text']);
+  });
 });
