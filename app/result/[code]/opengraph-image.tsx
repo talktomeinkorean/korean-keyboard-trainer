@@ -40,13 +40,14 @@ export default async function Image({ params }: { params: Promise<{ code: string
   const { timeMs, keysPerMin } = value;
   const rank = rankFor(timeMs);
 
-  const [card, photo, dmSans, dmSansBold, dmMono, notoKr] = await Promise.all([
+  const [card, photo, dmSans, dmSansBold, dmMono, notoKr, vt323] = await Promise.all([
     png('og-result-card.png'),
     png('og-result-photo.png'),
     font('DMSans-Medium.ttf'),
     font('DMSans-Bold.ttf'),
     font('DMMono-Medium.ttf'),
     font('NotoSansKR-Subset.ttf'),
+    font('VT323-Regular.ttf'),
   ]);
 
   return new ImageResponse(
@@ -153,10 +154,10 @@ export default async function Image({ params }: { params: Promise<{ code: string
               color: '#36454d',
             }}
           >
-            <span style={{ fontFamily: 'DM Mono', fontSize: s(20) }}>{formatRaceTime(timeMs)}</span>
+            <span style={{ fontFamily: 'VT323', fontSize: s(20) }}>{formatRaceTime(timeMs)}</span>
             <div style={{ display: 'flex', width: 1, height: s(11.5), backgroundColor: '#36454d' }} />
             <div style={{ display: 'flex', alignItems: 'baseline', gap: s(4) }}>
-              <span style={{ fontFamily: 'DM Mono', fontSize: s(20) }}>{keysPerMin}</span>
+              <span style={{ fontFamily: 'VT323', fontSize: s(20) }}>{keysPerMin}</span>
               <span style={{ fontFamily: 'DM Sans', fontSize: s(12), color: '#6b8999' }}>
                 keys/min
               </span>
@@ -185,6 +186,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
         { name: 'DM Sans', data: dmSansBold, style: 'normal', weight: 700 },
         { name: 'DM Mono', data: dmMono, style: 'normal', weight: 400 },
         { name: 'Noto Sans KR', data: notoKr, style: 'normal', weight: 500 },
+        { name: 'VT323', data: vt323, style: 'normal', weight: 400 },
       ],
     },
   );

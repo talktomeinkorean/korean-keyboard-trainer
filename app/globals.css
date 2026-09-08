@@ -13,6 +13,9 @@
   --font-dmsans: var(--font-dm-sans);
   --font-dmmono: var(--font-dm-mono);
   --font-pixel: "NeoDunggeunmo Pro", var(--font-dm-mono);
+  /* 숫자 전용 — 한글이 없으니 숫자에만 쓸 것 */
+  --font-vt323: var(--font-vt323-src), var(--font-dm-mono);
+  --font-silkscreen: var(--font-silkscreen-src), var(--font-dm-mono);
 }
 
 /* 홈 화면 카운터 숫자용 픽셀 폰트. 파일이 없으면 DM Mono 로 자동 폴백된다. */

@@ -31,7 +31,7 @@ function Hero() {
         Play Now
       </Link>
 
-      <p className="absolute left-1/2 top-[740.45px] -translate-x-1/2 whitespace-nowrap text-center font-pixel text-[50px] leading-[1.3] text-[#36454d]">
+      <p className="absolute left-1/2 top-[740.45px] -translate-x-1/2 whitespace-nowrap text-center font-silkscreen text-[50px] leading-[1.3] text-[#36454d]">
         {RUNNER_COUNT}
       </p>
     </section>
