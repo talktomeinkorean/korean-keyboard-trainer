@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { toJamoGroups } from '@/lib/hangul/jamoGroups';
+import { currentSyllableJamos } from '@/lib/hangul/jamoGroups';
 
 interface Props {
   item: string;
@@ -7,59 +7,47 @@ interface Props {
   errorCount: number;
 }
 
-const STATE_CLASS = {
-  done: 'border-emerald-600 text-emerald-500',
-  current: 'border-amber-400 text-amber-300',
-  todo: 'border-neutral-700 text-neutral-600',
+/**
+ * 지금 치고 있는 음절의 자모 칩 (시안 519:13449).
+ * 레이스 단어 카드와 같은 3상태 — 맞음 / 틀림 / 아직 안 침.
+ */
+const CHIP_STATE = {
+  correct: 'bg-[#eae5ff] border-[#8166ff] text-[#8166ff]',
+  wrong: 'bg-[#ffece5] border-[#ff5e23] text-[#ff5e23]',
+  todo: 'bg-white border-[#8166ff] text-[#8166ff]',
 } as const;
 
-const FLASH_CLASS = 'border-red-500 bg-red-500/20 text-red-400';
-const FLASH_MS = 300;
-
 export function JamoTrack({ item, typedJamoCount, errorCount }: Props) {
-  // 오타 플래시: errorCount 증가를 감지해 현재 칩을 잠깐 빨갛게.
-  // 마운트 시점의 누적 errorCount 로는 플래시하지 않는다 (ref 초기값 = 첫 errorCount).
-  const [flashing, setFlashing] = useState(false);
-  const prevErrorRef = useRef(errorCount);
+  const { jamos, typedCount } = currentSyllableJamos(item, typedJamoCount);
+
+  // 오타가 나면 지금 칠 칩을 틀림으로 두고, 올바른 입력으로 넘어가면 해제한다.
+  // 마운트 시점의 누적 errorCount 로는 표시하지 않는다.
+  const [wrong, setWrong] = useState(false);
+  const prevError = useRef(errorCount);
+  const prevTyped = useRef(typedJamoCount);
 
   useEffect(() => {
-    if (errorCount > prevErrorRef.current) {
-      setFlashing(true);
-      const t = setTimeout(() => setFlashing(false), FLASH_MS);
-      prevErrorRef.current = errorCount;
-      return () => clearTimeout(t);
-    }
-    prevErrorRef.current = errorCount;
-  }, [errorCount]);
-
-  const groups = toJamoGroups(item);
-  let jamoIndex = 0;
+    if (errorCount > prevError.current) setWrong(true);
+    else if (typedJamoCount !== prevTyped.current) setWrong(false);
+    prevError.current = errorCount;
+    prevTyped.current = typedJamoCount;
+  }, [errorCount, typedJamoCount]);
 
   return (
-    <div data-testid="jamo-track" className="flex items-center gap-3">
-      {groups.map((group, g) => (
-        <div key={g} className="flex gap-1">
-          {group.map((jamo) => {
-            const idx = jamoIndex++;
-            const state =
-              idx < typedJamoCount ? 'done' : idx === typedJamoCount ? 'current' : 'todo';
-            const flash = state === 'current' && flashing;
-            return (
-              <span
-                key={idx}
-                data-testid={`jamo-${idx}`}
-                data-state={state}
-                data-flash={flash}
-                className={`inline-flex h-8 w-7 items-center justify-center rounded border text-base transition-colors ${
-                  flash ? FLASH_CLASS : STATE_CLASS[state]
-                }`}
-              >
-                {jamo}
-              </span>
-            );
-          })}
-        </div>
-      ))}
+    <div data-testid="jamo-track" className="flex items-center gap-[5px]">
+      {jamos.map((jamo, i) => {
+        const state = i < typedCount ? 'correct' : i === typedCount && wrong ? 'wrong' : 'todo';
+        return (
+          <span
+            key={i}
+            data-testid={`jamo-${i}`}
+            data-state={state}
+            className={`inline-flex size-[25px] items-center justify-center rounded-[5px] border-[0.75px] font-dmsans text-[16px] transition-colors ${CHIP_STATE[state]}`}
+          >
+            {jamo}
+          </span>
+        );
+      })}
     </div>
   );
 }

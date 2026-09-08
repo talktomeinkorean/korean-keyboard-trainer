@@ -21,26 +21,28 @@ interface SetOptions {
  * rows 는 호출부에서 결정적 순서(level, source, text_korean)로 정렬돼 있어야 한다.
  */
 export function buildSetLessons(rows: PracticeText[], opts: SetOptions): Lesson[] {
-  const byLevel = new Map<number, string[]>();
+  const byLevel = new Map<number, PracticeText[]>();
   for (const row of rows) {
-    const item = sanitizeTypable(row.text_korean);
-    if (!item) continue;
+    if (!sanitizeTypable(row.text_korean)) continue;
     const level = row.level ?? 0;
-    const items = byLevel.get(level) ?? [];
-    items.push(item);
-    byLevel.set(level, items);
+    const kept = byLevel.get(level) ?? [];
+    kept.push(row);
+    byLevel.set(level, kept);
   }
 
   const lessons: Lesson[] = [];
   for (const level of [...byLevel.keys()].sort((a, b) => a - b)) {
-    const items = byLevel.get(level)!;
-    for (let i = 0; i < items.length; i += opts.chunkSize) {
+    const kept = byLevel.get(level)!;
+    for (let i = 0; i < kept.length; i += opts.chunkSize) {
       const set = i / opts.chunkSize + 1;
+      const chunk = kept.slice(i, i + opts.chunkSize);
       lessons.push({
         id: `${opts.idPrefix}-${level}-${set}`,
         stage: opts.stage,
         title: `${opts.titlePrefix} · Level ${level} · Set ${set}`,
-        items: items.slice(i, i + opts.chunkSize),
+        items: chunk.map((r) => sanitizeTypable(r.text_korean)),
+        glosses: chunk.map((r) => r.text_english),
+        sources: chunk.map((r) => r.source),
       });
     }
   }
@@ -51,17 +53,22 @@ export function buildSetLessons(rows: PracticeText[], opts: SetOptions): Lesson[
 export function buildPassageLessons(rows: PracticeText[]): Lesson[] {
   const lessons: Lesson[] = [];
   rows.forEach((row, index) => {
-    const items = row.text_korean
-      .split('\n')
-      .map(sanitizeTypable)
-      .filter(Boolean);
+    const items = row.text_korean.split('\n').map(sanitizeTypable).filter(Boolean);
     if (items.length === 0) return;
+    // 한국어와 영어의 줄 수가 같아 줄 단위로 짝지을 수 있다 (49개 지문 전부 확인)
+    const englishLines = (row.text_english ?? '').split('\n').map((l) => l.trim());
     const articleTitle = row.source?.match(/Articles\s+(.+)$/)?.[1];
+    // 배지에는 교재명까지만 — 지문 제목은 이미 화면 제목으로 나온다
+    const bookSource = articleTitle
+      ? row.source!.slice(0, row.source!.length - articleTitle.length).trim()
+      : row.source;
     lessons.push({
       id: `txt-${index + 1}`,
       stage: 'long_text',
       title: articleTitle ?? `Story ${index + 1}`,
       items,
+      glosses: items.map((_, i) => englishLines[i] ?? null),
+      sources: items.map(() => bookSource),
     });
   });
   return lessons;
