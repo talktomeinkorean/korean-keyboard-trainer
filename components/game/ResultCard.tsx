@@ -73,11 +73,11 @@ export function ResultCard({ timeMs, keysPerMin }: Props) {
 
         {/* 기록 — 배경 이미지의 흰 박스 안. 세로 중앙(380.5~427.5)에 맞춘다 */}
         <div className="absolute left-1/2 top-[404px] flex -translate-x-1/2 -translate-y-1/2 items-center gap-[10px] whitespace-nowrap text-[#36454d]">
-          <span data-testid="result-time" className="font-pixel text-[20px] leading-[1.8]">
+          <span data-testid="result-time" className="font-vt323 text-[20px] leading-[1.8]">
             {formatRaceTime(timeMs)}
           </span>
           <span aria-hidden className="h-[11.5px] w-px bg-[#36454d]" />
-          <span data-testid="result-speed" className="font-pixel text-[20px] leading-[1.8]">
+          <span data-testid="result-speed" className="font-vt323 text-[20px] leading-[1.8]">
             {keysPerMin}{' '}
             <span className="font-dmsans text-[12px] font-medium text-[#6b8999]">keys/min</span>
           </span>

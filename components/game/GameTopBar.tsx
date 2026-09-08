@@ -45,7 +45,7 @@ export function GameTopBar({ elapsedMs, muted, onToggleMuted, onExit }: Props) {
         <img src="/race/icons/hourglass.svg" alt="" className="h-[24px] w-[15px]" aria-hidden />
         <span
           data-testid="race-timer"
-          className="font-pixel text-[20px] tabular-nums text-[#36454d]"
+          className="font-vt323 text-[30px] tabular-nums text-[#36454d]"
         >
           {formatRaceTime(elapsedMs)}
         </span>

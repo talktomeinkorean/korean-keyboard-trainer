@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, DM_Sans, DM_Mono } from "next/font/google";
+import { Geist, Geist_Mono, DM_Sans, DM_Mono, VT323, Silkscreen } from "next/font/google";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { SITE_URL } from "@/lib/site";
 import { SITE_NAME } from "@/lib/seo";
@@ -30,6 +30,20 @@ const dmMono = DM_Mono({
   subsets: ["latin"],
 });
 
+// 숫자 전용 픽셀 폰트 — 한글 글리프가 없으므로 숫자에만 쓴다.
+// VT323: 결과 카드의 기록·타수 (시안 234:6112)
+const vt323 = VT323({
+  variable: "--font-vt323-src",
+  weight: "400",
+  subsets: ["latin"],
+});
+// Silkscreen: 홈의 참가자 수
+const silkscreen = Silkscreen({
+  variable: "--font-silkscreen-src",
+  weight: "400",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   // OG 이미지 등 상대 경로를 절대 URL 로 바꿀 기준
   metadataBase: new URL(SITE_URL),
@@ -50,7 +64,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} ${dmMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} ${dmMono.variable} ${vt323.variable} ${silkscreen.variable} h-full antialiased`}
     >
       {/* 로컬 개발 트래픽이 집계에 섞이지 않도록 프로덕션에서만 로드 */}
       {process.env.NODE_ENV === "production" && <GoogleTagManager gtmId={GTM_ID} />}

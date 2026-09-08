@@ -52,12 +52,12 @@ export function PracticeResult({ category, title, timeMs, keysPerMin, onRetry }:
 
         {/* 기록 — 모래시계 오른쪽. 흰 박스와 구분선은 배경 이미지에 있다 */}
         <div className="absolute left-[112px] top-[150px] flex h-[50px] w-[132px] items-center justify-center">
-          <span data-testid="practice-result-time" className="font-dmmono text-[28px] whitespace-nowrap">
+          <span data-testid="practice-result-time" className="font-vt323 text-[28px] whitespace-nowrap">
             {formatRaceTime(timeMs)}
           </span>
         </div>
         <div className="absolute inset-x-[36px] top-[225px] flex h-[50px] items-center justify-center">
-          <span data-testid="practice-result-speed" className="font-dmmono text-[25px] whitespace-nowrap">
+          <span data-testid="practice-result-speed" className="font-vt323 text-[25px] whitespace-nowrap">
             {keysPerMin}{' '}
             <span className="font-dmsans text-[15px] font-medium text-[#6b8999]">keys/min</span>
           </span>
