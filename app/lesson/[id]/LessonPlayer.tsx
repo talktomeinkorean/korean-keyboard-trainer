@@ -94,7 +94,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     />
   );
 
-  const backHref = `/lessons/${categorySlug}`;
+  // Vocabulary·Sentences 는 카테고리 주소가 곧 새 연습이라 뒤로가기가
+  // "다른 단어로 이동"처럼 보인다. 목록이 있는 카테고리만 그리로 보낸다.
+  const backHref = category?.startsDirectly ? '/lessons' : `/lessons/${categorySlug}`;
   const isWord = lesson.stage === 'word';
   const { done, current, todo } = splitByJamoProgress(session.currentItem, session.typedJamoCount);
 

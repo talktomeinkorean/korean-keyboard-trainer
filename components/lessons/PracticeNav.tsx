@@ -13,7 +13,7 @@ interface Props {
 /** 연습 화면 공통 내비게이션 바 (시안 320:22506). */
 export function PracticeNav({ title, backHref, right }: Props) {
   return (
-    <header className="flex h-[85px] shrink-0 items-center justify-between p-[24px]">
+    <header className="flex h-[85px] w-full shrink-0 items-center justify-between p-[24px]">
       <Link href={backHref} aria-label="Back" data-testid="practice-back" className="shrink-0">
         <img
           src="/lessons/icons/arrow-back.svg"
