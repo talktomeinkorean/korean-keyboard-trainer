@@ -54,11 +54,13 @@ export function ResultCard({ timeMs, keysPerMin }: Props) {
         >
           {/* 줄바꿈되면 2줄이 폴라로이드 밖으로 밀려나므로 한 줄로 고정한다 */}
           <p className="whitespace-nowrap font-pixel leading-[1.5]">
-            <span className="text-[12px]">{rank.emoji}</span>{' '}
             <span className="text-[16px]">{rank.korean}</span>{' '}
             <span className="text-[14px]">{rank.romaja}</span>
           </p>
-          <p className="font-dmmono text-[12px] leading-[1.5] text-[#7d9fb2]">{rank.english}</p>
+          {/* 이모지는 아랫줄 영어 이름 앞에 붙인다 */}
+          <p className="whitespace-nowrap font-dmmono text-[12px] leading-[1.5] text-[#7d9fb2]">
+            <span>{rank.emoji}</span> {rank.english}
+          </p>
         </div>
 
         {/* 등급별 문구 — 배경 이미지에 흰 글로우가 깔려 있는 자리 */}
