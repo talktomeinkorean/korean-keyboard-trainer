@@ -12,15 +12,16 @@ vi.mock('@/lib/audio/sounds', () => ({
   stopBgm: (...a: unknown[]) => stopBgm(...a),
 }));
 
+/** startRace 가 설치한 fetch 스텁 — 호출 내역을 검사할 때 쓴다. */
+let fetchMock: ReturnType<typeof vi.fn>;
+
 /** 게임을 시작해 타이머가 돌기 시작한 상태로 만든다. */
 async function startRace() {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async () => ({
-      ok: true,
-      json: async () => ({ words: [{ korean: '사과', english: 'apple' }] }),
-    })) as unknown as typeof fetch,
-  );
+  fetchMock = vi.fn(async () => ({
+    ok: true,
+    json: async () => ({ words: [{ korean: '사과', english: 'apple' }] }),
+  }));
+  vi.stubGlobal('fetch', fetchMock as unknown as typeof fetch);
   render(<RaceGame />);
 
   // 시작 팝업을 닫아야 입력을 받는다
@@ -90,5 +91,39 @@ describe('레이스 타이머와 BGM 일시정지', () => {
 
     fireEvent.click(screen.getByTestId('exit-popup-close'));
     await waitFor(() => expect(startBgm).toHaveBeenCalledTimes(1));
+  });
+});
+
+describe('완주 수 집계', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date('2026-10-01T00:00:00Z'));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  /** /api/finishes 로 나간 POST 호출들 */
+  function finishPosts() {
+    return fetchMock.mock.calls.filter(
+      ([url, init]) => url === '/api/finishes' && (init as RequestInit | undefined)?.method === 'POST',
+    );
+  }
+
+  it('결과 화면이 뜰 때 완주를 한 번 집계한다', async () => {
+    await startRace();
+    // 완주 전에는 보내지 않는다
+    expect(finishPosts()).toHaveLength(0);
+
+    // 사과 = ㅅㅏ + ㄱㅗㅏ
+    for (const code of ['KeyT', 'KeyK', 'KeyR', 'KeyH', 'KeyK']) {
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { code, bubbles: true }));
+      });
+    }
+
+    await screen.findByTestId('result-screen');
+    await waitFor(() => expect(finishPosts()).toHaveLength(1));
   });
 });

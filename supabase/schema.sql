@@ -29,3 +29,14 @@ create view race_best with (security_invoker = true) as
 
 revoke all on race_scores from anon, authenticated;
 revoke all on race_best from anon, authenticated;
+
+-- 완주 수 익명 집계.
+-- 기록을 저장(이메일 제출)하지 않고 완주만 한 사람까지 세기 위한 테이블이다.
+-- 행 하나 = 완주 한 번. 개인 식별 정보를 담지 않으므로 race_scores 의 동의 체계와 무관하다.
+create table race_finishes (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now()
+);
+
+alter table race_finishes enable row level security;
+revoke all on race_finishes from anon, authenticated;
