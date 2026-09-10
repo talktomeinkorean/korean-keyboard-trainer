@@ -29,6 +29,17 @@ describe('SubmitRecordPopup 동의 항목', () => {
     expect(screen.getByTestId('consent-marketing')).toBeInTheDocument();
   });
 
+  it('시안(519:14583)의 동의 문구를 그대로 쓴다', () => {
+    stubFetch();
+    open();
+    expect(
+      screen.getByText(/I agree to have my name and email used for the Hangeul Day drawing/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Subscribe to the TTMIK newsletter and get 50% OFF a yearly Courses/),
+    ).toBeInTheDocument();
+  });
+
   it('필수 동의 전에는 저장 버튼이 비활성이다', () => {
     stubFetch();
     open();

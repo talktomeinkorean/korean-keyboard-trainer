@@ -1,6 +1,8 @@
 import { revalidateTag } from 'next/cache';
+import { after } from 'next/server';
 import { parseScoreSubmission } from '@/lib/game/score';
 import { getServiceClient } from '@/lib/supabase/server';
+import { subscribeToNewsletter } from '@/lib/kajabi/newsletter';
 
 export async function POST(request: Request) {
   const supabase = getServiceClient();
@@ -35,6 +37,13 @@ export async function POST(request: Request) {
 
   // 새 기록 반영을 위해 리더보드 캐시 무효화 (다음 조회부터 백그라운드 갱신)
   revalidateTag('race-leaderboard', 'max');
+
+  // (선택) 마케팅 동의자만 Kajabi 뉴스레터로 넘긴다.
+  // after: 응답을 보낸 뒤에 돌기 때문에 Kajabi 가 느려도 사용자가 기다리지 않는다.
+  // 실패해도 기록은 이미 저장됐고 consent_marketing 도 남아 있어 나중에 다시 밀어 넣을 수 있다.
+  if (consentMarketing) {
+    after(() => subscribeToNewsletter({ name: nickname, email }));
+  }
 
   // 내 최고 기록과 순위 (플레이어별 최고 기록 뷰 기준)
   const { data: best, error: bestError } = await supabase
