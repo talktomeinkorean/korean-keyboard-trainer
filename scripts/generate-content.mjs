@@ -6,8 +6,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parse } from 'csv-parse/sync';
 
-// 앱에서 실제로 쓰는 종류만 담는다.
-// 자음/모음/음절은 lib/curriculum/lessons.ts 의 정적 커리큘럼이 담당한다.
+// 단어/문장/지문 — 서버에서만 읽는 큰 데이터.
 const FILES = [
   { path: 'data/vocabulary.csv', kind: 'vocabulary' },
   { path: 'data/sentences.csv', kind: 'sentence' },
@@ -15,6 +14,10 @@ const FILES = [
 ];
 
 const OUT = 'lib/content/practiceTexts.json';
+
+// Basics(자음·모음·음절) — 연습 세트를 브라우저에서 뽑기 때문에 클라이언트 번들에 들어간다.
+// 큰 데이터와 파일을 나눠 두는 이유가 그것이다 (한 글자짜리 항목뿐이라 몇 KB).
+const BASICS_OUT = 'lib/content/basics.json';
 
 function toRow(record) {
   const korean = (record.text_korean ?? '').trim();
@@ -52,3 +55,27 @@ for (const { path, kind } of FILES) {
 writeFileSync(OUT, JSON.stringify(out) + '\n');
 const total = Object.values(out).reduce((n, rows) => n + rows.length, 0);
 console.log(`→ ${OUT} (총 ${total}행, ${(readFileSync(OUT).length / 1024).toFixed(0)}KB)`);
+
+/** CSV 의 한국어 컬럼만 뽑는다. 정렬하지 않는다 — 자음·모음은 CSV 순서가 곧 교육 순서다. */
+function koreanColumn(path) {
+  return parse(readFileSync(path, 'utf8'), { columns: true, skip_empty_lines: true })
+    .map((r) => ({ level: parseInt(r.level, 10) || 1, text: (r.text_korean ?? '').trim() }))
+    .filter((r) => r.text);
+}
+
+const syllables = {};
+for (const { level, text } of koreanColumn('data/syllables.csv')) {
+  (syllables[level] ??= []).push(text);
+}
+
+const basics = {
+  consonants: koreanColumn('data/consonants.csv').map((r) => r.text),
+  vowels: koreanColumn('data/vowels.csv').map((r) => r.text),
+  syllables,
+};
+writeFileSync(BASICS_OUT, JSON.stringify(basics) + '\n');
+const levels = Object.entries(syllables).map(([l, v]) => `L${l}:${v.length}`).join(' ');
+console.log(
+  `→ ${BASICS_OUT} (자음 ${basics.consonants.length}, 모음 ${basics.vowels.length}, ` +
+    `음절 ${levels}, ${(readFileSync(BASICS_OUT).length / 1024).toFixed(0)}KB)`,
+);

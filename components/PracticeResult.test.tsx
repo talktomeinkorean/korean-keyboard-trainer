@@ -9,6 +9,7 @@ function open(over: Partial<Parameters<typeof PracticeResult>[0]> = {}) {
       title="엘리베이터에 4층이 없어요"
       timeMs={33_120}
       keysPerMin={87}
+      backHref="/lessons/long-text"
       onRetry={() => {}}
       {...over}
     />,
@@ -35,8 +36,11 @@ describe('PracticeResult', () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
-  it('Back to Practice 는 연습 메뉴로 간다', () => {
+  it('Back to Practice 는 넘겨준 목록으로 간다 — 긴 글은 지문 목록', () => {
     open();
-    expect(screen.getByTestId('practice-result-back')).toHaveAttribute('href', '/lessons');
+    expect(screen.getByTestId('practice-result-back')).toHaveAttribute(
+      'href',
+      '/lessons/long-text',
+    );
   });
 });
