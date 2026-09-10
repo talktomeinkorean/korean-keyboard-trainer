@@ -26,19 +26,19 @@ describe('sampleItems', () => {
 });
 
 describe('basicsSet', () => {
-  it('자음 첫 방문: 19개를 순서대로 돈 뒤 21개를 무작위로 채운다', () => {
+  it('자음 — 아직 못 끝냈으면: 19개를 순서대로 돈 뒤 21개를 무작위로 채운다', () => {
     const set = basicsSet(CONSONANTS, true);
     expect(set).toHaveLength(BASICS_SET_SIZE);
     expect(set.slice(0, 19)).toEqual(CONSONANTS);
   });
 
-  it('모음 첫 방문: 21개를 순서대로 돈 뒤 19개를 무작위로 채운다', () => {
+  it('모음 — 아직 못 끝냈으면: 21개를 순서대로 돈 뒤 19개를 무작위로 채운다', () => {
     const set = basicsSet(VOWELS, true);
     expect(set).toHaveLength(BASICS_SET_SIZE);
     expect(set.slice(0, 21)).toEqual(VOWELS);
   });
 
-  it('재방문은 순서대로 도는 구간 없이 40개 전부 무작위다', () => {
+  it('한 번 끝낸 뒤에는 순서대로 도는 구간 없이 40개 전부 무작위다', () => {
     const set = basicsSet(CONSONANTS, false);
     expect(set).toHaveLength(BASICS_SET_SIZE);
     expect(set.every((c) => CONSONANTS.includes(c))).toBe(true);

@@ -27,7 +27,7 @@ describe('LESSONS', () => {
     expect(getLesson('syllables')!.items.length).toBeGreaterThan(500);
   });
 
-  it('자음·모음은 CSV 순서(교육 순서)를 지킨다 — 첫 방문에 이 순서로 돈다', () => {
+  it('자음·모음은 CSV 순서(교육 순서)를 지킨다 — 처음 한 바퀴는 이 순서다', () => {
     // 홈로우부터 시작해 된소리로 끝난다
     expect(getLesson('consonants')?.items.slice(0, 5)).toEqual(['ㅁ', 'ㄴ', 'ㅇ', 'ㄹ', 'ㅎ']);
     expect(getLesson('consonants')?.items.at(-1)).toBe('ㅆ');

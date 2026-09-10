@@ -41,14 +41,15 @@ export function sampleItems<T>(pool: readonly T[], count: number): T[] {
 
 /**
  * 자음·모음 한 판.
- * 첫 방문이면 순서대로 한 바퀴 돈 뒤 나머지를 무작위로 채우고, 재방문이면 전부 무작위다.
+ * 아직 한 번도 끝내지 않았으면(firstTime) 순서대로 한 바퀴 돈 뒤 나머지를 무작위로 채우고,
+ * 이미 끝낸 적이 있으면 전부 무작위다.
  */
 export function basicsSet(
   pool: readonly string[],
-  firstVisit: boolean,
+  firstTime: boolean,
   size = BASICS_SET_SIZE,
 ): string[] {
-  if (!firstVisit) return sampleItems(pool, size);
+  if (!firstTime) return sampleItems(pool, size);
   return [...pool.slice(0, size), ...sampleItems(pool, size - pool.length)];
 }
 
