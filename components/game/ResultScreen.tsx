@@ -1,7 +1,7 @@
 'use client';
 
 /* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다. */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ResultCard } from './ResultCard';
 import { SubmitRecordPopup } from './SubmitRecordPopup';
@@ -24,24 +24,77 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
   const [showSubmit, setShowSubmit] = useState(false);
   // 이번 기록을 이미 저장했는지 — 한 판에 한 번만 등록되게 한다
   const [submitted, setSubmitted] = useState(false);
-  const [shared, setShared] = useState(false);
+  // 버튼에 잠깐 띄우는 안내 문구 (복사됨 / 저장됨)
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  const code = encodeResultCode({ timeMs, keysPerMin });
+
+  // 공유용 카드 이미지를 미리 받아둔다.
+  // iOS Safari 는 navigator.share 가 사용자 제스처 직후에 불려야 해서, 클릭한 뒤에
+  // fetch 를 기다렸다가 부르면 조용히 실패한다. 그래서 화면이 뜰 때 미리 받는다.
+  const cardFileRef = useRef<File | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      try {
+        const res = await fetch(`/result/${code}/card`);
+        if (!res.ok) return;
+        const blob = await res.blob();
+        if (alive) {
+          cardFileRef.current = new File([blob], 'hangeul-typing-race.png', { type: 'image/png' });
+        }
+      } catch {
+        /* 이미지를 못 받으면 아래에서 링크 공유로 떨어진다 */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [code]);
 
   async function share() {
     const rank = rankFor(timeMs);
-    const text = `I finished the Hangeul Typing Race in ${formatRaceTime(timeMs)} — ${rank.emoji} ${rank.korean} (${rank.english})!`;
+    const message = `I finished the Hangeul Typing Race in ${formatRaceTime(timeMs)} — ${rank.emoji} ${rank.korean} (${rank.english})!`;
     // 이 주소를 열면 결과 카드가 보이고, 링크 미리보기에도 카드 이미지가 뜬다
-    const url = `${window.location.origin}/result/${encodeResultCode({ timeMs, keysPerMin })}`;
+    const url = `${window.location.origin}/result/${code}`;
+    const file = cardFileRef.current;
+
+    // 1) 이미지를 공유 시트로 넘길 수 있으면 그렇게 한다 (인스타·카톡에 바로 붙는다).
+    //    파일과 함께 넘긴 url 은 iOS 에서 버려지는 일이 많아 문구 안에 넣는다.
+    if (file && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], text: `${message} ${url}` });
+      } catch {
+        /* 사용자가 공유 시트를 닫은 경우 */
+      }
+      return;
+    }
+
+    // 2) 파일 공유가 안 되는 환경(주로 PC) — 이미지를 내려받는다
+    if (file) {
+      const href = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = href;
+      a.download = file.name;
+      a.click();
+      // 클릭 직후 즉시 해제하면 일부 브라우저에서 다운로드가 끊긴다
+      setTimeout(() => URL.revokeObjectURL(href), 0);
+      setFeedback('Image saved!');
+      return;
+    }
+
+    // 3) 이미지를 못 받았으면 링크라도 공유한다
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Hangeul Typing Race', text, url });
-        return;
+        await navigator.share({ title: 'Hangeul Typing Race', text: message, url });
       } catch {
-        return; // 사용자가 공유 시트를 닫은 경우 — 클립보드로 대체하지 않는다
+        /* 사용자가 공유 시트를 닫은 경우 — 클립보드로 대체하지 않는다 */
       }
+      return;
     }
     try {
-      await navigator.clipboard.writeText(`${text} ${url}`);
-      setShared(true);
+      await navigator.clipboard.writeText(`${message} ${url}`);
+      setFeedback('Link copied!');
     } catch {
       /* 클립보드 권한이 없으면 아무 일도 하지 않는다 */
     }
@@ -82,7 +135,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
               data-testid="result-share"
               className={`${PIXEL_BUTTON} ${BUTTON}`}
             >
-              {shared ? 'Link copied!' : 'Save & Share'}
+              {feedback ?? 'Save & Share'}
             </button>
             <button
               type="button"

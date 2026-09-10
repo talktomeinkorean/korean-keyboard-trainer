@@ -1,36 +1,15 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
 import { notFound } from 'next/navigation';
 import { decodeResultCode } from '@/lib/game/resultCode';
-import { formatRaceTime, goalText, rankFor } from '@/lib/game/rank';
+import { goalText } from '@/lib/game/rank';
+import { loadCardAssets, resultCardElement } from '@/lib/og/resultCard';
 
 export const alt = 'My Hangeul Typing Race result';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-/**
- * 세로 카드(267x452)를 가로 캔버스 가운데 놓고, 양옆은 게임 배경으로 채운다.
- * 카드 안의 좌표는 앱과 같은 값에 이 배율만 곱한다.
- */
+/** 세로 카드(267x452)를 가로 캔버스 가운데 놓고, 양옆은 게임 배경으로 채운다. */
 const CARD_HEIGHT = 520;
-const CARD_WIDTH = Math.round((CARD_HEIGHT * 267) / 452);
-const S = CARD_HEIGHT / 452;
-/** 앱과 같은 px 값을 카드 배율로 옮긴다 */
-const s = (px: number) => Math.round(px * S * 100) / 100;
-
-/**
- * Satori 는 webp 를 못 읽어서 OG 전용 png 사본을 쓴다 (팔레트 축소로 용량을 줄였다).
- * 500KB 번들 한도가 있어 배경은 이미지 대신 그라디언트로 깐다.
- */
-async function png(name: string): Promise<string> {
-  const buf = await readFile(join(process.cwd(), 'assets', name));
-  return `data:image/png;base64,${buf.toString('base64')}`;
-}
-
-async function font(name: string) {
-  return readFile(join(process.cwd(), 'assets', name));
-}
 
 export default async function Image({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
@@ -38,17 +17,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
   if (!value) notFound();
 
   const { timeMs, keysPerMin } = value;
-  const rank = rankFor(timeMs);
-
-  const [card, photo, dmSans, dmSansBold, dmMono, notoKr, vt323] = await Promise.all([
-    png('og-result-card.png'),
-    png('og-result-photo.png'),
-    font('DMSans-Medium.ttf'),
-    font('DMSans-Bold.ttf'),
-    font('DMMono-Medium.ttf'),
-    font('NotoSansKR-Subset.ttf'),
-    font('VT323-Regular.ttf'),
-  ]);
+  const assets = await loadCardAssets();
 
   return new ImageResponse(
     (
@@ -66,104 +35,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
           backgroundImage: 'linear-gradient(180deg, #4d7f92 0%, #36454d 60%)',
         }}
       >
-        <div
-          style={{
-            position: 'relative',
-            display: 'flex',
-            width: CARD_WIDTH,
-            height: CARD_HEIGHT,
-            backgroundImage: `url(${card})`,
-            backgroundSize: `${CARD_WIDTH}px ${CARD_HEIGHT}px`,
-          }}
-        >
-          {/* 폴라로이드 사진 */}
-          <img
-            src={photo}
-            alt=""
-            width={s(110.5)}
-            height={s(109.5)}
-            style={{ position: 'absolute', left: s(78), top: s(75.5) }}
-          />
-
-          {/* 등급 라벨 */}
-          <div
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: s(191.8),
-              width: CARD_WIDTH,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              color: '#36454d',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: s(4) }}>
-              <span style={{ fontFamily: 'Noto Sans KR', fontSize: s(16) }}>{rank.korean}</span>
-              <span style={{ fontFamily: 'DM Mono', fontSize: s(14) }}>{rank.romaja}</span>
-            </div>
-            {/* 이모지는 아랫줄 영어 이름 앞에 */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: s(4),
-                fontFamily: 'DM Mono',
-                fontSize: s(12),
-                color: '#7d9fb2',
-              }}
-            >
-              <span>{rank.emoji}</span>
-              <span>{rank.english}</span>
-            </div>
-          </div>
-
-          {/* 등급별 문구 */}
-          <div
-            style={{
-              position: 'absolute',
-              left: s(38.5),
-              top: s(247.3),
-              width: s(190),
-              height: s(103.4),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              fontFamily: 'DM Sans',
-              fontSize: s(14),
-              lineHeight: 1.4,
-              color: '#36454d',
-            }}
-          >
-            {rank.message}
-          </div>
-
-          {/* 기록 */}
-          <div
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: s(386),
-              width: CARD_WIDTH,
-              height: s(36),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: s(10),
-              color: '#36454d',
-            }}
-          >
-            <span style={{ fontFamily: 'VT323', fontSize: s(20) }}>{formatRaceTime(timeMs)}</span>
-            <div style={{ display: 'flex', width: 1, height: s(11.5), backgroundColor: '#36454d' }} />
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: s(4) }}>
-              <span style={{ fontFamily: 'VT323', fontSize: s(20) }}>{keysPerMin}</span>
-              <span style={{ fontFamily: 'DM Sans', fontSize: s(12), color: '#6b8999' }}>
-                keys/min
-              </span>
-            </div>
-          </div>
-        </div>
+        {resultCardElement({ timeMs, keysPerMin, height: CARD_HEIGHT, assets })}
 
         {/* 카드 아래 목표 문구 */}
         <div
@@ -179,15 +51,6 @@ export default async function Image({ params }: { params: Promise<{ code: string
         </div>
       </div>
     ),
-    {
-      ...size,
-      fonts: [
-        { name: 'DM Sans', data: dmSans, style: 'normal', weight: 500 },
-        { name: 'DM Sans', data: dmSansBold, style: 'normal', weight: 700 },
-        { name: 'DM Mono', data: dmMono, style: 'normal', weight: 400 },
-        { name: 'Noto Sans KR', data: notoKr, style: 'normal', weight: 500 },
-        { name: 'VT323', data: vt323, style: 'normal', weight: 400 },
-      ],
-    },
+    { ...size, fonts: assets.fonts },
   );
 }

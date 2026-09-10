@@ -117,3 +117,65 @@ describe('ResultScreen', () => {
     expect(await screen.findByText('Link copied!')).toBeInTheDocument();
   });
 });
+
+describe('Save & Share — 카드 이미지', () => {
+  /** 카드 PNG 까지 내려주는 fetch 스텁 */
+  function stubFetchWithCard() {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) =>
+        String(url).includes('/card')
+          ? ({
+              ok: true,
+              status: 200,
+              blob: async () => new Blob([new Uint8Array([1, 2, 3])], { type: 'image/png' }),
+            } as unknown as Response)
+          : ({ ok: true, status: 200, json: async () => ({}) } as unknown as Response)),
+    );
+  }
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it('공유 시트에 파일을 넘길 수 있으면 카드 이미지를 공유한다', async () => {
+    stubFetchWithCard();
+    const share = vi.fn(async () => {});
+    vi.stubGlobal('navigator', { share, canShare: () => true });
+    open();
+
+    // 카드 이미지는 화면이 뜰 때 비동기로 받아온다. 준비되기 전 클릭은 링크 공유로
+    // 떨어지므로, 파일이 실린 호출이 나올 때까지 눌러본다.
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('result-share'));
+      expect(share.mock.calls.at(-1)?.[0]).toHaveProperty('files');
+    });
+
+    const arg = share.mock.calls.at(-1)![0] as { files: File[]; text: string };
+    expect(arg.files[0].name).toBe('hangeul-typing-race.png');
+    expect(arg.files[0].type).toBe('image/png');
+    // 파일과 함께 넘긴 url 은 버려지는 일이 많아 문구 안에 넣는다
+    expect(arg.text).toContain('/result/33120-112');
+  });
+
+  it('파일 공유가 안 되면 카드 이미지를 내려받는다', async () => {
+    stubFetchWithCard();
+    vi.stubGlobal('navigator', {}); // share·canShare 없음 = PC
+    // jsdom 에는 objectURL 구현이 없다
+    URL.createObjectURL = vi.fn(() => 'blob:card');
+    URL.revokeObjectURL = vi.fn();
+
+    let downloaded: string | null = null;
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      downloaded = this.download;
+    });
+
+    open();
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('result-share'));
+      expect(downloaded).toBe('hangeul-typing-race.png');
+    });
+
+    expect(await screen.findByText('Image saved!')).toBeInTheDocument();
+  });
+});
