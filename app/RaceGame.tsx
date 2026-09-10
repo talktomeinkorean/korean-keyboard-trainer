@@ -79,6 +79,17 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
     if (session.isComplete && !muted) playSfx('finish');
   }, [session.isComplete, muted]);
 
+  // 완주 수 익명 집계 — 결과 화면이 뜨는 시점에 1 올린다.
+  // 한 판에 한 번만 보낸다 (다시하기는 RaceRound 를 리마운트하므로 ref 가 초기화된다).
+  const countedRef = useRef(false);
+  useEffect(() => {
+    if (!session.isComplete || countedRef.current) return;
+    countedRef.current = true;
+    // 집계 실패가 게임 흐름을 막으면 안 되므로 조용히 넘긴다.
+    // keepalive: 결과 화면에서 바로 다른 페이지로 넘어가도 요청이 취소되지 않게 한다.
+    void fetch('/api/finishes', { method: 'POST', keepalive: true }).catch(() => {});
+  }, [session.isComplete]);
+
   // 키 입력 캡처 — LessonPlayer 와 동일 (IME 회피)
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
