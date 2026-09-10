@@ -6,6 +6,7 @@ import { keysPerMinute } from '@/lib/game/rank';
 import { playSfx, startBgm, pauseBgm, stopBgm } from '@/lib/audio/sounds';
 import { loadMuted, saveMuted } from '@/lib/audio/mutePreference';
 import { useLessonSession } from '@/lib/session/useLessonSession';
+import { LocalProgressStore } from '@/lib/progress/localStore';
 import { RaceScene } from '@/components/RaceScene';
 import { Keyboard } from '@/components/Keyboard';
 import { ResultScreen } from '@/components/game/ResultScreen';
@@ -18,6 +19,9 @@ import type { RaceWord } from '@/lib/game/raceWord';
 
 /** 한 판에 출제할 단어 수 (DB 미설정 시 폴백 풀에서 뽑는 개수) */
 const RACE_WORD_COUNT = 10;
+
+// 완주 집계에 실어 보낼 익명 ID 를 꺼내오는 용도 (연습 진행률과 같은 값을 쓴다)
+const progressStore = new LocalProgressStore();
 
 /** 단어 로드 (/api/race-words). 실패 시 내장 풀로 폴백 — 영어 뜻은 없다. */
 async function loadWords(): Promise<RaceWord[]> {
@@ -79,15 +83,24 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
     if (session.isComplete && !muted) playSfx('finish');
   }, [session.isComplete, muted]);
 
-  // 완주 수 익명 집계 — 결과 화면이 뜨는 시점에 1 올린다.
+  // 완주 수 익명 집계 — 결과 화면이 뜨는 시점에 한 행 쌓는다.
   // 한 판에 한 번만 보낸다 (다시하기는 RaceRound 를 리마운트하므로 ref 가 초기화된다).
   const countedRef = useRef(false);
   useEffect(() => {
     if (!session.isComplete || countedRef.current) return;
     countedRef.current = true;
     // 집계 실패가 게임 흐름을 막으면 안 되므로 조용히 넘긴다.
-    // keepalive: 결과 화면에서 바로 다른 페이지로 넘어가도 요청이 취소되지 않게 한다.
-    void fetch('/api/finishes', { method: 'POST', keepalive: true }).catch(() => {});
+    void (async () => {
+      // 브라우저별 익명 난수. 같은 사람이 여러 판을 해도 한 명으로 세기 위한 값이다.
+      const sessionId = await progressStore.getUserId();
+      // keepalive: 결과 화면에서 바로 다른 페이지로 넘어가도 요청이 취소되지 않게 한다.
+      await fetch('/api/finishes', {
+        method: 'POST',
+        keepalive: true,
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      });
+    })().catch(() => {});
   }, [session.isComplete]);
 
   // 키 입력 캡처 — LessonPlayer 와 동일 (IME 회피)
