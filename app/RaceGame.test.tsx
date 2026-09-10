@@ -98,6 +98,7 @@ describe('완주 수 집계', () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.setSystemTime(new Date('2026-10-01T00:00:00Z'));
+    localStorage.clear();
   });
   afterEach(() => {
     vi.useRealTimers();
@@ -111,19 +112,36 @@ describe('완주 수 집계', () => {
     );
   }
 
-  it('결과 화면이 뜰 때 완주를 한 번 집계한다', async () => {
-    await startRace();
-    // 완주 전에는 보내지 않는다
-    expect(finishPosts()).toHaveLength(0);
-
-    // 사과 = ㅅㅏ + ㄱㅗㅏ
+  /** 사과 = ㅅㅏ + ㄱㅗㅏ */
+  function typeApple() {
     for (const code of ['KeyT', 'KeyK', 'KeyR', 'KeyH', 'KeyK']) {
       act(() => {
         window.dispatchEvent(new KeyboardEvent('keydown', { code, bubbles: true }));
       });
     }
+  }
+
+  it('결과 화면이 뜰 때 완주를 한 번 집계한다', async () => {
+    await startRace();
+    // 완주 전에는 보내지 않는다
+    expect(finishPosts()).toHaveLength(0);
+
+    typeApple();
 
     await screen.findByTestId('result-screen');
     await waitFor(() => expect(finishPosts()).toHaveLength(1));
+  });
+
+  it('브라우저별 익명 ID 를 함께 보낸다 — 같은 사람의 여러 판을 한 명으로 세기 위해', async () => {
+    await startRace();
+    typeApple();
+    await waitFor(() => expect(finishPosts()).toHaveLength(1));
+
+    const [, init] = finishPosts()[0] as [string, RequestInit];
+    const { sessionId } = JSON.parse(String(init.body)) as { sessionId: string };
+    expect(sessionId).toEqual(expect.any(String));
+    expect(sessionId.length).toBeGreaterThan(0);
+    // 다음 판에서도 같은 값이 나가야 한 명으로 묶인다
+    expect(localStorage.getItem('htt.userId')).toBe(sessionId);
   });
 });

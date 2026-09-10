@@ -35,8 +35,21 @@ revoke all on race_best from anon, authenticated;
 -- 행 하나 = 완주 한 번. 개인 식별 정보를 담지 않으므로 race_scores 의 동의 체계와 무관하다.
 create table race_finishes (
   id uuid primary key default gen_random_uuid(),
+  -- 브라우저마다 한 번 발급해 localStorage 에 보관하는 난수(UUID).
+  -- 한 사람이 여러 판을 해도 한 명으로 세기 위한 값이며, 개인 식별 정보가 아니다.
+  session_id text,
   created_at timestamptz not null default now()
 );
 
+create index race_finishes_session_idx on race_finishes (session_id);
+
 alter table race_finishes enable row level security;
 revoke all on race_finishes from anon, authenticated;
+
+-- 완주 횟수와 참여자 수를 한 번에 읽는 집계 뷰.
+create view race_finish_stats with (security_invoker = true) as
+  select count(*)::int as finishes,
+         count(distinct session_id)::int as participants
+  from race_finishes;
+
+revoke all on race_finish_stats from anon, authenticated;
