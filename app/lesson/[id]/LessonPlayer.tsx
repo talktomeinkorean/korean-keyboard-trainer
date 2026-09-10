@@ -80,6 +80,10 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     }
   }, [session.isComplete, session.wpm, session.accuracy, lesson.id]);
 
+  // Vocabulary·Sentences 는 카테고리 주소가 곧 새 연습이라 뒤로가기가
+  // "다른 단어로 이동"처럼 보인다. 목록이 있는 카테고리만 그리로 보낸다.
+  const backHref = category?.randomSet ? '/lessons' : `/lessons/${categorySlug}`;
+
   const result = session.isComplete && (
     <PracticeResult
       category={categoryForStage(lesson.stage)?.title ?? ''}
@@ -87,6 +91,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       timeMs={elapsedMs}
       // 레이스와 같은 기준 — 오타를 뺀 자모 수를 분당으로 환산한다
       keysPerMin={keysPerMinute(session.keystrokes - session.errorCount, elapsedMs)}
+      // 끝내고 돌아갈 곳도 헤더 뒤로가기와 같다 — 긴 글은 지문 목록, Basics 는 Basics 목록
+      backHref={backHref}
       onRetry={() => {
         savedRef.current = false;
         session.reset();
@@ -94,9 +100,6 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     />
   );
 
-  // Vocabulary·Sentences 는 카테고리 주소가 곧 새 연습이라 뒤로가기가
-  // "다른 단어로 이동"처럼 보인다. 목록이 있는 카테고리만 그리로 보낸다.
-  const backHref = category?.startsDirectly ? '/lessons' : `/lessons/${categorySlug}`;
   const isWord = lesson.stage === 'word';
   const { done, current, todo } = splitByJamoProgress(session.currentItem, session.typedJamoCount);
 

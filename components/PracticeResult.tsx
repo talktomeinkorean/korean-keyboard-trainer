@@ -22,10 +22,12 @@ interface Props {
   timeMs: number;
   /** 분당 타수 — lib/game/rank 의 keysPerMinute 로 계산해서 넘긴다 */
   keysPerMin: number;
+  /** Back to Practice 목적지 — 목록이 있는 연습은 그 목록으로 돌아간다 */
+  backHref: string;
   onRetry: () => void;
 }
 
-export function PracticeResult({ category, title, timeMs, keysPerMin, onRetry }: Props) {
+export function PracticeResult({ category, title, timeMs, keysPerMin, backHref, onRetry }: Props) {
   return (
     <div
       data-testid="practice-result"
@@ -74,7 +76,7 @@ export function PracticeResult({ category, title, timeMs, keysPerMin, onRetry }:
             Try Again
           </button>
           <Link
-            href="/lessons"
+            href={backHref}
             data-testid="practice-result-back"
             className={`${PIXEL_BUTTON} w-[200px]`}
           >

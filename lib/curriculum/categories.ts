@@ -10,8 +10,11 @@ export interface Category {
   stages: Stage[];
   /** DB(practice_texts) 기반 자동 생성 레슨의 kind */
   dbKind?: 'vocabulary' | 'sentence' | 'long_text';
-  /** 목록 없이 곧바로 연습을 시작하는 카테고리 (시안 214:2403) */
-  startsDirectly?: boolean;
+  /**
+   * 목록 없이 곧바로 연습을 시작하는 카테고리 (시안 214:2403).
+   * 들어올 때마다 풀 전체에서 size 개를 무작위로 뽑아 한 판을 만든다.
+   */
+  randomSet?: { size: number; title: string };
   /** 목록에서 끝낸 항목을 회색으로 표시할지. Basics 는 완료 여부를 따지지 않는다. */
   showsCompletion?: boolean;
 }
@@ -40,7 +43,7 @@ export const CATEGORIES: Category[] = [
       'Type real Korean words by level, from everyday basics upward, with the English meaning alongside.',
     stages: [],
     dbKind: 'vocabulary',
-    startsDirectly: true,
+    randomSet: { size: 30, title: '30 Random Words' },
   },
   {
     slug: 'short-sentences',
@@ -49,7 +52,7 @@ export const CATEGORIES: Category[] = [
       'Type full Korean sentences, including spacing and punctuation, with feedback on every consonant and vowel.',
     stages: [],
     dbKind: 'sentence',
-    startsDirectly: true,
+    randomSet: { size: 10, title: '10 Random Sentences' },
   },
   {
     slug: 'long-text',

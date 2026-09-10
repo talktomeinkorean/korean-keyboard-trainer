@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { pageMetadata } from '@/lib/seo';
 import { PracticeBackground } from '@/components/PracticeBackground';
 import { CATEGORIES, getCategory, lessonsInCategory } from '@/lib/curriculum/categories';
-import { getContentLessons } from '@/lib/content/catalog';
+import { getContentLessons, getContentPool } from '@/lib/content/catalog';
 import { LessonList } from './LessonList';
 import { RandomPractice } from './RandomPractice';
 
@@ -37,13 +37,22 @@ export default async function CategoryPage({
   const found = getCategory(category);
   if (!found) notFound();
 
+  // Vocabulary / Sentences 는 시안에 목록 화면이 없다 — 곧바로 연습으로 들어간다.
+  // 자체 배경과 레이아웃을 가진 LessonPlayer 가 화면 전체를 그리므로 여기선 감싸지 않는다.
+  if (found.randomSet && found.dbKind) {
+    return (
+      <RandomPractice
+        pool={getContentPool(found.dbKind)}
+        size={found.randomSet.size}
+        title={found.randomSet.title}
+        id={found.slug}
+      />
+    );
+  }
+
   const lessons = found.dbKind
     ? getContentLessons(found.dbKind)
     : lessonsInCategory(category);
-
-  // Vocabulary / Sentences 는 시안에 목록 화면이 없다 — 곧바로 연습으로 들어간다.
-  // 자체 배경과 레이아웃을 가진 LessonPlayer 가 화면 전체를 그리므로 여기선 감싸지 않는다.
-  if (found.startsDirectly) return <RandomPractice lessons={lessons} />;
 
   // 시안의 Basics 는 버튼이 3개뿐이라 목록이 화면 가운데쯤에서 시작한다.
   // 항목이 많은 카테고리(Vocabulary 는 101개)까지 그 여백을 두면 첫 화면이

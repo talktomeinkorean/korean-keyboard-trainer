@@ -1,44 +1,25 @@
+import basics from '@/lib/content/basics.json';
 import { Lesson } from './types';
 
 /**
  * Basics 커리큘럼 — 시안(179:6625)의 버튼 3개와 1:1 로 맞춘다.
  *
- * 예전에는 자음을 Home/Top/Bottom Row 세 레슨으로 쪼갰지만, 시안에서 Basics 는
- * Consonants / Vowels / Syllables 세 버튼이고 누르면 바로 연습으로 들어간다.
- * 항목 순서는 쪼개져 있던 때의 순서(홈로우 → 윗줄 → 아랫줄)를 그대로 이어붙였다.
+ * items 는 "연습에 나올 수 있는 전체 풀" 이다. 실제 한 판(자모 40개, 음절 30개)은
+ * 들어올 때마다 브라우저에서 뽑는다 — lib/curriculum/practiceSet.ts 와
+ * app/lesson/[id]/BasicsPractice.tsx 참고.
+ *
+ * 풀의 원본은 data/consonants.csv·vowels.csv·syllables.csv 이고,
+ * `npm run content:generate` 로 basics.json 을 만든다. 자음·모음은 CSV 순서가
+ * 곧 교육 순서(홈로우 → 윗줄 → 아랫줄 → 된소리)라 정렬하지 않는다.
  */
 export const LESSONS: Lesson[] = [
-  {
-    id: 'consonants',
-    stage: 'consonant',
-    title: 'Consonants',
-    items: [
-      // 홈로우
-      'ㅁ', 'ㄴ', 'ㅇ', 'ㄹ', 'ㅎ', 'ㅁ', 'ㄴ', 'ㅇ',
-      // 윗줄
-      'ㅂ', 'ㅈ', 'ㄷ', 'ㄱ', 'ㅅ', 'ㄱ', 'ㄷ', 'ㅂ',
-      // 아랫줄
-      'ㅋ', 'ㅌ', 'ㅊ', 'ㅍ', 'ㅋ', 'ㅊ', 'ㅌ', 'ㅍ',
-    ],
-  },
-  {
-    id: 'vowels',
-    stage: 'vowel',
-    title: 'Vowels',
-    items: [
-      'ㅏ', 'ㅓ', 'ㅗ', 'ㅜ', 'ㅡ', 'ㅣ', 'ㅏ', 'ㅗ',
-      'ㅑ', 'ㅕ', 'ㅛ', 'ㅠ', 'ㅐ', 'ㅔ', 'ㅑ', 'ㅔ',
-    ],
-  },
+  { id: 'consonants', stage: 'consonant', title: 'Consonants', items: basics.consonants },
+  { id: 'vowels', stage: 'vowel', title: 'Vowels', items: basics.vowels },
   {
     id: 'syllables',
     stage: 'syllable',
     title: 'Syllables',
-    items: [
-      '가', '나', '다', '라', '마', '바', '사', '아',
-      // 받침
-      '간', '달', '곰', '술', '밥', '눈', '문', '발',
-    ],
+    items: Object.values(basics.syllables).flat(),
   },
   // 단어/문장/지문 레슨은 콘텐츠 데이터 기반 자동 생성 (lib/content/catalog.ts)
 ];

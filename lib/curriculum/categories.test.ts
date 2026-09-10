@@ -39,9 +39,20 @@ describe('categories', () => {
     expect(new Set(all).size).toBe(all.length);
   });
 
-  it('Vocabulary·Sentences 만 목록 없이 바로 연습으로 들어간다', () => {
-    const direct = CATEGORIES.filter((c) => c.startsDirectly).map((c) => c.slug);
+  it('Vocabulary·Sentences 만 목록 없이 무작위 한 판으로 들어간다', () => {
+    const direct = CATEGORIES.filter((c) => c.randomSet).map((c) => c.slug);
     expect(direct).toEqual(['vocabulary', 'short-sentences']);
+  });
+
+  it('한 판 개수는 스펙대로 단어 30개·문장 10개다', () => {
+    expect(getCategory('vocabulary')?.randomSet).toEqual({
+      size: 30,
+      title: '30 Random Words',
+    });
+    expect(getCategory('short-sentences')?.randomSet).toEqual({
+      size: 10,
+      title: '10 Random Sentences',
+    });
   });
 
   it('완료 표시는 Long Text 에서만 한다 (Basics 는 완료 여부를 따지지 않는다)', () => {
