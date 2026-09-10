@@ -12,7 +12,10 @@ create table race_scores (
   -- (선택) 학습 팁·할인 정보 수신 동의. 마케팅 발송 대상 구분에 사용.
   consent_marketing boolean not null default false,
   -- 동의 시각은 저장 시각과 같으므로 created_at 을 그대로 근거로 쓴다.
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- Kajabi 뉴스레터 폼에 넘긴 시각. 성공했을 때만 채운다.
+  -- consent_marketing 이 true 인데 null 이면 아직 못 넘긴 것이라 다시 보내야 한다.
+  kajabi_synced_at timestamptz
 );
 
 create index race_scores_email_time_idx on race_scores (email, time_ms);
