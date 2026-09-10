@@ -160,8 +160,8 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose, onSubmitted }: Pr
                   />
                 </span>
                 <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
-                  (Required) I agree to have my name and email collected for the Hangeul Day
-                  drawing.
+                  (Required) I agree to have my name and email used for the Hangeul Day drawing
+                  and winner announcements.
                 </span>
               </label>
               <label className="flex items-start gap-[10px]">
@@ -175,8 +175,8 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose, onSubmitted }: Pr
                   />
                 </span>
                 <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
-                  (Optional) I&apos;d love to receive Korean learning tips and exclusive
-                  discounts from TTMIK!
+                  (Optional) Subscribe to the TTMIK newsletter and get 50% OFF a yearly Courses
+                  subscription 🎁
                 </span>
               </label>
             </div>
