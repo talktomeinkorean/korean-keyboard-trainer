@@ -27,6 +27,8 @@ function stubFetch(submit: () => Response, token: () => Response = () => tokenRe
 
 describe('subscribeToNewsletter', () => {
   beforeEach(() => {
+    // 실행 환경에 토큰이 들어 있어도 이 블록은 OAuth 경로를 본다
+    vi.stubEnv('KAJABI_API_TOKEN', '');
     vi.stubEnv('KAJABI_CLIENT_ID', 'id-1');
     vi.stubEnv('KAJABI_CLIENT_SECRET', 'secret-1');
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -118,5 +120,51 @@ describe('subscribeToNewsletter', () => {
     const { subscribeToNewsletter } = await loadModule();
 
     expect(await subscribeToNewsletter({ name: 'A', email: 'a@b.co' })).toBe('failed');
+  });
+});
+
+// Public API 키 발급 권한(Owner·Subowner)이 없는 동안 쓰는 임시 경로
+describe('subscribeToNewsletter — 토큰을 직접 넣은 경우', () => {
+  beforeEach(() => {
+    vi.stubEnv('KAJABI_API_TOKEN', 'given-token');
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  it('토큰 발급을 건너뛰고 그대로 쓴다', async () => {
+    const fetchMock = stubFetch(() => created);
+    const { subscribeToNewsletter } = await loadModule();
+
+    expect(await subscribeToNewsletter({ name: 'A', email: 'a@b.co' })).toBe('sent');
+    expect(fetchMock).toHaveBeenCalledTimes(1); // 토큰 요청 없음
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('https://api.kajabi.com/v1/forms/2149717545/submit');
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer given-token');
+  });
+
+  it('client_id·secret 이 함께 있어도 직접 넣은 토큰이 우선이다', async () => {
+    vi.stubEnv('KAJABI_CLIENT_ID', 'id-1');
+    vi.stubEnv('KAJABI_CLIENT_SECRET', 'secret-1');
+    const fetchMock = stubFetch(() => created);
+    const { subscribeToNewsletter } = await loadModule();
+
+    await subscribeToNewsletter({ name: 'A', email: 'a@b.co' });
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/oauth/token'))).toBe(false);
+  });
+
+  it('401 이면 재발급을 시도하지 않고, 무엇을 해야 하는지 로그에 남긴다', async () => {
+    const fetchMock = stubFetch(
+      () => ({ ok: false, status: 401, text: async () => 'expired' }) as Response,
+    );
+    const { subscribeToNewsletter } = await loadModule();
+
+    expect(await subscribeToNewsletter({ name: 'A', email: 'a@b.co' })).toBe('failed');
+    // 갱신할 방법이 없으므로 토큰 요청도 재시도도 하지 않는다
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(console.error).mock.calls[0][0]).toContain('KAJABI_CLIENT_ID');
   });
 });
