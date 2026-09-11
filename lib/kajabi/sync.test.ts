@@ -31,7 +31,8 @@ const contact = { email: 'a@b.co', name: 'KIM TT' };
 
 describe('syncMarketingConsent', () => {
   beforeEach(() => {
-    vi.stubEnv('KAJABI_API_TOKEN', 'given-token');
+    vi.stubEnv('KAJABI_CLIENT_ID', 'id-1');
+    vi.stubEnv('KAJABI_CLIENT_SECRET', 'secret-1');
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
   afterEach(() => {
@@ -45,7 +46,8 @@ describe('syncMarketingConsent', () => {
     const { store, marked } = fakeStore(false);
 
     expect(await syncMarketingConsent(store, contact)).toBe('sent');
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    // 토큰 발급 + 폼 제출
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(marked).toEqual(['a@b.co']);
   });
 
@@ -68,7 +70,6 @@ describe('syncMarketingConsent', () => {
   });
 
   it('환경 변수가 없어 건너뛴 경우에도 표시를 남기지 않는다', async () => {
-    vi.stubEnv('KAJABI_API_TOKEN', '');
     vi.stubEnv('KAJABI_CLIENT_ID', '');
     vi.stubEnv('KAJABI_CLIENT_SECRET', '');
     stubKajabi('skipped');

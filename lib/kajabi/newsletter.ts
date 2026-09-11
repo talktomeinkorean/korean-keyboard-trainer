@@ -3,13 +3,9 @@
  *
  * 문서: https://help.kajabi.com/api-reference/forms/submit-form
  *
- * 인증에 쓸 토큰을 얻는 길이 두 가지고, 둘 다 지원한다.
- *  1. KAJABI_CLIENT_ID / KAJABI_CLIENT_SECRET — 만료 전에 토큰을 스스로 새로 받는다. 이쪽이 정석이다.
- *  2. KAJABI_API_TOKEN — 이미 발급받은 액세스 토큰을 그대로 쓴다. 스스로 갱신하지 못해서
- *     만료되면 연동이 멈춘다. Public API 키 발급 권한(Owner·Subowner)이 없을 때의 임시 방편이다.
- *
- * 1번이 있으면 1번을 쓴다. 스스로 갱신하는 쪽이 언제나 낫고, 2번이 환경 변수에 남아 있어도
- * 조용히 만료되는 경로로 돌아가지 않는다.
+ * 인증은 OAuth2 client_credentials 다. KAJABI_CLIENT_ID / KAJABI_CLIENT_SECRET 로 토큰을 받아
+ * 캐시하고 만료 전에 새로 받는다. 값은 Kajabi 대시보드의 Settings > Public API 에서 발급한다
+ * (Owner·Subowner 만 발급 가능).
  *
  * 실패해도 예외를 밖으로 던지지 않는다. 이 호출이 일어나는 시점에는 기록이 이미
  * Supabase 에 저장돼 있고 consent_marketing 도 남아 있어서, 나중에 다시 밀어 넣을 수 있다.
@@ -29,23 +25,6 @@ const FALLBACK_TTL_S = 1800;
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
 export type SubscribeResult = 'sent' | 'skipped' | 'failed';
-
-type Credentials =
-  | { kind: 'token'; token: string }
-  | { kind: 'oauth'; clientId: string; clientSecret: string };
-
-/**
- * 환경 변수에서 인증 수단을 고른다. 아무것도 없으면 null — 호출을 건너뛴다.
- * 스스로 갱신하는 client_id·secret 이 있으면 그쪽을 먼저 쓴다.
- */
-function readCredentials(): Credentials | null {
-  const clientId = process.env.KAJABI_CLIENT_ID;
-  const clientSecret = process.env.KAJABI_CLIENT_SECRET;
-  if (clientId && clientSecret) return { kind: 'oauth', clientId, clientSecret };
-  const token = process.env.KAJABI_API_TOKEN;
-  if (token) return { kind: 'token', token };
-  return null;
-}
 
 async function fetchToken(clientId: string, clientSecret: string): Promise<string | null> {
   const res = await fetch(TOKEN_URL, {
@@ -99,29 +78,19 @@ export async function subscribeToNewsletter(input: {
   name: string;
   email: string;
 }): Promise<SubscribeResult> {
-  const creds = readCredentials();
-  if (!creds) return 'skipped';
+  const clientId = process.env.KAJABI_CLIENT_ID;
+  const clientSecret = process.env.KAJABI_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return 'skipped';
 
   try {
-    const token =
-      creds.kind === 'token'
-        ? creds.token
-        : await getToken(creds.clientId, creds.clientSecret);
+    const token = await getToken(clientId, clientSecret);
     if (!token) return 'failed';
 
     let res = await postSubmission(token, input.name, input.email);
+    // 키를 교체했거나 캐시한 토큰이 먼저 죽은 경우 — 한 번만 새로 받아 다시 보낸다
     if (res.status === 401) {
-      if (creds.kind === 'token') {
-        // 직접 넣은 토큰은 갱신할 방법이 없다. 무엇을 해야 하는지 로그에 그대로 적는다.
-        console.error(
-          '[kajabi] 토큰이 거부됐다(401). KAJABI_API_TOKEN 은 만료되면 되살릴 수 없다 — ' +
-            'Settings > Public API 에서 키를 발급해 KAJABI_CLIENT_ID/KAJABI_CLIENT_SECRET 로 바꿔야 한다.',
-        );
-        return 'failed';
-      }
-      // 키를 교체했거나 캐시한 토큰이 먼저 죽은 경우 — 한 번만 새로 받아 다시 보낸다
       cachedToken = null;
-      const fresh = await fetchToken(creds.clientId, creds.clientSecret);
+      const fresh = await fetchToken(clientId, clientSecret);
       if (!fresh) return 'failed';
       res = await postSubmission(fresh, input.name, input.email);
     }
