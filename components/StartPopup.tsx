@@ -1,9 +1,12 @@
-/* eslint-disable @next/next/no-img-element -- 시안 그대로의 고정 크기 픽셀 아트라 최적화 파이프라인이 필요 없다. */
+/* eslint-disable @next/next/no-img-element -- 시안 그대로의 고정 크기 카드 아트라 최적화 파이프라인이 필요 없다. */
 
 interface Props {
   onStart: () => void;
 }
 
+// 시안 카드를 2x(534x604)로 내보낸 것. 표시 크기(265x300)의 두 배라 레티나에서 1:1 로 찍힌다.
+// pixelated 를 쓰지 않는 이유: 본문이 픽셀 아트가 아니라 안티에일리어싱된 글자·이모지라,
+// 1x 화면에서 최근접 축소하면 얇은 격자선과 글자가 깨진다.
 const POPUP_SRC = '/race/popup-start.webp';
 
 // 카드(265x300) 안에서 Game Start 버튼이 차지하는 비율 — 시안 좌표 기준.
@@ -20,9 +23,8 @@ export function StartPopup({ onStart }: Props) {
       <div className="relative w-[265px] max-w-[85vw] aspect-[265/300]">
         <img
           src={POPUP_SRC}
-          alt="Find out your rank! Type Korean words to reach the finish line. Turn the Key Guide on or off anytime."
+          alt="Find out your rank! Use your keyboard on desktop, or tap the keys on screen."
           className="absolute inset-0 h-full w-full"
-          style={{ imageRendering: 'pixelated' }}
         />
         <button
           type="button"

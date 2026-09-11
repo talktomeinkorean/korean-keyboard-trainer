@@ -16,8 +16,12 @@ describe('StartPopup', () => {
     expect(onStart).toHaveBeenCalledTimes(1);
   });
 
-  it('픽셀아트가 뭉개지지 않도록 pixelated 렌더링을 지정한다', () => {
+  it('안내 문구를 alt 로 읽을 수 있다 — 본문이 이미지 안에 있다', () => {
     render(<StartPopup onStart={() => {}} />);
-    expect(screen.getByAltText(/find out your rank/i).style.imageRendering).toBe('pixelated');
+    const art = screen.getByAltText(/find out your rank/i);
+    expect(art).toHaveAttribute('alt', expect.stringContaining('keyboard on desktop'));
+    expect(art).toHaveAttribute('alt', expect.stringContaining('tap the keys on screen'));
+    // 2x 에셋이라 최근접 축소를 쓰면 격자선과 글자가 깨진다
+    expect(art.style.imageRendering).toBe('');
   });
 });
