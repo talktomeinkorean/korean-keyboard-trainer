@@ -32,7 +32,7 @@ describe('RaceScene', () => {
     expect(bgPosition()).toContain('0%');
   });
 
-  it('픽셀아트가 뭉개지지 않도록 pixelated 렌더링을 지정한다', () => {
+  it('배경은 확대해 쓰므로 pixelated 렌더링을 지정한다', () => {
     render(<RaceScene progress={0} total={10} />);
     expect(screen.getByTestId('race-scene-bg').style.imageRendering).toBe('pixelated');
   });
@@ -41,7 +41,8 @@ describe('RaceScene', () => {
     render(<RaceScene progress={0} total={10} />);
     const runner = screen.getByTestId('race-runner');
     expect(runner.style.backgroundImage).toContain('run_sheet.webp');
-    expect(runner.style.imageRendering).toBe('pixelated');
+    // 시트가 표시 크기보다 커서 확대될 일이 없다 — 최근접을 쓰면 축소할 때 디테일이 날아간다
+    expect(runner.style.imageRendering).toBe('');
   });
 
   it('진행 중일 때만 달리기 애니메이션을 재생한다', () => {

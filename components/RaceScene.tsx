@@ -10,8 +10,12 @@ interface Props {
 }
 
 const BG_SRC = '/race/bg_hanriver.webp';
+// 4프레임 시트(512x128, 프레임당 128px). 이 크기를 고른 이유는 아래 CHAR_PX 주석 참고.
 const RUN_SHEET_SRC = '/race/run_sheet.webp';
 /** 캐릭터 렌더 크기(px). 스프라이트 시트는 이 크기 4프레임 가로 배열이다. */
+// 시트는 프레임당 128px 라 레티나에서 64px 로 그리면 정확히 1:1 이다.
+// imageRendering 을 지정하지 않는 이유: 어느 화면에서도 확대가 아니라 1:1 이거나 축소라,
+// 최근접(pixelated)을 쓰면 축소할 때 1px 디테일이 통째로 날아간다.
 const CHAR_PX = 64;
 
 /**
@@ -58,7 +62,6 @@ export function RaceScene({ progress, total, running = false, children }: Props)
           backgroundSize: `${CHAR_PX * 4}px ${CHAR_PX}px`,
           backgroundRepeat: 'no-repeat',
           backgroundPositionX: 0,
-          imageRendering: 'pixelated',
           animation: running ? 'sprite-run 0.5s steps(4) infinite' : undefined,
         }}
       />
