@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ResultCard } from './ResultCard';
 import { SubmitRecordPopup } from './SubmitRecordPopup';
+import { ShareLinkPopup } from './ShareLinkPopup';
 import { PIXEL_BUTTON, PIXEL_BUTTON_BASE } from './pixelButton';
 import { formatRaceTime, rankFor } from '@/lib/game/rank';
 import { encodeResultCode } from '@/lib/game/resultCode';
@@ -24,10 +25,13 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
   const [showSubmit, setShowSubmit] = useState(false);
   // 이번 기록을 이미 저장했는지 — 한 판에 한 번만 등록되게 한다
   const [submitted, setSubmitted] = useState(false);
-  // 버튼에 잠깐 띄우는 안내 문구 (복사됨 / 저장됨)
-  const [feedback, setFeedback] = useState<string | null>(null);
+  // 이미지 처리가 끝난 뒤 뜨는 링크 공유 팝업
+  const [showShareLink, setShowShareLink] = useState(false);
 
   const code = encodeResultCode({ timeMs, keysPerMin });
+  // 이 주소를 열면 결과 카드가 보이고, 링크 미리보기에도 카드 이미지가 뜬다.
+  // 렌더 중에는 window 를 읽지 않는다 (서버 렌더와 어긋난다)
+  const shareUrl = () => `${window.location.origin}/result/${code}`;
 
   // 공유용 카드 이미지를 미리 받아둔다.
   // iOS Safari 는 navigator.share 가 사용자 제스처 직후에 불려야 해서, 클릭한 뒤에
@@ -52,26 +56,28 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
     };
   }, [code]);
 
+  /**
+   * Save & Share — 이미지를 먼저 처리하고, 끝나면 링크 공유 팝업을 띄운다.
+   *
+   * 이미지 처리 방식만 환경에 따라 갈린다. 브라우저가 사진 앨범에 직접 저장할 수 없어서,
+   * 모바일에서 사진첩에 넣는 유일한 길이 OS 공유 시트의 "이미지 저장" 이기 때문이다.
+   * 링크 팝업은 어느 환경에서나 똑같다.
+   */
   async function share() {
     const rank = rankFor(timeMs);
     const message = `I finished the Hangeul Typing Race in ${formatRaceTime(timeMs)} — ${rank.emoji} ${rank.korean} (${rank.english})!`;
-    // 이 주소를 열면 결과 카드가 보이고, 링크 미리보기에도 카드 이미지가 뜬다
-    const url = `${window.location.origin}/result/${code}`;
     const file = cardFileRef.current;
 
-    // 1) 이미지를 공유 시트로 넘길 수 있으면 그렇게 한다 (인스타·카톡에 바로 붙는다).
+    // 1) 모바일 — OS 공유 시트로 이미지를 넘긴다. 여기서 사진첩 저장도, 카톡·인스타 공유도 된다.
     //    파일과 함께 넘긴 url 은 iOS 에서 버려지는 일이 많아 문구 안에 넣는다.
     if (file && navigator.canShare?.({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], text: `${message} ${url}` });
+        await navigator.share({ files: [file], text: `${message} ${shareUrl()}` });
       } catch {
-        /* 사용자가 공유 시트를 닫은 경우 */
+        /* 사용자가 공유 시트를 닫은 경우 — 링크 팝업은 그대로 띄운다 */
       }
-      return;
-    }
-
-    // 2) 파일 공유가 안 되는 환경(주로 PC) — 이미지를 내려받는다
-    if (file) {
+    } else if (file) {
+      // 2) PC — 곧바로 내려받는다
       const href = URL.createObjectURL(file);
       const a = document.createElement('a');
       a.href = href;
@@ -79,25 +85,10 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
       a.click();
       // 클릭 직후 즉시 해제하면 일부 브라우저에서 다운로드가 끊긴다
       setTimeout(() => URL.revokeObjectURL(href), 0);
-      setFeedback('Image saved!');
-      return;
     }
 
-    // 3) 이미지를 못 받았으면 링크라도 공유한다
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Hangeul Typing Race', text: message, url });
-      } catch {
-        /* 사용자가 공유 시트를 닫은 경우 — 클립보드로 대체하지 않는다 */
-      }
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(`${message} ${url}`);
-      setFeedback('Link copied!');
-    } catch {
-      /* 클립보드 권한이 없으면 아무 일도 하지 않는다 */
-    }
+    // 3) 이미지를 못 받았어도 링크는 공유할 수 있다 — 팝업은 언제나 띄운다
+    setShowShareLink(true);
   }
 
   return (
@@ -135,7 +126,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
               data-testid="result-share"
               className={`${PIXEL_BUTTON} ${BUTTON}`}
             >
-              {feedback ?? 'Save & Share'}
+              Save & Share
             </button>
             <button
               type="button"
@@ -168,6 +159,10 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
           </Link>
         </div>
       </div>
+
+      {showShareLink && (
+        <ShareLinkPopup url={shareUrl()} onClose={() => setShowShareLink(false)} />
+      )}
 
       {showSubmit && (
         <SubmitRecordPopup
