@@ -105,16 +105,39 @@ describe('ResultScreen', () => {
     expect(submit).toHaveTextContent('Submit This Record');
   });
 
-  it('공유 API 가 없으면 링크를 클립보드에 복사한다', async () => {
+  it('이미지를 못 받아도 링크 공유 팝업은 뜬다', async () => {
+    // 카드 이미지 요청이 실패하는 상황
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 500 }) as Response));
+    open();
+    fireEvent.click(screen.getByTestId('result-share'));
+
+    const popup = await screen.findByTestId('share-popup');
+    expect(popup).toBeInTheDocument();
+    expect(screen.getByTestId('share-link')).toHaveTextContent(
+      `${window.location.origin}/result/33120-112`,
+    );
+  });
+
+  it('Copy Link 를 누르면 주소를 클립보드에 복사하고 문구가 바뀐다', async () => {
     stubFetch();
     const writeText = vi.fn(async () => {});
     vi.stubGlobal('navigator', { clipboard: { writeText } });
     open();
     fireEvent.click(screen.getByTestId('result-share'));
 
+    fireEvent.click(await screen.findByTestId('share-copy'));
     await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
-    expect(writeText.mock.calls[0][0]).toContain('00:33.12');
-    expect(await screen.findByText('Link copied!')).toBeInTheDocument();
+    expect(writeText.mock.calls[0][0]).toBe(`${window.location.origin}/result/33120-112`);
+    expect(await screen.findByText('Copied!')).toBeInTheDocument();
+  });
+
+  it('링크 팝업은 닫을 수 있다', async () => {
+    stubFetch();
+    open();
+    fireEvent.click(screen.getByTestId('result-share'));
+
+    fireEvent.click(await screen.findByTestId('share-popup-close'));
+    await waitFor(() => expect(screen.queryByTestId('share-popup')).not.toBeInTheDocument());
   });
 });
 
@@ -176,6 +199,23 @@ describe('Save & Share — 카드 이미지', () => {
       expect(downloaded).toBe('hangeul-typing-race.png');
     });
 
-    expect(await screen.findByText('Image saved!')).toBeInTheDocument();
+    // 내려받은 뒤 링크 공유 팝업이 이어서 뜬다
+    expect(await screen.findByTestId('share-popup')).toBeInTheDocument();
+  });
+
+  it('모바일에서 공유 시트가 닫힌 뒤에도 링크 팝업이 뜬다', async () => {
+    stubFetchWithCard();
+    // 사용자가 시트를 닫은 경우(거부)에도 링크는 공유할 수 있어야 한다
+    const share = vi.fn(async () => {
+      throw new DOMException('abort', 'AbortError');
+    });
+    vi.stubGlobal('navigator', { share, canShare: () => true });
+    open();
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('result-share'));
+      expect(share).toHaveBeenCalled();
+    });
+    expect(await screen.findByTestId('share-popup')).toBeInTheDocument();
   });
 });
