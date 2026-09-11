@@ -4,10 +4,12 @@
  * 문서: https://help.kajabi.com/api-reference/forms/submit-form
  *
  * 인증에 쓸 토큰을 얻는 길이 두 가지고, 둘 다 지원한다.
- *  1. KAJABI_API_TOKEN — 이미 발급받은 액세스 토큰을 그대로 쓴다. 스스로 갱신하지 못해서
+ *  1. KAJABI_CLIENT_ID / KAJABI_CLIENT_SECRET — 만료 전에 토큰을 스스로 새로 받는다. 이쪽이 정석이다.
+ *  2. KAJABI_API_TOKEN — 이미 발급받은 액세스 토큰을 그대로 쓴다. 스스로 갱신하지 못해서
  *     만료되면 연동이 멈춘다. Public API 키 발급 권한(Owner·Subowner)이 없을 때의 임시 방편이다.
- *  2. KAJABI_CLIENT_ID / KAJABI_CLIENT_SECRET — 만료 전에 토큰을 스스로 새로 받는다. 이쪽이 정석이다.
- * 1번이 있으면 1번을 쓴다. 권한이 생기면 KAJABI_API_TOKEN 을 지우기만 하면 2번으로 넘어간다.
+ *
+ * 1번이 있으면 1번을 쓴다. 스스로 갱신하는 쪽이 언제나 낫고, 2번이 환경 변수에 남아 있어도
+ * 조용히 만료되는 경로로 돌아가지 않는다.
  *
  * 실패해도 예외를 밖으로 던지지 않는다. 이 호출이 일어나는 시점에는 기록이 이미
  * Supabase 에 저장돼 있고 consent_marketing 도 남아 있어서, 나중에 다시 밀어 넣을 수 있다.
@@ -32,13 +34,16 @@ type Credentials =
   | { kind: 'token'; token: string }
   | { kind: 'oauth'; clientId: string; clientSecret: string };
 
-/** 환경 변수에서 인증 수단을 고른다. 아무것도 없으면 null — 호출을 건너뛴다. */
+/**
+ * 환경 변수에서 인증 수단을 고른다. 아무것도 없으면 null — 호출을 건너뛴다.
+ * 스스로 갱신하는 client_id·secret 이 있으면 그쪽을 먼저 쓴다.
+ */
 function readCredentials(): Credentials | null {
-  const token = process.env.KAJABI_API_TOKEN;
-  if (token) return { kind: 'token', token };
   const clientId = process.env.KAJABI_CLIENT_ID;
   const clientSecret = process.env.KAJABI_CLIENT_SECRET;
   if (clientId && clientSecret) return { kind: 'oauth', clientId, clientSecret };
+  const token = process.env.KAJABI_API_TOKEN;
+  if (token) return { kind: 'token', token };
   return null;
 }
 

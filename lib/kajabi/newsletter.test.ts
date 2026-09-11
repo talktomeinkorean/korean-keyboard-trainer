@@ -27,8 +27,6 @@ function stubFetch(submit: () => Response, token: () => Response = () => tokenRe
 
 describe('subscribeToNewsletter', () => {
   beforeEach(() => {
-    // 실행 환경에 토큰이 들어 있어도 이 블록은 OAuth 경로를 본다
-    vi.stubEnv('KAJABI_API_TOKEN', '');
     vi.stubEnv('KAJABI_CLIENT_ID', 'id-1');
     vi.stubEnv('KAJABI_CLIENT_SECRET', 'secret-1');
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -40,7 +38,10 @@ describe('subscribeToNewsletter', () => {
   });
 
   it('환경 변수가 없으면 아무것도 보내지 않는다 — 로컬·프리뷰에서 실제 구독이 생기면 안 된다', async () => {
+    // 실행 환경에 값이 들어 있어도 "없는 상태" 를 보게 한다
+    vi.stubEnv('KAJABI_API_TOKEN', '');
     vi.stubEnv('KAJABI_CLIENT_ID', '');
+    vi.stubEnv('KAJABI_CLIENT_SECRET', '');
     const fetchMock = stubFetch(() => created);
     const { subscribeToNewsletter } = await loadModule();
 
@@ -146,14 +147,15 @@ describe('subscribeToNewsletter — 토큰을 직접 넣은 경우', () => {
     expect((init.headers as Record<string, string>).Authorization).toBe('Bearer given-token');
   });
 
-  it('client_id·secret 이 함께 있어도 직접 넣은 토큰이 우선이다', async () => {
+  it('client_id·secret 이 함께 있으면 그쪽을 쓴다 — 스스로 갱신하는 편이 낫다', async () => {
     vi.stubEnv('KAJABI_CLIENT_ID', 'id-1');
     vi.stubEnv('KAJABI_CLIENT_SECRET', 'secret-1');
     const fetchMock = stubFetch(() => created);
     const { subscribeToNewsletter } = await loadModule();
 
     await subscribeToNewsletter({ name: 'A', email: 'a@b.co' });
-    expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/oauth/token'))).toBe(false);
+    // 남아 있는 KAJABI_API_TOKEN 때문에 조용히 만료되는 경로로 돌아가면 안 된다
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/oauth/token'))).toBe(true);
   });
 
   it('401 이면 재발급을 시도하지 않고, 무엇을 해야 하는지 로그에 남긴다', async () => {
