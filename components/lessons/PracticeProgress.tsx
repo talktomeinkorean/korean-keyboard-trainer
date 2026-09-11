@@ -35,7 +35,6 @@ export function PracticeProgress({ done, total, running }: Props) {
           left: `calc(${ratio * 100}% - ${ratio * SPRITE}px)`,
           backgroundImage: `url(${RUN_SHEET_SRC})`,
           backgroundSize: `${SPRITE * 4}px ${SPRITE}px`,
-          imageRendering: 'pixelated',
           animation: running ? 'sprite-run-sm 0.5s steps(4) infinite' : undefined,
         }}
       />
