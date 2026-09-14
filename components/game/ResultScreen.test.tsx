@@ -19,11 +19,12 @@ describe('ResultScreen', () => {
   beforeEach(() => localStorage.clear());
   afterEach(() => vi.unstubAllGlobals());
 
-  it('시안의 버튼 3개와 연습 유도를 보여준다', async () => {
+  it('시안의 버튼 4개와 연습 유도를 보여준다', async () => {
     stubFetch();
     open();
     expect(screen.getByTestId('result-submit')).toHaveTextContent('Submit This Record');
-    expect(screen.getByTestId('result-share')).toHaveTextContent('Save & Share');
+    expect(screen.getByTestId('result-save')).toHaveTextContent('Save');
+    expect(screen.getByTestId('result-share')).toHaveTextContent('Share');
     expect(screen.getByTestId('result-retry')).toHaveTextContent('Try Again');
     expect(screen.getByTestId('result-practice')).toHaveAttribute('href', '/lessons');
   });
@@ -105,8 +106,8 @@ describe('ResultScreen', () => {
     expect(submit).toHaveTextContent('Submit This Record');
   });
 
-  it('이미지를 못 받아도 링크 공유 팝업은 뜬다', async () => {
-    // 카드 이미지 요청이 실패하는 상황
+  it('Share 는 카드 이미지와 무관하게 링크 팝업을 띄운다', async () => {
+    // 카드 이미지 요청이 실패해도 링크는 공유할 수 있어야 한다
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 500 }) as Response));
     open();
     fireEvent.click(screen.getByTestId('result-share'));
@@ -141,7 +142,7 @@ describe('ResultScreen', () => {
   });
 });
 
-describe('Save & Share — 카드 이미지', () => {
+describe('Save — 카드 이미지', () => {
   /** 카드 PNG 까지 내려주는 fetch 스텁 */
   function stubFetchWithCard() {
     vi.stubGlobal(
@@ -157,29 +158,40 @@ describe('Save & Share — 카드 이미지', () => {
     );
   }
 
+  /** 카드 이미지는 비동기로 받아온다 — 받을 때까지 Save 는 잠겨 있다 */
+  async function readySave() {
+    const button = screen.getByTestId('result-save');
+    await waitFor(() => expect(button).toBeEnabled());
+    return button;
+  }
+
   afterEach(() => vi.restoreAllMocks());
 
-  it('공유 시트에 파일을 넘길 수 있으면 카드 이미지를 공유한다', async () => {
+  it('이미지를 받기 전에는 Save 가 잠겨 있다', async () => {
+    // 카드 요청이 실패하면 끝내 열리지 않는다
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 500 }) as Response));
+    open();
+    expect(screen.getByTestId('result-save')).toBeDisabled();
+  });
+
+  it('모바일에서는 카드 이미지를 공유 시트로 넘긴다 (사진첩 저장 경로)', async () => {
     stubFetchWithCard();
     const share = vi.fn(async () => {});
     vi.stubGlobal('navigator', { share, canShare: () => true });
     open();
 
-    // 카드 이미지는 화면이 뜰 때 비동기로 받아온다. 준비되기 전 클릭은 링크 공유로
-    // 떨어지므로, 파일이 실린 호출이 나올 때까지 눌러본다.
-    await waitFor(() => {
-      fireEvent.click(screen.getByTestId('result-share'));
-      expect(share.mock.calls.at(-1)?.[0]).toHaveProperty('files');
-    });
+    fireEvent.click(await readySave());
 
-    const arg = share.mock.calls.at(-1)![0] as { files: File[]; text: string };
+    await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+    const arg = share.mock.calls[0][0] as { files: File[]; text?: string };
     expect(arg.files[0].name).toBe('hangeul-typing-race.png');
     expect(arg.files[0].type).toBe('image/png');
-    // 파일과 함께 넘긴 url 은 버려지는 일이 많아 문구 안에 넣는다
-    expect(arg.text).toContain('/result/33120-112');
+    // Save 는 이미지만 다룬다 — 링크·문구는 Share 쪽 몫이다
+    expect(arg.text).toBeUndefined();
+    expect(screen.queryByTestId('share-popup')).not.toBeInTheDocument();
   });
 
-  it('파일 공유가 안 되면 카드 이미지를 내려받는다', async () => {
+  it('PC 에서는 카드 이미지를 내려받는다', async () => {
     stubFetchWithCard();
     vi.stubGlobal('navigator', {}); // share·canShare 없음 = PC
     // jsdom 에는 objectURL 구현이 없다
@@ -194,28 +206,10 @@ describe('Save & Share — 카드 이미지', () => {
     });
 
     open();
-    await waitFor(() => {
-      fireEvent.click(screen.getByTestId('result-share'));
-      expect(downloaded).toBe('hangeul-typing-race.png');
-    });
+    fireEvent.click(await readySave());
 
-    // 내려받은 뒤 링크 공유 팝업이 이어서 뜬다
-    expect(await screen.findByTestId('share-popup')).toBeInTheDocument();
-  });
-
-  it('모바일에서 공유 시트가 닫힌 뒤에도 링크 팝업이 뜬다', async () => {
-    stubFetchWithCard();
-    // 사용자가 시트를 닫은 경우(거부)에도 링크는 공유할 수 있어야 한다
-    const share = vi.fn(async () => {
-      throw new DOMException('abort', 'AbortError');
-    });
-    vi.stubGlobal('navigator', { share, canShare: () => true });
-    open();
-
-    await waitFor(() => {
-      fireEvent.click(screen.getByTestId('result-share'));
-      expect(share).toHaveBeenCalled();
-    });
-    expect(await screen.findByTestId('share-popup')).toBeInTheDocument();
+    expect(downloaded).toBe('hangeul-typing-race.png');
+    // 저장은 저장으로 끝난다 — 링크 팝업은 뜨지 않는다
+    expect(screen.queryByTestId('share-popup')).not.toBeInTheDocument();
   });
 });
