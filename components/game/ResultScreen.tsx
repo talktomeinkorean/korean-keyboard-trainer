@@ -7,7 +7,6 @@ import { ResultCard } from './ResultCard';
 import { SubmitRecordPopup } from './SubmitRecordPopup';
 import { ShareLinkPopup } from './ShareLinkPopup';
 import { PIXEL_BUTTON, PIXEL_BUTTON_BASE } from './pixelButton';
-import { formatRaceTime, rankFor } from '@/lib/game/rank';
 import { encodeResultCode } from '@/lib/game/resultCode';
 
 interface Props {
@@ -37,6 +36,8 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
   // iOS Safari 는 navigator.share 가 사용자 제스처 직후에 불려야 해서, 클릭한 뒤에
   // fetch 를 기다렸다가 부르면 조용히 실패한다. 그래서 화면이 뜰 때 미리 받는다.
   const cardFileRef = useRef<File | null>(null);
+  // 다 받기 전에는 Save 를 잠가둔다 — 눌러도 아무 일이 없으면 고장으로 보인다
+  const [cardReady, setCardReady] = useState(false);
   useEffect(() => {
     let alive = true;
     void (async () => {
@@ -46,9 +47,10 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
         const blob = await res.blob();
         if (alive) {
           cardFileRef.current = new File([blob], 'hangeul-typing-race.png', { type: 'image/png' });
+          setCardReady(true);
         }
       } catch {
-        /* 이미지를 못 받으면 아래에서 링크 공유로 떨어진다 */
+        /* 이미지를 못 받으면 Save 는 잠긴 채로 둔다. Share 는 영향받지 않는다 */
       }
     })();
     return () => {
@@ -57,38 +59,31 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
   }, [code]);
 
   /**
-   * Save & Share — 이미지를 먼저 처리하고, 끝나면 링크 공유 팝업을 띄운다.
+   * Save — 카드 이미지를 기기에 남긴다. 링크는 건드리지 않는다.
    *
-   * 이미지 처리 방식만 환경에 따라 갈린다. 브라우저가 사진 앨범에 직접 저장할 수 없어서,
-   * 모바일에서 사진첩에 넣는 유일한 길이 OS 공유 시트의 "이미지 저장" 이기 때문이다.
-   * 링크 팝업은 어느 환경에서나 똑같다.
+   * 모바일은 OS 공유 시트를 거친다. 브라우저가 사진 앨범에 직접 쓸 수 없어서,
+   * 사진첩에 넣는 유일한 길이 시트의 "이미지 저장" 이기 때문이다. PC 는 곧바로 내려받는다.
    */
-  async function share() {
-    const rank = rankFor(timeMs);
-    const message = `I finished the Hangeul Typing Race in ${formatRaceTime(timeMs)} — ${rank.emoji} ${rank.korean} (${rank.english})!`;
+  async function save() {
     const file = cardFileRef.current;
+    if (!file) return; // 준비 전에는 버튼이 잠겨 있어 여기까지 오지 않는다
 
-    // 1) 모바일 — OS 공유 시트로 이미지를 넘긴다. 여기서 사진첩 저장도, 카톡·인스타 공유도 된다.
-    //    파일과 함께 넘긴 url 은 iOS 에서 버려지는 일이 많아 문구 안에 넣는다.
-    if (file && navigator.canShare?.({ files: [file] })) {
+    if (navigator.canShare?.({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], text: `${message} ${shareUrl()}` });
+        await navigator.share({ files: [file] });
       } catch {
-        /* 사용자가 공유 시트를 닫은 경우 — 링크 팝업은 그대로 띄운다 */
+        /* 사용자가 시트를 닫은 경우 */
       }
-    } else if (file) {
-      // 2) PC — 곧바로 내려받는다
-      const href = URL.createObjectURL(file);
-      const a = document.createElement('a');
-      a.href = href;
-      a.download = file.name;
-      a.click();
-      // 클릭 직후 즉시 해제하면 일부 브라우저에서 다운로드가 끊긴다
-      setTimeout(() => URL.revokeObjectURL(href), 0);
+      return;
     }
 
-    // 3) 이미지를 못 받았어도 링크는 공유할 수 있다 — 팝업은 언제나 띄운다
-    setShowShareLink(true);
+    const href = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = href;
+    a.download = file.name;
+    a.click();
+    // 클릭 직후 즉시 해제하면 일부 브라우저에서 다운로드가 끊긴다
+    setTimeout(() => URL.revokeObjectURL(href), 0);
   }
 
   return (
@@ -120,14 +115,26 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
                 {submitted ? 'Play again for another entry' : 'More entries, more chances to win'}
               </span>
             </button>
-            <button
-              type="button"
-              onClick={share}
-              data-testid="result-share"
-              className={`${PIXEL_BUTTON} ${BUTTON}`}
-            >
-              Save & Share
-            </button>
+            {/* 시안: 한 줄에 둘로 나눠 담는다. Save 는 이미지, Share 는 링크. */}
+            <div className={`flex ${BUTTON} gap-[10px]`}>
+              <button
+                type="button"
+                onClick={save}
+                disabled={!cardReady}
+                data-testid="result-save"
+                className={`${PIXEL_BUTTON} flex-1 disabled:opacity-60 disabled:hover:brightness-100`}
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowShareLink(true)}
+                data-testid="result-share"
+                className={`${PIXEL_BUTTON} flex-1`}
+              >
+                Share
+              </button>
+            </div>
             <button
               type="button"
               onClick={onRetry}
