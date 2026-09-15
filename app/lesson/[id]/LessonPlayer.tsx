@@ -87,7 +87,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   const result = session.isComplete && (
     <PracticeResult
-      category={categoryForStage(lesson.stage)?.title ?? ''}
+      stage={lesson.stage}
       title={lesson.title}
       timeMs={elapsedMs}
       // 레이스와 같은 기준 — 오타를 뺀 자모 수를 분당으로 환산한다
