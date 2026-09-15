@@ -1,13 +1,21 @@
 /* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아트라 최적화 파이프라인이 필요 없다. */
-import { formatRaceTime, goalText, rankFor } from '@/lib/game/rank';
+import { formatRaceTime, goalText, rankAnimalSrc, rankFor } from '@/lib/game/rank';
+import { resultBackgroundSrc } from '@/lib/game/backgrounds';
 
 /**
  * 카드 배경(노란 그라디언트·격자·제목·폴라로이드 테두리·기록 라벨바·흰 박스)은
  * 시안을 2x 로 내보낸 한 장의 이미지다. 아래 좌표들은 이 이미지에서 실측했다.
  */
 const CARD_SRC = '/race/result-card.webp';
-/** 폴라로이드 안에 들어가는 사진. 등급과 무관하게 모든 결과가 같은 사진을 쓴다. */
-const PHOTO_SRC = '/race/result-photo.webp';
+
+/**
+ * 폴라로이드 사진 창 — 배경 이미지의 빈 사각형 자리다.
+ * 안에는 뛴 장소와 등급 캐릭터를 겹쳐 넣는다 (시안 695:7837).
+ * 캐릭터 좌표는 시안(창 224.756x222.959, 캐릭터 75.725x94.656 @ 74.515,115.003)을
+ * 이 창 크기로 줄인 값이다.
+ */
+const PHOTO = { left: 78, top: 75.5, width: 110.5, height: 109.5 };
+const ANIMAL = { left: 36.63, top: 56.48, width: 37.23, height: 46.49 };
 
 // 시안 캔버스 (265x450 + 1px 테두리). 아래 좌표는 모두 이 기준이다.
 const CARD_WIDTH = 267;
@@ -18,6 +26,8 @@ interface Props {
   timeMs: number;
   /** 분당 타수 — lib/game/rank 의 keysPerMinute 로 계산해서 넘긴다 */
   keysPerMin: number;
+  /** 이 판에서 뛴 배경 id. 모르면(공유 링크) 기본 배경으로 그린다. */
+  backgroundId?: string;
 }
 
 /**
@@ -25,7 +35,7 @@ interface Props {
  * 기록만으로 등급·문구를 결정한다.
  * 아래 목표 문구는 흰 글씨라 어두운 배경 위에 놓아야 한다.
  */
-export function ResultCard({ timeMs, keysPerMin }: Props) {
+export function ResultCard({ timeMs, keysPerMin, backgroundId }: Props) {
   const rank = rankFor(timeMs);
 
   return (
@@ -39,13 +49,24 @@ export function ResultCard({ timeMs, keysPerMin }: Props) {
           backgroundSize: '100% 100%',
         }}
       >
-        {/* 폴라로이드 사진 — 배경 이미지의 빈 사각형에 맞춰 실측한 위치 */}
-        <img
-          src={PHOTO_SRC}
-          alt=""
-          aria-hidden
-          className="absolute left-[78px] top-[75.5px] h-[109.5px] w-[110.5px]"
-        />
+        {/* 폴라로이드 사진 — 뛴 장소 위에 등급 캐릭터를 세운다 */}
+        <div className="absolute overflow-hidden" style={PHOTO}>
+          <img
+            src={resultBackgroundSrc(backgroundId)}
+            alt=""
+            aria-hidden
+            data-testid="result-place"
+            className="absolute inset-0 size-full"
+          />
+          <img
+            src={rankAnimalSrc(rank)}
+            alt=""
+            aria-hidden
+            data-testid="result-animal"
+            className="absolute"
+            style={ANIMAL}
+          />
+        </div>
 
         {/* 등급 라벨 — 폴라로이드 아래쪽 흰 여백 */}
         <div
