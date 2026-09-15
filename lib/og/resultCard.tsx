@@ -2,6 +2,8 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { formatRaceTime, rankFor } from '@/lib/game/rank';
+import { RACE_BACKGROUNDS } from '@/lib/game/backgrounds';
+import type { ResultCodeValue } from '@/lib/game/resultCode';
 
 /**
  * 결과 카드를 이미지로 그리는 부분 — OG 이미지(가로 캔버스)와 저장용 카드(세로)가
@@ -25,9 +27,25 @@ async function font(name: string) {
   return readFile(join(process.cwd(), 'assets', name));
 }
 
+/**
+ * 폴라로이드 사진 창과 그 안의 캐릭터 — 앱의 ResultCard 와 같은 값이다.
+ * (시안 695:7837 의 창 224.756x222.959 를 110.5x109.5 로 줄인 좌표)
+ */
+const PHOTO = { left: 78, top: 75.5, width: 110.5, height: 109.5 };
+const ANIMAL = { left: 36.63, top: 56.48, width: 37.23, height: 46.49 };
+
+/** 결과 코드에 실린 배경 id → OG 전용 사본. 모르는 값은 첫 배경으로 떨어진다. */
+function placeFile(id?: string): string {
+  const background = RACE_BACKGROUNDS.find((b) => b.id === id) ?? RACE_BACKGROUNDS[0];
+  return `og/place-${background.id}.png`;
+}
+
 export interface CardAssets {
   card: string;
-  photo: string;
+  /** 뛴 장소 */
+  place: string;
+  /** 등급 캐릭터 */
+  animal: string;
   fonts: {
     name: string;
     data: Buffer;
@@ -36,10 +54,11 @@ export interface CardAssets {
   }[];
 }
 
-export async function loadCardAssets(): Promise<CardAssets> {
-  const [card, photo, dmSans, dmSansBold, dmMono, notoKr, vt323] = await Promise.all([
+export async function loadCardAssets({ timeMs, backgroundId }: ResultCodeValue): Promise<CardAssets> {
+  const [card, place, animal, dmSans, dmSansBold, dmMono, notoKr, vt323] = await Promise.all([
     png('og-result-card.png'),
-    png('og-result-photo.png'),
+    png(placeFile(backgroundId)),
+    png(`og/animal-${rankFor(timeMs).id}.png`),
     font('DMSans-Medium.ttf'),
     font('DMSans-Bold.ttf'),
     font('DMMono-Medium.ttf'),
@@ -49,7 +68,8 @@ export async function loadCardAssets(): Promise<CardAssets> {
 
   return {
     card,
-    photo,
+    place,
+    animal,
     fonts: [
       { name: 'DM Sans', data: dmSans, style: 'normal', weight: 500 },
       { name: 'DM Sans', data: dmSansBold, style: 'normal', weight: 700 },
@@ -87,14 +107,27 @@ export function resultCardElement({ timeMs, keysPerMin, height, assets }: CardPr
         backgroundSize: `${width}px ${height}px`,
       }}
     >
-      {/* 폴라로이드 사진 */}
-      <img
-        src={assets.photo}
-        alt=""
-        width={s(110.5)}
-        height={s(109.5)}
-        style={{ position: 'absolute', left: s(78), top: s(75.5) }}
-      />
+      {/* 폴라로이드 사진 — 뛴 장소 위에 등급 캐릭터를 세운다 */}
+      <div
+        style={{
+          position: 'absolute',
+          display: 'flex',
+          left: s(PHOTO.left),
+          top: s(PHOTO.top),
+          width: s(PHOTO.width),
+          height: s(PHOTO.height),
+          overflow: 'hidden',
+        }}
+      >
+        <img src={assets.place} alt="" width={s(PHOTO.width)} height={s(PHOTO.height)} />
+        <img
+          src={assets.animal}
+          alt=""
+          width={s(ANIMAL.width)}
+          height={s(ANIMAL.height)}
+          style={{ position: 'absolute', left: s(ANIMAL.left), top: s(ANIMAL.top) }}
+        />
+      </div>
 
       {/* 등급 라벨 */}
       <div

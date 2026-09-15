@@ -77,6 +77,14 @@ export const RANKS: Rank[] = [
   },
 ];
 
+/**
+ * 등급별 캐릭터 그림 (120x150). 파일 이름이 RankId 와 1:1 이라 그대로 조합한다 —
+ * 어긋나면 rank.test.ts 가 잡는다.
+ */
+export function rankAnimalSrc(rank: Rank): string {
+  return `/race/${rank.id}.png`;
+}
+
 /** 기록(ms)에 해당하는 등급. 경계값은 '미만'이라 정확히 12초면 말(horse). */
 export function rankFor(timeMs: number): Rank {
   return RANKS.find((r) => r.maxMs === null || timeMs < r.maxMs) ?? RANKS[RANKS.length - 1];

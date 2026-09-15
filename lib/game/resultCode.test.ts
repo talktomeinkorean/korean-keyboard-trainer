@@ -29,3 +29,32 @@ describe('resultCode', () => {
     expect(decodeResultCode('3600000-2000')).toEqual({ timeMs: 3_600_000, keysPerMin: 2000 });
   });
 });
+
+describe('배경 칸', () => {
+  it('배경을 실어 보내고 되읽는다', () => {
+    const code = encodeResultCode({ timeMs: 33_120, keysPerMin: 112, backgroundId: 'uljiro' });
+    expect(code).toBe('33120-112-uljiro');
+    expect(decodeResultCode(code)).toEqual({
+      timeMs: 33_120,
+      keysPerMin: 112,
+      backgroundId: 'uljiro',
+    });
+  });
+
+  it('배경 칸이 없던 예전 링크도 그대로 읽는다', () => {
+    expect(decodeResultCode('33120-112')).toEqual({
+      timeMs: 33_120,
+      keysPerMin: 112,
+      backgroundId: undefined,
+    });
+  });
+
+  it('모르는 배경 id 라도 404 로 만들지 않는다 — 그리는 쪽에서 기본 배경으로 떨어진다', () => {
+    expect(decodeResultCode('33120-112-nowhere')?.backgroundId).toBe('nowhere');
+  });
+
+  it('형식이 어긋나면 여전히 null', () => {
+    expect(decodeResultCode('33120-112-UPPER')).toBeNull();
+    expect(decodeResultCode('33120-112-a-b')).toBeNull();
+  });
+});

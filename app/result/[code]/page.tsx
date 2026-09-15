@@ -32,7 +32,11 @@ export default async function ResultPage({ params }: Props) {
 
   return (
     <main className="flex min-h-screen flex-col items-center gap-[20px] bg-[#36454d] px-4 pt-[50px] pb-[40px]">
-      <ResultCard timeMs={value.timeMs} keysPerMin={value.keysPerMin} />
+      <ResultCard
+        timeMs={value.timeMs}
+        keysPerMin={value.keysPerMin}
+        backgroundId={value.backgroundId}
+      />
       <Link href="/race" className={`${PIXEL_BUTTON} w-[265px] max-w-full`}>
         Try It Yourself
       </Link>

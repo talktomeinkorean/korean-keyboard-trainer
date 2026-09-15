@@ -17,7 +17,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
   if (!value) notFound();
 
   const { timeMs, keysPerMin } = value;
-  const assets = await loadCardAssets();
+  const assets = await loadCardAssets(value);
 
   return new ImageResponse(
     (

@@ -39,3 +39,24 @@ describe('ResultCard', () => {
     expect(screen.getByTestId('result-rank')).toHaveTextContent('🐌 Snail');
   });
 });
+
+describe('ResultCard — 폴라로이드 사진', () => {
+  it('뛴 배경과 같은 장소를 쓴다', () => {
+    render(<ResultCard timeMs={33_120} keysPerMin={112} backgroundId="uljiro" />);
+    expect(screen.getByTestId('result-place')).toHaveAttribute('src', '/race/result-uljiro.png');
+  });
+
+  it('등급에 맞는 캐릭터를 세운다', () => {
+    render(<ResultCard timeMs={33_120} keysPerMin={112} backgroundId="gwanghwamun" />);
+    expect(screen.getByTestId('result-animal')).toHaveAttribute('src', '/race/rabbit.png');
+
+    // 등급이 바뀌면 캐릭터도 바뀐다
+    render(<ResultCard timeMs={9_000} keysPerMin={400} backgroundId="gwanghwamun" />);
+    expect(screen.getAllByTestId('result-animal')[1]).toHaveAttribute('src', '/race/king.png');
+  });
+
+  it('배경을 모르면(공유 링크) 기본 장소로 그린다', () => {
+    render(<ResultCard timeMs={33_120} keysPerMin={112} />);
+    expect(screen.getByTestId('result-place')).toHaveAttribute('src', '/race/result-hanriver.png');
+  });
+});

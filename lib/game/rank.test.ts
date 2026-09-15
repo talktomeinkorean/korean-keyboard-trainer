@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { RANKS, rankFor, nextRank, formatRaceTime, goalText, keysPerMinute } from './rank';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { RANKS, rankFor, nextRank, formatRaceTime, goalText, keysPerMinute, rankAnimalSrc } from './rank';
 
 describe('rankFor', () => {
   it('스펙의 구간대로 등급을 정한다', () => {
@@ -59,5 +61,16 @@ describe('keysPerMinute', () => {
 
   it('기록이 0 이면 0 이다 (0 으로 나누지 않는다)', () => {
     expect(keysPerMinute(50, 0)).toBe(0);
+  });
+});
+
+describe('등급별 캐릭터 그림', () => {
+  it('RankId 마다 같은 이름의 파일이 public/race 에 있다', () => {
+    for (const rank of RANKS) {
+      const src = rankAnimalSrc(rank);
+      expect(src).toBe(`/race/${rank.id}.png`);
+      // 파일 이름 규약에 기대고 있으므로 실제로 있는지까지 본다
+      expect(existsSync(join(process.cwd(), 'public', src))).toBe(true);
+    }
   });
 });

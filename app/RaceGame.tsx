@@ -216,6 +216,7 @@ function RaceRound({
           accuracy={session.accuracy}
           // 오타를 뺀 자모 수가 곧 타수다
           keysPerMin={keysPerMinute(session.keystrokes - session.errorCount, elapsedMs)}
+          backgroundId={background.id}
           onRetry={onRetry}
         />
       )}

@@ -17,20 +17,22 @@ interface Props {
   accuracy: number;
   /** 분당 타수 — lib/game/rank 의 keysPerMinute 로 계산해서 넘긴다 */
   keysPerMin: number;
+  /** 이 판에서 뛴 배경 id — 결과 카드 사진을 같은 장소로 맞춘다 */
+  backgroundId?: string;
   onRetry: () => void;
 }
 
 /** 시안 버튼 폭 (265px) */
 const BUTTON = 'w-[265px] max-w-full';
 
-export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
+export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRetry }: Props) {
   const [showSubmit, setShowSubmit] = useState(false);
   // 이번 기록을 이미 저장했는지 — 한 판에 한 번만 등록되게 한다
   const [submitted, setSubmitted] = useState(false);
   // 이미지 처리가 끝난 뒤 뜨는 링크 공유 팝업
   const [showShareLink, setShowShareLink] = useState(false);
 
-  const code = encodeResultCode({ timeMs, keysPerMin });
+  const code = encodeResultCode({ timeMs, keysPerMin, backgroundId });
   // 이 주소를 열면 결과 카드가 보이고, 링크 미리보기에도 카드 이미지가 뜬다.
   // 렌더 중에는 window 를 읽지 않는다 (서버 렌더와 어긋난다)
   const shareUrl = () => `${window.location.origin}/result/${code}`;
@@ -97,7 +99,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
       <div className="flex min-h-full flex-col">
         {/* 상단 — 뒤의 게임 화면이 블러로 비친다 */}
         <div className="flex shrink-0 flex-col items-center gap-[20px] px-4 pt-[50px] pb-[26px]">
-          <ResultCard timeMs={timeMs} keysPerMin={keysPerMin} />
+          <ResultCard timeMs={timeMs} keysPerMin={keysPerMin} backgroundId={backgroundId} />
 
           <div className="flex flex-col items-center gap-[10px]">
             {/* 저장 후에는 잠기고 문구가 바뀐다. 새 판을 시작하면 화면이 다시
