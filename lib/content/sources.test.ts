@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import practiceTexts from './practiceTexts.json';
 import { sourceLink, TTMIK_STORIES_URL } from './sources';
 
@@ -7,6 +9,7 @@ describe('sourceLink', () => {
     expect(sourceLink('My First 500 Korean Words Book 1')).toEqual({
       label: 'My First 500 Korean Words Book 1',
       href: 'https://store.talktomeinkorean.com/products/my-first-500-korean-words-book-1',
+      cover: '/lessons/book1.png',
     });
     expect(sourceLink('Core Grammar Level 1 Lesson 1')).toEqual({
       label: 'TTMIK Courses - Core Grammar Level 1',
@@ -41,6 +44,18 @@ describe('sourceLink', () => {
       ),
     );
     expect(labels.size).toBe(13);
+  });
+
+  it('책 표지는 Vocabulary 에만 있고, 가리키는 파일이 실제로 있다', () => {
+    const vocabCovers = new Set(practiceTexts.vocabulary.map((row) => sourceLink(row.source ?? '')?.cover));
+    expect([...vocabCovers].sort()).toEqual(['/lessons/book1.png', '/lessons/book2.png']);
+    for (const cover of vocabCovers) {
+      expect(existsSync(join(process.cwd(), 'public', cover!))).toBe(true);
+    }
+    const others = [...practiceTexts.sentence, ...practiceTexts.long_text].filter(
+      (row) => sourceLink(row.source ?? '')?.cover,
+    );
+    expect(others).toEqual([]);
   });
 
   it('규칙에 없는 출처는 null', () => {

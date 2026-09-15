@@ -15,6 +15,8 @@ export interface SourceLink {
   /** 배지에 적는 문구 */
   label: string;
   href: string;
+  /** 배지 왼쪽 교재 표지 (시안에서는 Vocabulary 만 있다) */
+  cover?: string;
 }
 
 const RULES: { pattern: RegExp; link: (n: string) => SourceLink }[] = [
@@ -23,6 +25,7 @@ const RULES: { pattern: RegExp; link: (n: string) => SourceLink }[] = [
     link: (n) => ({
       label: `My First 500 Korean Words Book ${n}`,
       href: `https://store.talktomeinkorean.com/products/my-first-500-korean-words-book-${n}`,
+      cover: `/lessons/book${n}.png`,
     }),
   },
   {

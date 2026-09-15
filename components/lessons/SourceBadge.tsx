@@ -10,6 +10,7 @@ interface Props {
 /**
  * 출처 배지 (시안 I519:13897;423:11708 · 413:10486 · 401:8676) — 이 연습 내용이 어느 교재에서 왔는지.
  * 누르면 새 탭에서 해당 교재·강의 페이지가 열린다. 규칙에 없는 출처면 원문만 링크 없이 보인다.
+ * Vocabulary 는 배지 왼쪽에 교재 표지가 붙는다.
  */
 export function SourceBadge({ source, className = '' }: Props) {
   const link = sourceLink(source);
@@ -30,14 +31,29 @@ export function SourceBadge({ source, className = '' }: Props) {
       </div>
     );
   }
+
+  const linkProps = { href: link.href, target: '_blank', rel: 'noopener noreferrer' } as const;
+  const pressable = 'transition hover:brightness-97 active:translate-y-px';
+
+  // Vocabulary: 배지 왼쪽에 교재 표지 (시안 I519:13897;423:11703). 표지까지 한 링크다.
+  // 표지 에셋은 -15° 기울인 상태로 export 된 3x(121x149) 라 회전은 걸지 않는다.
+  if (link.cover) {
+    return (
+      <a data-testid="source-badge" {...linkProps} className={`flex items-center gap-[10px] ${pressable}`}>
+        <img
+          src={link.cover}
+          alt=""
+          aria-hidden
+          data-testid="source-cover"
+          className="h-[49.384px] w-[40.16px] shrink-0"
+        />
+        <span className={style}>{body}</span>
+      </a>
+    );
+  }
+
   return (
-    <a
-      data-testid="source-badge"
-      href={link.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`${style} transition hover:brightness-97 active:translate-y-px`}
-    >
+    <a data-testid="source-badge" {...linkProps} className={`${style} ${pressable}`}>
       {body}
     </a>
   );
