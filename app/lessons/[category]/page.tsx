@@ -7,6 +7,7 @@ import { PracticeBackground } from '@/components/PracticeBackground';
 import { CATEGORIES, getCategory, lessonsInCategory } from '@/lib/curriculum/categories';
 import { getContentLessons, getContentPool } from '@/lib/content/catalog';
 import { LessonList } from './LessonList';
+import { SourceBadge } from '@/components/lessons/SourceBadge';
 import { RandomPractice } from './RandomPractice';
 
 export function generateStaticParams() {
@@ -58,6 +59,8 @@ export default async function CategoryPage({
   // 항목이 많은 카테고리(Vocabulary 는 101개)까지 그 여백을 두면 첫 화면이
   // 거의 비어 보이므로, 짧은 목록에서만 시안 간격을 쓴다.
   const roomy = lessons.length <= 5;
+  // 긴 글은 지문 전체가 한 교재에서 왔다 — 목록 위에 출처 배지를 한 번 둔다 (시안 250:4244)
+  const listSource = found.dbKind === 'long_text' ? (lessons[0]?.sources?.[0] ?? null) : null;
 
   return (
     // 배경이 밝아서 글자색을 고정한다 — 다크 모드에서 body 색을 물려받으면 안 보인다
@@ -79,7 +82,18 @@ export default async function CategoryPage({
         <span aria-hidden className="size-[32px]" />
       </header>
 
-      <div className={`flex flex-col items-center px-4 pb-[40px] ${roomy ? 'pt-[191px]' : 'pt-[30px]'}`}>
+      {/* 시안: 헤더 바로 아래 배지(폭 280), 배지 아래 69px 에서 목록 시작 */}
+      {listSource && (
+        <div className="flex justify-center px-4">
+          <SourceBadge source={listSource} className="min-w-[280px]" />
+        </div>
+      )}
+
+      <div
+        className={`flex flex-col items-center px-4 pb-[40px] ${
+          listSource ? 'pt-[69px]' : roomy ? 'pt-[191px]' : 'pt-[30px]'
+        }`}
+      >
         {lessons.length === 0 ? (
           <p className="text-[#6b8999]">Coming soon</p>
         ) : (

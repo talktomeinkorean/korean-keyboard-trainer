@@ -26,7 +26,9 @@ export function PracticeNav({ title, backHref, right }: Props) {
       <h1 className="truncate px-[10px] text-center font-dmsans text-[20px] font-bold text-[#36454d]">
         {title}
       </h1>
-      <span className="flex size-[32px] shrink-0 items-center justify-center">{right}</span>
+      {/* 비면 왼쪽 뒤로가기(32px)와 같은 빈 자리라 제목이 가운데 온다. 내용이 있으면 그 크기를 따른다 —
+          시안의 긴 글 헤더도 아이콘(44px)만큼 제목이 왼쪽으로 치우쳐 있다 */}
+      <span className="flex min-h-[32px] min-w-[32px] shrink-0 items-center justify-center">{right}</span>
     </header>
   );
 }

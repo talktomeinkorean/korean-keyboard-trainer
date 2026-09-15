@@ -10,6 +10,7 @@ import { PracticeProgress } from '@/components/lessons/PracticeProgress';
 import { PracticeCard } from '@/components/lessons/PracticeCard';
 import { KeyGuideToggle } from '@/components/game/KeyGuideToggle';
 import { SourceBadge } from '@/components/lessons/SourceBadge';
+import { StoriesAppLink } from '@/components/lessons/StoriesAppLink';
 import { TypingInput } from '@/components/lessons/TypingInput';
 import { splitByJamoProgress } from '@/lib/hangul/jamoGroups';
 import { PracticeResult } from '@/components/PracticeResult';
@@ -108,7 +109,12 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     <main className="flex min-h-screen flex-col items-center text-[#36454d]">
       <PracticeBackground />
       {/* 긴 글은 지문 제목이 곧 화면 제목이다 (시안 519:15870) */}
-      <PracticeNav title={isExtendedStage && isLongText ? lesson.title : navTitle} backHref={backHref} />
+      <PracticeNav
+        title={isExtendedStage && isLongText ? lesson.title : navTitle}
+        backHref={backHref}
+        // 긴 글은 연습 화면에 출처 배지를 두지 않고 헤더에 Stories 앱 아이콘을 둔다 (시안 413:9472)
+        right={isLongText ? <StoriesAppLink /> : undefined}
+      />
 
       <PracticeProgress
         done={session.currentIndex}
@@ -175,7 +181,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               {nextLine}
             </p>
           )}
-          {source && <SourceBadge source={source} />}
+          {/* 긴 글의 출처는 지문 목록 화면에 한 번만 보인다 (시안 250:4244) */}
+          {source && !isLongText && <SourceBadge source={source} />}
         </div>
       </div>
 
