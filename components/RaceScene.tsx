@@ -1,4 +1,8 @@
+import { RACE_BACKGROUNDS } from '@/lib/game/backgrounds';
+
 interface Props {
+  /** 배경 파노라마 — 판마다 무작위로 고른 것 (lib/game/backgrounds) */
+  backgroundSrc?: string;
   /** 완성한 단어 수 */
   progress: number;
   /** 전체 단어 수 */
@@ -9,7 +13,6 @@ interface Props {
   children?: React.ReactNode;
 }
 
-const BG_SRC = '/race/bg_hanriver.webp';
 // 4프레임 시트(512x128, 프레임당 128px). 이 크기를 고른 이유는 아래 CHAR_PX 주석 참고.
 const RUN_SHEET_SRC = '/race/run_sheet.webp';
 /** 캐릭터 렌더 크기(px). 스프라이트 시트는 이 크기 4프레임 가로 배열이다. */
@@ -19,13 +22,19 @@ const RUN_SHEET_SRC = '/race/run_sheet.webp';
 const CHAR_PX = 64;
 
 /**
- * 레이스 배경 씬 — 한강 파노라마(1983×793)를 창(뷰포트)으로 잘라 보여주고,
+ * 레이스 배경 씬 — 서울 파노라마(1983×793, 한강·광화문·을지로 중 하나)를 창(뷰포트)으로 잘라 보여주고,
  * 단어를 완성할 때마다 배경을 가로로 밀어 전진하는 느낌을 준다.
  *
  * backgroundPosition 을 % 로 다루면 실제 렌더 크기를 재지 않아도
  * 0% = 장면 시작, 100% = 장면 끝(결승선)이 되어 반응형에서 그대로 동작한다.
  */
-export function RaceScene({ progress, total, running = false, children }: Props) {
+export function RaceScene({
+  backgroundSrc = RACE_BACKGROUNDS[0].src,
+  progress,
+  total,
+  running = false,
+  children,
+}: Props) {
   const ratio = total > 0 ? Math.min(Math.max(progress / total, 0), 1) : 0;
   const positionX = `${ratio * 100}%`;
 
@@ -40,7 +49,7 @@ export function RaceScene({ progress, total, running = false, children }: Props)
         data-testid="race-scene-bg"
         className="absolute inset-0 transition-[background-position] duration-500 ease-out motion-reduce:transition-none"
         style={{
-          backgroundImage: `url(${BG_SRC})`,
+          backgroundImage: `url(${backgroundSrc})`,
           backgroundSize: 'auto 100%',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: `${positionX} bottom`,

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { pickRaceWords } from '@/lib/game/words';
+import { pickRaceBackground, type RaceBackground } from '@/lib/game/backgrounds';
 import { keysPerMinute } from '@/lib/game/rank';
 import { playSfx, startBgm, pauseBgm, stopBgm } from '@/lib/audio/sounds';
 import { loadMuted, saveMuted } from '@/lib/audio/mutePreference';
@@ -37,7 +38,15 @@ async function loadWords(): Promise<RaceWord[]> {
   return pickRaceWords(RACE_WORD_COUNT).map((korean) => ({ korean, english: null }));
 }
 
-function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void }) {
+function RaceRound({
+  words,
+  background,
+  onRetry,
+}: {
+  words: RaceWord[];
+  background: RaceBackground;
+  onRetry: () => void;
+}) {
   const session = useLessonSession({ items: words.map((w) => w.korean) });
   // Key Guide — 기본 켜짐
   const [keyGuide, setKeyGuide] = useState(true);
@@ -157,6 +166,7 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
     <main className="flex min-h-screen flex-col items-center gap-4">
       {/* 시안: 상단 바와 단어 카드가 배경 씬 안에 겹쳐 들어간다 */}
       <RaceScene
+        backgroundSrc={background.src}
         progress={session.currentIndex + (session.isComplete ? 1 : 0)}
         total={words.length}
         running={isPlaying}
@@ -214,21 +224,26 @@ function RaceRound({ words, onRetry }: { words: RaceWord[]; onRetry: () => void 
 }
 
 export function RaceGame() {
-  const [words, setWords] = useState<RaceWord[] | null>(null);
+  // 한 판 = 단어 묶음 + 배경. Try Again 도 새 판이라 둘 다 새로 뽑는다.
+  const [round, setRound] = useState<{ words: RaceWord[]; background: RaceBackground } | null>(null);
 
   // 랜덤 선택은 hydration 불일치를 피해 클라이언트에서 실행
-  useEffect(() => {
-    void loadWords().then(setWords);
+  const startRound = useCallback(() => {
+    void loadWords().then((words) => setRound({ words, background: pickRaceBackground() }));
   }, []);
+  useEffect(() => {
+    startRound();
+  }, [startRound]);
 
-  if (!words) return <main className="min-h-screen" />;
+  if (!round) return <main className="min-h-screen" />;
 
-  // words 배열을 key 로 사용 — Retry 시 세션 전체 리마운트
+  // 단어·배경을 key 로 사용 — Retry 시 세션 전체 리마운트
   return (
     <RaceRound
-      key={words.map((w) => w.korean).join(',')}
-      words={words}
-      onRetry={() => void loadWords().then(setWords)}
+      key={`${round.background.id}:${round.words.map((w) => w.korean).join(',')}`}
+      words={round.words}
+      background={round.background}
+      onRetry={startRound}
     />
   );
 }
