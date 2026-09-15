@@ -24,7 +24,7 @@ export async function GET(_request: Request, ctx: RouteContext<'/result/[code]/c
   }
 
   const { timeMs, keysPerMin } = value;
-  const assets = await loadCardAssets();
+  const assets = await loadCardAssets(value);
 
   return new ImageResponse(
     (

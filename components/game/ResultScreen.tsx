@@ -32,7 +32,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
   // 이미지 처리가 끝난 뒤 뜨는 링크 공유 팝업
   const [showShareLink, setShowShareLink] = useState(false);
 
-  const code = encodeResultCode({ timeMs, keysPerMin });
+  const code = encodeResultCode({ timeMs, keysPerMin, backgroundId });
   // 이 주소를 열면 결과 카드가 보이고, 링크 미리보기에도 카드 이미지가 뜬다.
   // 렌더 중에는 window 를 읽지 않는다 (서버 렌더와 어긋난다)
   const shareUrl = () => `${window.location.origin}/result/${code}`;
