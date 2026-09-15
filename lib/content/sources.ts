@@ -49,3 +49,31 @@ export function sourceLink(source: string): SourceLink | null {
   }
   return null;
 }
+
+/**
+ * 연습 결과 화면의 보라 버튼 — 방금 친 내용을 제대로 배우러 가는 링크 (시안 1211:8309 · 1211:8305 · 1171:7359).
+ * Basics 는 버튼이 없다. 문구는 시안의 줄바꿈 그대로, padLeft 는 시안이 변형마다 준 왼쪽 여백이다.
+ */
+export interface ResultLink {
+  lines: [string, string];
+  href: string;
+  padLeft: number;
+}
+
+export const RESULT_LINKS: Partial<Record<'word' | 'sentence' | 'long_text', ResultLink>> = {
+  word: {
+    lines: ['See how these', 'words are used'],
+    href: 'https://store.talktomeinkorean.com/products/my-first-500-korean-words-book-1-book-2',
+    padLeft: 54,
+  },
+  sentence: {
+    lines: ['Learn the grammar', 'in these sentences'],
+    href: 'https://courses.talktomeinkorean.com/?utm_source=website&utm_medium=landing&utm_campaign=241129_redirectionbutton',
+    padLeft: 33,
+  },
+  long_text: {
+    lines: ['Listen, quiz, and', 'review this story'],
+    href: TTMIK_STORIES_URL,
+    padLeft: 37,
+  },
+};
