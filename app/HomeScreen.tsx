@@ -45,18 +45,20 @@ function Hero() {
         className="absolute left-[65.26px] top-[486px] h-[22px] w-[262.49px]"
       />
       {/* 선물·게임패드 — Join Now 버튼 모서리에 걸친다. 버튼 위에 그려지므로 클릭을 가로채지 않게 한다.
-          좌표는 시안 프레임(1220:25125, 46.5·486) 기준. 그룹은 좌표계를 만들지 않아 그룹 오프셋은 더하지 않는다. */}
+          좌표: 시안 프레임(1220:25125) 46.5·486 + 그룹(1220:25167) 0·31 + 그룹 안 위치.
+          회전된 아이콘이라 get_metadata 의 x/y 는 회전 전 값이 섞여 틀린다 — get_design_context 의
+          렌더 위치(좌 5.14·0, 우 257.55·59.89)를 쓴다. */}
       <img
         src="/home/icon-gift-left.svg"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute left-[51.64px] top-[522.7px] size-[38px]"
+        className="pointer-events-none absolute left-[51.64px] top-[517px] size-[38px]"
       />
       <img
         src="/home/icon-gift-right.svg"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute left-[310.85px] top-[576.89px] h-[33.88px] w-[38.52px]"
+        className="pointer-events-none absolute left-[304.05px] top-[576.89px] h-[33.88px] w-[38.52px]"
       />
 
       <p className="absolute left-1/2 top-[726.7px] -translate-x-1/2 whitespace-nowrap text-center font-silkscreen text-[40px] leading-[1.3] tracking-[-4px] text-[#36454d]">
