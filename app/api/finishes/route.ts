@@ -9,35 +9,9 @@
  * 주의: 인증이 없어 반복 호출로 숫자를 부풀릴 수 있다. 표시용 집계값이라 그대로
  * 두기로 했으니, 정확도가 필요한 곳(추첨·순위)에는 이 값을 쓰지 말 것.
  */
-import { revalidateTag, unstable_cache } from 'next/cache';
+import { revalidateTag } from 'next/cache';
 import { getServiceClient } from '@/lib/supabase/server';
-
-interface FinishStats {
-  /** 완주 횟수 — 행 수 */
-  finishes: number;
-  /** 참여자 수 — 서로 다른 session_id 수 */
-  participants: number;
-}
-
-async function fetchFinishStats(): Promise<FinishStats> {
-  const supabase = getServiceClient();
-  if (!supabase) throw new Error('not configured');
-  const { data, error } = await supabase
-    .from('race_finish_stats')
-    .select('finishes, participants')
-    .single<FinishStats>();
-  if (error || !data) throw new Error(error?.message ?? 'no stats');
-  return data;
-}
-
-// 60초 캐시 — 리더보드와 같은 이유(free 티어 egress)로 조회를 분당 1회 수준으로 묶는다.
-// 주의: 미설정(503) 판단은 캐시 밖에서 한다. 캐시 안에서 판단하면 환경 변수를
-// 넣은 뒤에도 최대 60초간 미설정 응답이 캐시로 남는다.
-// 키에 v2: 숫자 하나만 담던 시절의 캐시가 남아 있어도 섞이지 않게 한다.
-const getCachedFinishStats = unstable_cache(fetchFinishStats, ['race-finishes-v2'], {
-  revalidate: 60,
-  tags: ['race-finishes'],
-});
+import { getCachedFinishStats } from '@/lib/finishes/stats';
 
 /**
  * 익명 세션 ID 추출. 형식이 어긋나면 null 로 두고 그냥 쌓는다 —

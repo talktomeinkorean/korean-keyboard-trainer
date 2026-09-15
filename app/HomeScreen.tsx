@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- 시안 그대로의 고정 px 배경 아트라 최적화 파이프라인이 필요 없다. */
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 // Figma "Home" (node 1220:24828) 을 2x 로 export 한 배경 아트.
 // 이벤트 블록(타이틀·Join Now·See prizes)과 참여인원 숫자는 이 이미지에서 빠져 있어
@@ -10,11 +11,14 @@ const HOME_ART = '/home/Home.webp';
 const CANVAS_WIDTH = 393;
 const HERO_HEIGHT = 832.158;
 
-// 시안의 "Runners so far" 수치. 실제 참가자 수를 붙이기 전까지의 표시값.
-const RUNNER_COUNT = '123,456';
+
+/** "Runners so far" 숫자. 집계를 못 읽었으면 가짜 숫자 대신 "-" 를 보인다. */
+function formatRunnerCount(count: number | null): string {
+  return count === null ? '-' : count.toLocaleString('en-US');
+}
 
 /** 시안 배경 위에 얹는 인터랙티브 영역. */
-function Hero() {
+function Hero({ runnerCount }: { runnerCount: number | null }) {
   return (
     <section className="relative mx-auto" style={{ width: CANVAS_WIDTH, height: HERO_HEIGHT }}>
       {/* 헤드라인은 배경 아트에 그려져 있어 문서 구조용으로만 남긴다. */}
@@ -33,7 +37,15 @@ function Hero() {
           className="flex items-center gap-[9px] px-[2px] pb-[2px] font-dmsans text-[15px] font-semibold leading-[1.1] text-black opacity-60"
         >
           See prizes &amp; rules
-          <PixelArrowDown className="size-[11px] shrink-0" />
+          {/* 시안 박스는 7.165x10.975 이고 선 굵기만큼 에셋이 좌우로 0.53px 삐져나온다 */}
+          <span className="relative h-[10.975px] w-[7.165px] shrink-0">
+            <img
+              src="/home/arrow-down.svg"
+              alt=""
+              aria-hidden
+              className="absolute left-[-0.53px] top-0 h-[13px] w-[9px] max-w-none"
+            />
+          </span>
         </a>
       </div>
 
@@ -62,7 +74,7 @@ function Hero() {
       />
 
       <p className="absolute left-1/2 top-[726.7px] -translate-x-1/2 whitespace-nowrap text-center font-silkscreen text-[40px] leading-[1.3] tracking-[-4px] text-[#36454d]">
-        {RUNNER_COUNT}
+        {formatRunnerCount(runnerCount)}
       </p>
     </section>
   );
@@ -103,77 +115,111 @@ function PixelArrowDown({ className }: { className?: string }) {
   );
 }
 
-const FAQ = [
+/** 강조색 — 시안에서 날짜·당첨 조건 등에 쓰는 보라 두 가지 */
+const PURPLE = 'text-[#8166ff]';
+const PURPLE_SOFT = 'text-[#8d78f1]';
+
+/** 목록의 상품명 — 굵게 밑줄 */
+function Product({ children }: { children: string }) {
+  return <strong className="font-bold underline [text-decoration-thickness:10%]">{children}</strong>;
+}
+
+const FAQ: { question: string; cardGap: string; answer: ReactNode }[] = [
   {
     question: 'What can I win?',
+    cardGap: 'gap-[8px]',
     answer: (
       <>
-        <p className="text-[#8166ff]">Pick one, worth $100</p>
-        <ul className="list-disc ps-[21px]">
-          <li>Korean Bootcamp for Beginners (6 weeks)</li>
-          <li>TTMIK Courses (6-month Subscription)</li>
-          <li>TTMIK Stories (6-month Subscription)</li>
-          <li>Seyo: Learn &amp; Speak Korean (6-month Subscription)</li>
+        <p className={`leading-[1.5] ${PURPLE}`}>Choose one prize, worth up to $129</p>
+        <ul className="list-disc leading-[1.5]">
+          <li className="ms-[21px]">
+            Korean <Product>Bootcamp</Product> for Beginners (6 weeks)
+          </li>
+          <li className="ms-[21px]">
+            TTMIK <Product>Courses</Product> (6-month Subscription)
+          </li>
+          <li className="ms-[21px]">
+            TTMIK <Product>Stories</Product> (6-month Subscription)
+          </li>
+          <li className="ms-[21px]">
+            <Product>Seyo</Product> (6-month Subscription)
+          </li>
         </ul>
       </>
     ),
   },
   {
     question: "I'm slow. Can I still win?",
+    cardGap: 'gap-[8px]',
     answer: (
-      <p>
-        Yes! It&apos;s not about being fast.
-        <br />
-        <br />
-        We pick <span className="text-[#8d78f1]">2 winners</span> at random from{' '}
-        <span className="text-[#8d78f1]">every rank</span>! (달팽이 🐌 to 타자왕 👑)
-        <br />
-        <br />
-        Your time decides your rank, not your chance of winning 😉
-      </p>
+      <>
+        <p className="leading-[1.3]">Yes! It&apos;s not about being fast.</p>
+        <p className="leading-[1.3]">
+          We pick <span className={PURPLE_SOFT}>2 winners</span> at random from{' '}
+          <span className={PURPLE_SOFT}>every rank</span>! (달팽이 🐌 to 타자왕 👑)
+        </p>
+        <p className="leading-[1.3]">Your time decides your rank, not your chance of winning 😉</p>
+      </>
     ),
   },
   {
     question: 'How do I enter?',
+    cardGap: 'gap-[12px]',
     answer: (
       <>
-        <p className="text-[#8166ff]">Oct 1 – Oct 11, 2026 (11:59 PM KST)</p>
-        <p>1. Finish a race</p>
-        <p>2. Tap &quot;Submit This Record&quot;</p>
-        <p>3. Leave your name and email</p>
-        <br />
-        <p>Each record you save is one entry in the draw for that rank so play as many times as you like!</p>
+        <div className="leading-[1.3]">
+          <p>1. Finish a race</p>
+          <p>2. Tap &quot;Submit This Record&quot;</p>
+          <p>3. Leave your name and email</p>
+        </div>
+        <p className="leading-[1.3]">
+          Each record you save is one entry in the draw for that rank so play as many times as you like!
+        </p>
+        <p className={`leading-[1.3] ${PURPLE}`}>Oct 1 – Oct 11, 2026 (11:59 PM KST)</p>
       </>
     ),
   },
   {
     question: 'How do I know if I won?',
+    cardGap: 'gap-[8px]',
     answer: (
-      <p>
+      <p className="leading-[1.3]">
         We&apos;ll email every winner directly, with a short form to choose their prize 📬
         <br />
-        <span className="text-[#8166ff]">(Winners announced Oct 16, 2026)</span>
+        <span className={PURPLE}>(Winners announced Oct 16, 2026)</span>
       </p>
     ),
   },
 ];
 
-/** 하단 Q&A — 시안은 전부 펼친 상태. details 로 접고 펼 수 있게 한다. */
+/**
+ * 하단 Q&A — 시안은 전부 펼친 상태(1220:25353). details 로 접고 펼 수 있게 한다.
+ * 구분선은 details 밖에 둔다 — summary 가 details 의 첫 자식이어야 기본 "Details" 요약이 안 생긴다.
+ */
 function Faq() {
   return (
-      <div className="flex flex-col gap-[22px]">
-        {FAQ.map(({ question, answer }) => (
-          <details key={question} open className="group border-t border-white/30 pt-[12px]">
+    <div className="flex flex-col gap-[22px]">
+      {FAQ.map(({ question, cardGap, answer }) => (
+        <div key={question} className="flex flex-col gap-[12px]">
+          {/* 시안: 흰색 0.5px 점선(2px 선 · 2px 틈). 선은 자리를 차지하지 않고 위로 그려진다 —
+              높이를 주면 네 줄에서 2px 가 밀린다 */}
+          <div aria-hidden className="relative h-0 w-full">
+            <div className="absolute inset-x-0 -top-[0.5px] h-[0.5px] bg-[repeating-linear-gradient(90deg,#fff_0_2px,transparent_2px_4px)]" />
+          </div>
+          <details open className="group">
             <summary className="flex cursor-pointer list-none items-center gap-[10px] [&::-webkit-details-marker]:hidden">
               <PixelArrowDown className="size-[20px] shrink-0 -rotate-90 text-[#8ceb97] transition-transform group-open:rotate-0" />
               <span className="font-dmsans text-[15px] font-bold leading-[1.5] text-white">{question}</span>
             </summary>
-            <div className="mt-[12px] rounded-[10px] bg-white p-[20px] font-dmsans text-[14px] leading-[1.5] text-black">
+            <div
+              className={`mt-[12px] flex flex-col ${cardGap} rounded-[10px] bg-white p-[20px] font-dmsans text-[14px] text-black`}
+            >
               {answer}
             </div>
           </details>
-        ))}
-      </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -260,7 +306,7 @@ function PrizeSection() {
   );
 }
 
-export function HomeScreen() {
+export function HomeScreen({ runnerCount }: { runnerCount: number | null }) {
   return (
     <main className="relative flex-1 overflow-x-clip bg-[#36454d]">
       {/* 캔버스보다 넓은 화면에서 좌우가 비지 않도록 하늘 그라디언트를 깔아둔다. */}
@@ -277,7 +323,7 @@ export function HomeScreen() {
         className="absolute left-1/2 top-0 max-w-none -translate-x-1/2"
         style={{ width: CANVAS_WIDTH }}
       />
-      <Hero />
+      <Hero runnerCount={runnerCount} />
       <PrizeSection />
     </main>
   );
