@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { CATEGORIES } from '@/lib/curriculum/categories';
 import { pageMetadata } from '@/lib/seo';
+import { TtmikFooter } from '@/components/event/TtmikFooter';
 
 export const metadata = pageMetadata({
   title: 'Korean Typing Practice — Hangeul Keyboard Lessons',
@@ -38,7 +39,7 @@ export default function LessonsPage() {
         하기 위해서다 — 고정 px 이면 393px 보다 좁은 화면에서 간격이 틀어진다.
       */}
       <div
-        className="relative flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-origin-content bg-no-repeat pt-[15%]"
+        className="relative flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-origin-content bg-no-repeat pt-[15%] pb-[130px]"
         style={{ backgroundImage: `url(${BG_SRC})`, backgroundSize: '100% auto' }}
       >
         {/* 이벤트 배너 — 배경 위에 겹쳐 띄운다. 누르면 홈(레이스)으로 */}
@@ -76,6 +77,15 @@ export default function LessonsPage() {
             );
           })}
         </nav>
+      </div>
+
+      {/* TTMIK 푸터 (시안 294:18025) — 밝은 영역이 끝나고 55px 아래에서 시작, 하단 40px.
+          시안은 마지막 버튼 아래 130px 에서 어두운 영역이 시작한다 (위 pb). 배경 아트 하단은
+          고른 연보라 격자라 어디서 잘려도 어색하지 않다. */}
+      <div className="bg-[#36454d] px-4 pt-[55px] pb-[40px]">
+        <div className="mx-auto w-[350px] max-w-full">
+          <TtmikFooter />
+        </div>
       </div>
     </main>
   );

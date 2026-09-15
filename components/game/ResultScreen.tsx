@@ -6,6 +6,9 @@ import Link from 'next/link';
 import { ResultCard } from './ResultCard';
 import { SubmitRecordPopup } from './SubmitRecordPopup';
 import { ShareLinkPopup } from './ShareLinkPopup';
+import { PrizeDrawHeading } from '@/components/event/PrizeDrawHeading';
+import { Faq } from '@/components/event/Faq';
+import { TtmikFooter } from '@/components/event/TtmikFooter';
 import { PIXEL_BUTTON, PIXEL_BUTTON_BASE } from './pixelButton';
 import { encodeResultCode } from '@/lib/game/resultCode';
 
@@ -146,8 +149,8 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
           </div>
         </div>
 
-        {/* 하단 — 타자 연습 유도. 화면이 남으면 끝까지 채운다 */}
-        <div className="flex min-h-[460px] flex-1 flex-col items-center gap-[10px] bg-[#36454d] px-4 pt-[21px] pb-[40px]">
+        {/* 하단 — 타자 연습 유도, 이벤트 안내, TTMIK 푸터 (시안 602:6543). 화면이 남으면 끝까지 채운다 */}
+        <div className="flex flex-1 flex-col items-center gap-[10px] bg-[#36454d] px-4 pt-[21px] pb-[40px]">
           <p className="text-center font-dmsans text-[14px] font-bold text-white">
             Want to build <span className="text-[#ab99ff]">real typing skills</span>?
           </p>
@@ -164,6 +167,16 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, onRetry }: Props) {
               className="h-[11px] w-[16.5px]"
             />
           </Link>
+
+          {/* 시안: Practice Typing 아래 65.68px (부모 gap 10 + 55.68). 결과 화면은 Q&A 를 접어 두고
+              트로피를 홈보다 18% 크게 쓴다 */}
+          <div className="mt-[55.68px] flex w-[350px] max-w-full flex-col gap-[60px]">
+            <div className="flex flex-col gap-[40px]">
+              <PrizeDrawHeading trophyScale={33.049 / 27.972} />
+              <Faq defaultOpen={false} />
+            </div>
+            <TtmikFooter />
+          </div>
         </div>
       </div>
 
