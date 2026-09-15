@@ -37,6 +37,28 @@ function Hero() {
         </a>
       </div>
 
+      {/* 이벤트 타이틀 — 픽셀 글자라 에셋으로 넣는다. 40% 검정이라 뒤의 민트가 비쳐 짙은 초록이 된다.
+          (파일 속 mix-blend-mode: plus-darker 는 Safari 전용이지만 검정에는 효과가 없어 브라우저마다 같다) */}
+      <img
+        src="/home/prize-title.svg"
+        alt="Hangeul Day Prize Draw"
+        className="absolute left-[65.26px] top-[486px] h-[22px] w-[262.49px]"
+      />
+      {/* 선물·게임패드 — Join Now 버튼 모서리에 걸친다. 버튼 위에 그려지므로 클릭을 가로채지 않게 한다.
+          좌표는 시안 프레임(1220:25125, 46.5·486) 기준. 그룹은 좌표계를 만들지 않아 그룹 오프셋은 더하지 않는다. */}
+      <img
+        src="/home/icon-gift-left.svg"
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute left-[51.64px] top-[522.7px] size-[38px]"
+      />
+      <img
+        src="/home/icon-gift-right.svg"
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute left-[310.85px] top-[576.89px] h-[33.88px] w-[38.52px]"
+      />
+
       <p className="absolute left-1/2 top-[726.7px] -translate-x-1/2 whitespace-nowrap text-center font-silkscreen text-[40px] leading-[1.3] tracking-[-4px] text-[#36454d]">
         {RUNNER_COUNT}
       </p>
@@ -44,16 +66,28 @@ function Hero() {
   );
 }
 
-/** 이벤트 안내 — Q&A 위에 놓이는 제목과 기간. */
+/** 이벤트 안내 — Q&A 위에 놓이는 트로피와 제목·기간 (시안 1220:25047). */
 function PrizeDrawHeading() {
   return (
     <div id="prize-draw" className="flex scroll-mt-4 flex-col items-center gap-[20px] text-center">
-      <p className="font-dmsans text-[24.85px] font-extrabold leading-[1.5] text-white">
-        Hangeul Day Prize Draw
-      </p>
-      <p className="font-dmsans text-[22px] font-medium leading-[1.5] text-[#f9f064]">
-        Oct 1 – Oct 11, 2026
-      </p>
+      {/* 레이아웃은 시안의 트로피 박스(27.97x25.18)로 잡고, 흰 바깥 테두리(3.47px)가 포함된
+          에셋은 그만큼 바깥으로 삐져나오게 둔다 — 그래야 아래 글자와의 간격 20px 가 시안과 맞는다. */}
+      <div className="relative h-[25.175px] w-[27.972px] shrink-0">
+        <img
+          src="/home/icon-trophy.svg"
+          alt=""
+          aria-hidden
+          className="absolute left-[-3.467px] top-[-3.467px] h-[33px] w-[35px] max-w-none"
+        />
+      </div>
+      <div>
+        <p className="font-dmsans text-[24.85px] font-extrabold leading-[1.5] text-white">
+          Hangeul Day Prize Draw
+        </p>
+        <p className="font-dmsans text-[22px] font-medium leading-[1.5] text-[#f9f064]">
+          Oct 1 – Oct 11, 2026
+        </p>
+      </div>
     </div>
   );
 }
@@ -141,13 +175,84 @@ function Faq() {
   );
 }
 
-/** 히어로 아래 어두운 영역 — 이벤트 제목과 Q&A. */
+/** 푸터의 TTMIK 앱 목록 (시안 1277:13632). 링크는 시안에 걸린 주소 그대로. */
+const TTMIK_APPS = [
+  {
+    name: 'TTMIK Courses',
+    tagline: 'Turn Hangeul into real Korean skills.',
+    icon: '/home/icons/courses.png',
+    href: 'https://ttmik.me/4yub10b',
+  },
+  {
+    name: 'TTMIK Books',
+    tagline: 'Build your Korean, one page at a time.',
+    icon: '/home/icons/books.png',
+    href: 'https://ttmik.me/4xRD4H3',
+  },
+  {
+    name: 'TTMIK Stories',
+    tagline: 'Read, listen, and grow naturally.',
+    icon: '/home/icons/stories.png',
+    href: 'https://ttmikstories.onelink.me/Mj4f/fu8e7afk',
+  },
+  {
+    name: 'Seyo',
+    tagline: 'Practice speaking Korean.',
+    icon: '/home/icons/seyo.png',
+    href: 'https://seyo.onelink.me/xicV/rjuv9u7d',
+  },
+];
+
+/** 하단 TTMIK 푸터 — 로고, 앱 목록, 저작권 (시안 1277:13618). */
+function Footer() {
+  return (
+    <footer className="flex flex-col items-center gap-[30px]">
+      <div className="flex w-full flex-col items-center gap-[20px]">
+        <img src="/home/ttmik-logo.svg" alt="Talk To Me In Korean" className="h-[34px] w-[68px]" />
+        <p className="text-center font-dmsans text-[20px] font-bold leading-[1.5] tracking-[-0.4px] text-[#8eb6cc]">
+          Keep the momentum going
+        </p>
+      </div>
+
+      <ul className="flex w-full flex-col gap-[20px]">
+        {TTMIK_APPS.map((app) => (
+          <li key={app.name}>
+            <a
+              href={app.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-[16px]"
+            >
+              <img src={app.icon} alt="" aria-hidden className="size-[44.896px] shrink-0" />
+              <span className="flex flex-col font-dmsans leading-[1.6]">
+                <span className="text-[17px] font-bold text-white">{app.name}</span>
+                <span className="-mt-[2px] text-[14px] font-medium text-[#8eb6cc]">{app.tagline}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <div className="flex w-full flex-col gap-[10px]">
+        <hr className="border-t-[0.5px] border-[#8eb6cc]" />
+        <p className="text-center font-dmmono text-[11px] font-medium leading-[1.5] text-white">
+          © 2026 Talk To Me In Korean. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  );
+}
+
+/** 히어로 아래 어두운 영역 — 이벤트 제목, Q&A, 푸터. */
 function PrizeSection() {
   return (
-    <section className="relative pb-[107.5px] pt-[72.88px]">
-      <div className="mx-auto flex w-[350px] max-w-[calc(100%-32px)] flex-col gap-[40px]">
-        <PrizeDrawHeading />
-        <Faq />
+    <section className="relative pb-[30px] pt-[72.88px]">
+      <div className="mx-auto flex w-[350px] max-w-[calc(100%-32px)] flex-col gap-[60px]">
+        <div className="flex flex-col gap-[40px]">
+          <PrizeDrawHeading />
+          <Faq />
+        </div>
+        <Footer />
       </div>
     </section>
   );
