@@ -10,12 +10,32 @@ describe('Keyboard', () => {
     expect(screen.getByTestId('kbd-key-Shift')).toBeInTheDocument();
   });
 
-  it('확장 레이아웃: 숫자열 10 + 따옴표/물음표 키가 추가된다', () => {
+  it('확장 레이아웃: 숫자열 10 + 세미콜론/따옴표/물음표 키가 추가된다', () => {
     const { container } = render(<Keyboard nextCode={null} layout="extended" />);
-    expect(container.querySelectorAll('[data-kbd-key]')).toHaveLength(42);
+    expect(container.querySelectorAll('[data-kbd-key]')).toHaveLength(43);
     expect(screen.getByTestId('kbd-key-Digit1')).toBeInTheDocument();
+    expect(screen.getByTestId('kbd-key-Semicolon')).toBeInTheDocument();
     expect(screen.getByTestId('kbd-key-Quote')).toBeInTheDocument();
     expect(screen.getByTestId('kbd-key-Slash')).toBeInTheDocument();
+  });
+
+  it('시안 키캡 표기: 숫자는 1 에만 !, 문장부호는 윗글자를 크게 적는다 (1171:9048)', () => {
+    render(<Keyboard nextCode={null} layout="extended" />);
+    expect(screen.getByTestId('kbd-key-Digit1')).toHaveTextContent('1!');
+    // 나머지 숫자키는 아랫글자가 없다 — 지금까지는 숫자를 한 번 더 적었다
+    expect(screen.getByTestId('kbd-key-Digit2')).toHaveTextContent(/^2$/);
+    expect(screen.getByTestId('kbd-key-Semicolon')).toHaveTextContent(':;');
+    expect(screen.getByTestId('kbd-key-Quote')).toHaveTextContent('"\'');
+    expect(screen.getByTestId('kbd-key-Slash')).toHaveTextContent(/^\?$/);
+  });
+
+  it('키 폭을 키에 직접 적는다 — 자모 34px, 문장 30px', () => {
+    // CSS 변수를 거치면 그 변수가 비었을 때 키가 글자 폭으로 쪼그라든다
+    const { rerender } = render(<Keyboard nextCode={null} />);
+    expect(screen.getByTestId('kbd-key-KeyQ').className).toContain('w-[min(34px,');
+
+    rerender(<Keyboard nextCode={null} layout="extended" />);
+    expect(screen.getByTestId('kbd-key-KeyQ').className).toContain('w-[min(30px,');
   });
 
   it('nextCode 키에 강조 표시를 한다', () => {

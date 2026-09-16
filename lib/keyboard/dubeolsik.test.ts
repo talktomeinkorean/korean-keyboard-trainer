@@ -2,13 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { DUBEOLSIK, keyByCode, keyByJamo, keyForChar } from './dubeolsik';
 
 describe('DUBEOLSIK keymap', () => {
-  it('자음 14, 모음 12, 숫자 10, 문장부호 4 키를 매핑한다', () => {
+  it('자음 14, 모음 12, 숫자 10, 문장부호 5 키를 매핑한다', () => {
     const count = (t: string) => DUBEOLSIK.filter((k) => k.type === t).length;
     expect(count('consonant')).toBe(14);
     expect(count('vowel')).toBe(12);
     expect(count('digit')).toBe(10);
-    expect(count('punct')).toBe(4);
-    expect(DUBEOLSIK).toHaveLength(40);
+    expect(count('punct')).toBe(5);
+    expect(DUBEOLSIK).toHaveLength(41);
   });
 
   it('마침표/쉼표 키를 매핑한다 (문장 콘텐츠용)', () => {
@@ -54,6 +54,8 @@ describe('DUBEOLSIK keymap', () => {
     expect(keyByCode('Quote')?.jamo).toBe("'");
     expect(keyByCode('Quote')?.shift).toBe('"');
     expect(keyByCode('Slash')?.shift).toBe('?');
+    expect(keyByCode('Semicolon')?.jamo).toBe(';');
+    expect(keyByCode('Semicolon')?.shift).toBe(':');
   });
 
   it('keyForChar 로 기본/shift 문자를 역조회한다', () => {

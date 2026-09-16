@@ -17,7 +17,7 @@ export function KeyGuideToggle({ on, onToggle }: Props) {
           className="size-[19px] rotate-30"
           style={{ imageRendering: 'pixelated' }}
         />
-        <span className="text-[12px] font-bold text-[#36454d]">Key Guide</span>
+        <span className="font-dmsans text-[12px] font-bold text-[#36454d]">Key Guide</span>
       </span>
 
       <button
@@ -39,7 +39,7 @@ export function KeyGuideToggle({ on, onToggle }: Props) {
         />
         {/* 라벨은 손잡이 반대편에 — 시안 좌표(ON 11.5px / OFF 30.5px 중심) */}
         <span
-          className={`absolute top-[4px] -translate-x-1/2 text-[8px] font-bold leading-none text-[#36454d] opacity-40 ${
+          className={`absolute top-[4px] -translate-x-1/2 font-dmsans text-[8px] font-bold leading-none text-[#36454d] opacity-40 ${
             on ? 'left-[11.5px]' : 'left-[30.5px]'
           }`}
         >

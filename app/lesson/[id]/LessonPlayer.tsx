@@ -58,7 +58,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       if (
         e.code.startsWith('Key') || e.code.startsWith('Digit') ||
         e.code === 'Space' || e.code === 'Comma' || e.code === 'Period' ||
-        e.code === 'Quote' || e.code === 'Slash'
+        e.code === 'Semicolon' || e.code === 'Quote' || e.code === 'Slash'
       ) {
         e.preventDefault();
         session.handleKey(e.code, e.shiftKey);
@@ -128,13 +128,13 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       {isExtendedStage ? (
         <>
           {/* 문장·긴글: 칠 문장 위, 친 내용 아래 (시안 519:15861) */}
-          <PracticeCard className="mt-[19px] min-h-[160px] items-start justify-start p-[15px]">
+          <PracticeCard className="mt-[19px] min-h-[152px] items-start justify-start p-[15px]">
             <TypingInput target={session.currentItem} typed={session.typed} />
           </PracticeCard>
           {gloss && (
             <p
               data-testid="practice-gloss"
-              className="mt-[10px] w-[330px] max-w-full px-[5px] font-dmsans text-[14px] font-bold leading-[1.3] text-[#597280]"
+              className="mt-[10px] w-[330px] max-w-full px-[5px] font-dmsans text-[14px] font-bold leading-[1.4] text-[#597280]"
             >
               {gloss}
             </p>
@@ -191,10 +191,14 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           nextCode={session.nextCode}
           nextShift={session.nextShift}
           layout={isExtendedStage ? 'extended' : 'basic'}
-          keyGuide={keyGuide}
+          keyGuide={!isExtendedStage && keyGuide}
           onKeyPress={session.handleKey}
         />
-        <KeyGuideToggle on={keyGuide} onToggle={() => setKeyGuide((v) => !v)} />
+        {/* 문장·긴글에는 Key Guide 가 없다 (시안 1171:9029). 글자를 보고 치는 단계라
+            다음 키를 짚어 주지 않는다 — 토글을 감추는 데 그치지 않고 강조도 끈다. */}
+        {!isExtendedStage && (
+          <KeyGuideToggle on={keyGuide} onToggle={() => setKeyGuide((v) => !v)} />
+        )}
       </div>
 
       {result}

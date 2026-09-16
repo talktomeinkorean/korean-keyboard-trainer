@@ -49,6 +49,7 @@ export const DUBEOLSIK: KeyDef[] = [
   // 문장부호 — DB 문장 콘텐츠 입력용
   { code: 'Comma', jamo: ',', type: 'punct', finger: 'right-middle' },
   { code: 'Period', jamo: '.', type: 'punct', finger: 'right-ring' },
+  { code: 'Semicolon', jamo: ';', shift: ':', type: 'punct', finger: 'right-pinky' },
   { code: 'Quote', jamo: "'", shift: '"', type: 'punct', finger: 'right-pinky' },
   { code: 'Slash', jamo: '/', shift: '?', type: 'punct', finger: 'right-pinky' },
 ];
