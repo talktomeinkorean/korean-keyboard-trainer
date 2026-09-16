@@ -191,10 +191,14 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           nextCode={session.nextCode}
           nextShift={session.nextShift}
           layout={isExtendedStage ? 'extended' : 'basic'}
-          keyGuide={keyGuide}
+          keyGuide={!isExtendedStage && keyGuide}
           onKeyPress={session.handleKey}
         />
-        <KeyGuideToggle on={keyGuide} onToggle={() => setKeyGuide((v) => !v)} />
+        {/* 문장·긴글에는 Key Guide 가 없다 (시안 1171:9029). 글자를 보고 치는 단계라
+            다음 키를 짚어 주지 않는다 — 토글을 감추는 데 그치지 않고 강조도 끈다. */}
+        {!isExtendedStage && (
+          <KeyGuideToggle on={keyGuide} onToggle={() => setKeyGuide((v) => !v)} />
+        )}
       </div>
 
       {result}
