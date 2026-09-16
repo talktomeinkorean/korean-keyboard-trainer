@@ -16,6 +16,15 @@ export const metadata = pageMetadata({
  * 파일이 없으면 아래 그라디언트 폴백만 보인다.
  */
 const BG_SRC = '/lessons/bg-practice.webp';
+/**
+ * 데스크톱에서 컬럼 좌우를 채우는 전체 폭 배경 (시안 1278:7657).
+ * 시안 에셋의 아래쪽 다크 밴드는 잘라냈다 — 밝은 영역이 어디서 끝나는지는 콘텐츠가
+ * 정하므로, 이미지에 구워 두면 컬럼의 푸터 경계와 어긋난다. 다크는 푸터가 직접 그린다.
+ */
+const DESKTOP_BG_SRC = '/lessons/desktop-bg-home.webp';
+
+/** 컬럼 밖으로 번져 좌우를 채우는 층. 섹션 높이를 그대로 따라간다. */
+const BLEED = 'absolute inset-y-0 left-1/2 -z-10 hidden w-screen -translate-x-1/2 sm:block';
 const BANNER_SRC = '/lessons/promotion-banner.webp';
 
 // 시안 버튼: 300x55, #ab99ff, 진한 테두리, 위아래 안쪽 그림자로 입체감
@@ -42,6 +51,14 @@ export default function LessonsPage() {
         className="relative flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-origin-content bg-no-repeat pt-[15%] pb-[130px]"
         style={{ backgroundImage: `url(${BG_SRC})`, backgroundSize: '100% auto' }}
       >
+        {/* 데스크톱 좌우 채움 — 이 섹션과 높이가 같아 아래 다크 푸터와 경계가 저절로 맞는다.
+            섹션이 이미지보다 길 수 있어, 바탕을 이미지 끝 색으로 깔아 이어붙인다. */}
+        <div
+          aria-hidden
+          className={`${BLEED} bg-[#ebe7ff] bg-top bg-no-repeat`}
+          style={{ backgroundImage: `url(${DESKTOP_BG_SRC})`, backgroundSize: '100% auto' }}
+        />
+
         {/* 이벤트 배너 — 배경 위에 겹쳐 띄운다. 누르면 홈(레이스)으로 */}
         <Link href="/" data-testid="promotion-banner" className="absolute inset-x-0 top-0 z-10">
           <img
@@ -82,7 +99,8 @@ export default function LessonsPage() {
       {/* TTMIK 푸터 (시안 294:18025) — 밝은 영역이 끝나고 55px 아래에서 시작, 하단 40px.
           시안은 마지막 버튼 아래 130px 에서 어두운 영역이 시작한다 (위 pb). 배경 아트 하단은
           고른 연보라 격자라 어디서 잘려도 어색하지 않다. */}
-      <div className="bg-[#36454d] px-4 pt-[55px] pb-[40px]">
+      <div className="relative bg-[#36454d] px-4 pt-[55px] pb-[40px]">
+        <div aria-hidden className={`${BLEED} bg-[#36454d]`} />
         <div className="mx-auto w-[350px] max-w-full">
           <TtmikFooter />
         </div>

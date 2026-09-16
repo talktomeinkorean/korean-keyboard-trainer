@@ -1,3 +1,5 @@
+import { DesktopBackground } from './DesktopBackground';
+
 /**
  * 연습 화면 배경 — 스크롤해도 화면에 고정된다.
  *
@@ -5,16 +7,22 @@
  * 같이 흐르게 두면 아래쪽이 비거나 격자가 늘어난다. 화면에 고정해 그라디언트와
  * 격자가 언제나 시안 비율대로 보이게 한다.
  *
- * 앱 본문과 같은 폭(--app-width)으로 가운데 정렬한다.
+ * 앱 본문과 같은 폭(--app-width)으로 가운데 정렬하고, 데스크톱에서 비는 좌우는
+ * 전체 폭 배경이 뒤에서 채운다.
  */
 const BG_SRC = '/lessons/basic-practice.webp';
+/** 데스크톱에서 컬럼 좌우를 채우는 같은 계열 배경 (시안 1171:9029) */
+const DESKTOP_BG_SRC = '/lessons/desktop-bg-practice.webp';
 
 export function PracticeBackground() {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none fixed inset-y-0 left-1/2 -z-10 w-full max-w-[var(--app-width)] -translate-x-1/2 bg-no-repeat"
-      style={{ backgroundImage: `url(${BG_SRC})`, backgroundSize: '100% 100%' }}
-    />
+    <>
+      <DesktopBackground src={DESKTOP_BG_SRC} />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-y-0 left-1/2 -z-10 w-full max-w-[var(--app-width)] -translate-x-1/2 bg-no-repeat"
+        style={{ backgroundImage: `url(${BG_SRC})`, backgroundSize: '100% 100%' }}
+      />
+    </>
   );
 }

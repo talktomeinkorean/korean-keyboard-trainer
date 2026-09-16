@@ -40,40 +40,58 @@ export function RaceScene({
 
   return (
     // 시안: 화면 최상단부터 435px. 상단 바·단어 카드가 이 안에 겹쳐 들어간다.
-    // 이미지(2.5:1)가 창보다 넓어야 가로 스크롤이 성립하는데, 이 비율이면 약 2.8배가 남는다.
-    <div
-      data-testid="race-scene"
-      className="relative w-full aspect-[393/435] overflow-hidden bg-sky-300"
-    >
+    // 바깥 상자는 좌우 블리드를 담는 자리다 — 안쪽 창이 overflow-hidden 이라 거기 두면 잘린다.
+    <div className="relative w-full aspect-[393/435]">
+      {/*
+        데스크톱에서 컬럼 좌우를 채운다 (시안 1171:8127).
+        같은 배경을 전체 폭으로 한 번 더 깔고, 검정 40% + 블러 20px 로 덮어 뒤로 물린다.
+        판마다 배경이 달라지므로 전용 에셋을 두지 않고 그때 쓰는 이미지를 그대로 쓴다.
+      */}
       <div
-        data-testid="race-scene-bg"
-        className="absolute inset-0 transition-[background-position] duration-500 ease-out motion-reduce:transition-none"
-        style={{
-          backgroundImage: `url(${backgroundSrc})`,
-          backgroundSize: 'auto 100%',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: `${positionX} bottom`,
-          imageRendering: 'pixelated',
-        }}
+        aria-hidden
+        data-testid="race-scene-bleed"
+        className="absolute inset-y-0 left-1/2 hidden w-screen -translate-x-1/2 bg-cover bg-center sm:block"
+        style={{ backgroundImage: `url(${backgroundSrc})` }}
       />
-      {children}
+      <div
+        aria-hidden
+        className="absolute inset-y-0 left-1/2 hidden w-screen -translate-x-1/2 bg-black/40 backdrop-blur-[20px] sm:block"
+      />
 
-      {/* 캐릭터 — 4프레임 스프라이트. 진행 중에만 달리고, 멈추면 첫 프레임으로 선다. */}
       <div
-        data-testid="race-runner"
-        role="img"
-        aria-label="runner"
-        className="absolute bottom-[10%] left-[40%]"
-        style={{
-          width: CHAR_PX,
-          height: CHAR_PX,
-          backgroundImage: `url(${RUN_SHEET_SRC})`,
-          backgroundSize: `${CHAR_PX * 4}px ${CHAR_PX}px`,
-          backgroundRepeat: 'no-repeat',
-          backgroundPositionX: 0,
-          animation: running ? 'sprite-run 0.5s steps(4) infinite' : undefined,
-        }}
-      />
+        data-testid="race-scene"
+        className="absolute inset-0 overflow-hidden bg-sky-300"
+      >
+        <div
+          data-testid="race-scene-bg"
+          className="absolute inset-0 transition-[background-position] duration-500 ease-out motion-reduce:transition-none"
+          style={{
+            backgroundImage: `url(${backgroundSrc})`,
+            backgroundSize: 'auto 100%',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: `${positionX} bottom`,
+            imageRendering: 'pixelated',
+          }}
+        />
+        {children}
+
+        {/* 캐릭터 — 4프레임 스프라이트. 진행 중에만 달리고, 멈추면 첫 프레임으로 선다. */}
+        <div
+          data-testid="race-runner"
+          role="img"
+          aria-label="runner"
+          className="absolute bottom-[10%] left-[40%]"
+          style={{
+            width: CHAR_PX,
+            height: CHAR_PX,
+            backgroundImage: `url(${RUN_SHEET_SRC})`,
+            backgroundSize: `${CHAR_PX * 4}px ${CHAR_PX}px`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPositionX: 0,
+            animation: running ? 'sprite-run 0.5s steps(4) infinite' : undefined,
+          }}
+        />
+      </div>
     </div>
   );
 }
