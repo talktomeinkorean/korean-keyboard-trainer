@@ -41,23 +41,25 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
   // iOS Safari 는 navigator.share 가 사용자 제스처 직후에 불려야 해서, 클릭한 뒤에
   // fetch 를 기다렸다가 부르면 조용히 실패한다. 그래서 화면이 뜰 때 미리 받는다.
   const cardFileRef = useRef<File | null>(null);
-  // 다 받기 전에는 Save 를 잠가둔다 — 눌러도 아무 일이 없으면 고장으로 보인다
-  const [cardReady, setCardReady] = useState(false);
+  // 아직 안 받아졌을 때 눌린 경우 기다릴 수 있게 받는 중인 약속도 들고 있는다
+  const cardPendingRef = useRef<Promise<File | null> | null>(null);
   useEffect(() => {
     let alive = true;
-    void (async () => {
+    cardFileRef.current = null;
+    const pending = (async (): Promise<File | null> => {
       try {
         const res = await fetch(`/result/${code}/card`);
-        if (!res.ok) return;
+        if (!res.ok) return null;
         const blob = await res.blob();
-        if (alive) {
-          cardFileRef.current = new File([blob], 'hangeul-typing-race.png', { type: 'image/png' });
-          setCardReady(true);
-        }
+        return new File([blob], 'hangeul-typing-race.png', { type: 'image/png' });
       } catch {
-        /* 이미지를 못 받으면 Save 는 잠긴 채로 둔다. Share 는 영향받지 않는다 */
+        return null; // 못 받으면 Save 는 아무 일도 하지 않는다. Share 는 영향받지 않는다
       }
     })();
+    cardPendingRef.current = pending;
+    void pending.then((file) => {
+      if (alive) cardFileRef.current = file;
+    });
     return () => {
       alive = false;
     };
@@ -70,8 +72,12 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
    * 사진첩에 넣는 유일한 길이 시트의 "이미지 저장" 이기 때문이다. PC 는 곧바로 내려받는다.
    */
   async function save() {
-    const file = cardFileRef.current;
-    if (!file) return; // 준비 전에는 버튼이 잠겨 있어 여기까지 오지 않는다
+    // 거의 항상 미리 받아둔 것이 있다. iOS 는 클릭 직후에 share 를 불러야 해서
+    // 기다리지 않고 바로 쓰는 것이 중요하다.
+    // 아직이면(결과 화면이 뜨자마자 누른 드문 경우) 기다렸다 이어간다 —
+    // 이때 iOS 는 제스처가 만료돼 공유 시트가 안 뜰 수 있다.
+    const file = cardFileRef.current ?? (await cardPendingRef.current);
+    if (!file) return; // 끝내 못 받은 경우
 
     if (navigator.canShare?.({ files: [file] })) {
       try {
@@ -125,9 +131,8 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
               <button
                 type="button"
                 onClick={save}
-                disabled={!cardReady}
                 data-testid="result-save"
-                className={`${PIXEL_BUTTON} flex-1 disabled:opacity-60 disabled:hover:brightness-100`}
+                className={`${PIXEL_BUTTON} flex-1`}
               >
                 Save
               </button>
