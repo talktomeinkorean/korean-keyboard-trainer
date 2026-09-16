@@ -29,6 +29,15 @@ describe('Keyboard', () => {
     expect(screen.getByTestId('kbd-key-Slash')).toHaveTextContent(/^\?$/);
   });
 
+  it('키 폭을 키에 직접 적는다 — 자모 34px, 문장 30px', () => {
+    // CSS 변수를 거치면 그 변수가 비었을 때 키가 글자 폭으로 쪼그라든다
+    const { rerender } = render(<Keyboard nextCode={null} />);
+    expect(screen.getByTestId('kbd-key-KeyQ').className).toContain('w-[min(34px,');
+
+    rerender(<Keyboard nextCode={null} layout="extended" />);
+    expect(screen.getByTestId('kbd-key-KeyQ').className).toContain('w-[min(30px,');
+  });
+
   it('nextCode 키에 강조 표시를 한다', () => {
     render(<Keyboard nextCode="KeyR" />);
     expect(screen.getByTestId('kbd-key-KeyR').className).toContain('bg-[#8ceb97]');

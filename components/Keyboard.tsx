@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다. */
 'use client';
 
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { DUBEOLSIK, SPACE_KEY } from '@/lib/keyboard/dubeolsik';
 
 const BASIC_ROWS: string[][] = [
@@ -32,16 +32,30 @@ const CAPS: Record<string, [main: string, sub: string]> = {
   Slash: ['?', ''],
 };
 
+/**
+ * 시안 키 폭 — 자모 34px, 문장 30px(한 줄이 11키라 더 좁다).
+ * 좁은 화면에선 비율대로 줄어든다. 브레이크포인트를 쓰지 않아 PC 와 모바일이
+ * 같은 레이아웃을 유지한다. CSS 변수로 빼지 않는 건 여기서만 쓰기 때문이다 —
+ * 변수가 비면 키가 글자 폭으로 쪼그라들어 키보드가 무너진다.
+ */
+const KEY_WIDTH = {
+  basic: 'w-[min(34px,calc((100vw_-_53px)/10))]',
+  extended: 'w-[min(30px,calc((100vw_-_63px)/11))]',
+} as const;
+
+/** 키 사이 4px, 줄 사이 5px (시안 237:9862) */
+const KEY_GAP = 'gap-[4px]';
+const ROW_GAP = 'gap-[5px]';
+
 // 시안 기준 흰 키 + 진한 테두리. 다음에 칠 키만 연두로 강조한다.
-// 폭은 --kw (자모 34px, 문장 30px. 좁은 화면에선 비율대로 축소). 브레이크포인트를
-// 쓰지 않아 PC 와 모바일이 같은 레이아웃을 유지한다.
+// 모서리는 자모 키 5px, shift·Space 3.708px 라 호출부에서 정한다.
 const KEY_BASE =
-  'h-[40px] rounded-[5px] border-[0.75px] border-[#36454d] ' +
+  'h-[40px] border-[0.75px] border-[#36454d] ' +
   'flex flex-col items-center justify-center select-none touch-manipulation ' +
   'transition active:scale-95';
 
-function keyClasses(isNext: boolean, widthClass = 'w-[var(--kw)]'): string {
-  return `${KEY_BASE} ${widthClass} ${isNext ? 'bg-[#8ceb97]' : 'bg-white active:bg-neutral-100'}`;
+function keyClasses(isNext: boolean, extra = 'rounded-[5px]'): string {
+  return `${KEY_BASE} ${extra} ${isNext ? 'bg-[#8ceb97]' : 'bg-white active:bg-neutral-100'}`;
 }
 
 interface Props {
@@ -60,7 +74,7 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
   // 화면 키보드 전용 Shift 토글 (모바일 탭 입력용). 키 입력 후 자동 해제.
   const [shiftOn, setShiftOn] = useState(false);
   const rows = layout === 'extended' ? EXTENDED_ROWS : BASIC_ROWS;
-  const keyWidth = layout === 'extended' ? 'var(--key-w-ext)' : 'var(--key-w)';
+  const keyWidth = KEY_WIDTH[layout];
 
   function press(code: string) {
     onKeyPress?.(code, shiftOn);
@@ -74,12 +88,9 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
       : 'bg-white active:bg-neutral-100';
 
   return (
-    <div
-      className="flex flex-col gap-[var(--key-row-gap)] items-center"
-      style={{ '--kw': keyWidth } as CSSProperties}
-    >
+    <div className={`flex flex-col ${ROW_GAP} items-center`}>
       {rows.map((row, ri) => (
-        <div key={ri} className="flex gap-[var(--key-gap)]">
+        <div key={ri} className={`flex ${KEY_GAP}`}>
           {row.map((code) => {
             const k = byCode.get(code)!;
             const isNext = keyGuide && code === nextCode;
@@ -92,7 +103,7 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
                 data-testid={`kbd-key-${code}`}
                 data-kbd-key
                 onClick={() => press(code)}
-                className={keyClasses(isNext)}
+                className={keyClasses(isNext, `rounded-[5px] ${keyWidth}`)}
               >
                 <span className="font-pretendard text-[14px] font-bold text-[#36454d]">{cap}</span>
                 <span className="font-dmsans text-[10px] font-bold text-[#5c8499]">{sub}</span>
@@ -102,7 +113,7 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
         </div>
       ))}
       {/* shift 70px · Space 150px 는 키 폭과 무관한 고정값이다 (시안 237:9894) */}
-      <div className="flex gap-[var(--key-gap)]">
+      <div className={`flex ${KEY_GAP}`}>
         <button
           type="button"
           data-testid="kbd-key-Shift"
@@ -125,7 +136,7 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
           data-testid="kbd-key-Space"
           data-kbd-key
           onClick={() => press(SPACE_KEY.code)}
-          className={keyClasses(keyGuide && nextCode === SPACE_KEY.code, 'w-[150px] !rounded-[3.708px]')}
+          className={keyClasses(keyGuide && nextCode === SPACE_KEY.code, 'w-[150px] rounded-[3.708px]')}
         >
           <span className="font-dmsans text-[14px] font-semibold text-[#36454d]">Space</span>
         </button>
