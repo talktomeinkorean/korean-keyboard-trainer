@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { CATEGORIES } from '@/lib/curriculum/categories';
 import { pageMetadata } from '@/lib/seo';
 import { TtmikFooter } from '@/components/event/TtmikFooter';
+import { SKY_WITH_GRID } from '@/components/lessonsSky';
 
 export const metadata = pageMetadata({
   title: 'Korean Typing Practice — Hangeul Keyboard Lessons',
@@ -11,20 +12,10 @@ export const metadata = pageMetadata({
   path: '/lessons',
 });
 
-/**
- * 시안의 배경(그라디언트·로고·장식)은 한 장의 이미지로 깐다.
- * 파일이 없으면 아래 그라디언트 폴백만 보인다.
- */
-const BG_SRC = '/lessons/bg-practice.webp';
-/**
- * 데스크톱에서 컬럼 좌우를 채우는 전체 폭 배경 (시안 1278:7657).
- * 시안 에셋의 아래쪽 다크 밴드는 잘라냈다 — 밝은 영역이 어디서 끝나는지는 콘텐츠가
- * 정하므로, 이미지에 구워 두면 컬럼의 푸터 경계와 어긋난다. 다크는 푸터가 직접 그린다.
- */
-const DESKTOP_BG_SRC = '/lessons/desktop-bg-home.webp';
-
+/** 예전에는 배경 이미지에 구워져 있던 로고 */
+const LOGO_SRC = '/logo.png';
 /** 컬럼 밖으로 번져 좌우를 채우는 층. 섹션 높이를 그대로 따라간다. */
-const BLEED = 'absolute inset-y-0 left-1/2 -z-10 hidden w-screen -translate-x-1/2 sm:block';
+const BLEED = 'absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2';
 const BANNER_SRC = '/lessons/promotion-banner.webp';
 
 // 시안 버튼: 300x55, #ab99ff, 진한 테두리, 위아래 안쪽 그림자로 입체감
@@ -36,49 +27,45 @@ const CATEGORY_BUTTON =
 
 export default function LessonsPage() {
   return (
-    // 배경 이미지는 폭에 맞춰 비율대로 늘어난다. 이미지가 없을 때를 대비해
-    // 시안과 비슷한 그라디언트를 클래스로 깔아 둔다.
-    <main className="flex min-h-screen flex-col">
-      <h1 className="sr-only">Hangeul Typing Practice</h1>
+    <main className='flex min-h-screen flex-col'>
+      <h1 className='sr-only'>Hangeul Typing Practice</h1>
 
-      {/*
-        배경 시작점을 아래로 내려 배너가 로고를 가리지 않게 한다.
-        bg-origin-content: 배경 위치 기준을 padding 아래(content box)로 옮긴다.
-        pt 를 % 로 잡은 건 배너 높이(w-full 이라 폭에 비례)와 같이 움직이게
-        하기 위해서다 — 고정 px 이면 393px 보다 좁은 화면에서 간격이 틀어진다.
-      */}
-      <div
-        className="relative flex flex-1 flex-col items-center bg-gradient-to-b from-[#f9f395] via-[#fffef3] via-70% to-[#ebe7ff] bg-top bg-origin-content bg-no-repeat pt-[15%] pb-[130px]"
-        style={{ backgroundImage: `url(${BG_SRC})`, backgroundSize: '100% auto' }}
-      >
-        {/* 데스크톱 좌우 채움 — 이 섹션과 높이가 같아 아래 다크 푸터와 경계가 저절로 맞는다.
-            그라디언트가 컬럼과 어긋나지 않게 크기·시작점을 컬럼 배경에 맞춘다:
-            데스크톱에서 컬럼은 항상 --app-width 라 컬럼 이미지(786x1700)는 그 폭에서
-            높이 850px 로 그려지고, bg-origin-content + pt-[15%] 때문에 15% 아래에서 시작한다.
-            섹션이 그보다 길 수 있어 바탕은 이미지 끝 색으로 깔아 이어붙인다. */}
+      {/* pt 를 % 로 잡은 건 배너 높이(w-full 이라 폭에 비례)와 같이 움직이게 하기 위해서다 —
+          고정 px 이면 393px 보다 좁은 화면에서 간격이 틀어진다. */}
+      <div className='relative flex flex-1 flex-col items-center pt-[15%] pb-[130px]'>
+        {/* 배경 — 컬럼과 좌우를 한 겹으로 칠한다 */}
         <div
           aria-hidden
-          className={`${BLEED} bg-[#ebe7ff] bg-no-repeat`}
-          style={{
-            backgroundImage: `url(${DESKTOP_BG_SRC})`,
-            backgroundSize: '100% calc(var(--app-width) * 1700 / 786)',
-            backgroundPosition: 'center calc(var(--app-width) * 0.15)',
-          }}
+          className={BLEED}
+          style={{ backgroundImage: SKY_WITH_GRID }}
         />
 
         {/* 이벤트 배너 — 배경 위에 겹쳐 띄운다. 누르면 홈(레이스)으로 */}
-        <Link href="/" data-testid="promotion-banner" className="absolute inset-x-0 top-0 z-10">
+        <Link
+          href='/'
+          data-testid='promotion-banner'
+          className='absolute inset-x-0 top-0 z-10'
+        >
           <img
             src={BANNER_SRC}
-            alt="Hangeul Day Typing Race, until Oct 11th. More records, more chances to win!"
-            className="w-full"
+            alt='Hangeul Day Typing Race, until Oct 11th. More records, more chances to win!'
+            className='w-full'
           />
         </Link>
 
-        {/* 배경 이미지의 로고·문구 영역. 폭에 비례해 함께 줄어들도록 비율로 잡는다. */}
-        <div aria-hidden className="w-full shrink-0 aspect-[393/420]" />
+        {/* 로고·문구 — 배경에 구워져 있던 것을 요소로 꺼냈다. 폭에 비례해 함께 줄어들도록 비율로 잡는다. */}
+        <div className='flex w-full shrink-0 flex-col items-center gap-[2.56px] pt-[8%] pb-[6%]'>
+          <img src={LOGO_SRC} alt='' aria-hidden className='w-[58%]' />
+          {/* 시안 타이포 그대로 (1278:7976 · 1278:7977) */}
+          <p className='text-center font-dmsans text-[29.62px] font-black leading-normal text-[#36454d]'>
+            Hangeul Typing
+          </p>
+          <p className='text-center font-dmmono text-[23.696px] font-medium leading-normal text-[#ab99ff]'>
+            Practice
+          </p>
+        </div>
 
-        <nav className="flex w-full flex-col items-center gap-[10px] px-4">
+        <nav className='flex w-full flex-col items-center gap-[10px] px-4'>
           {CATEGORIES.map((category) => {
             const hasContent = category.stages.length > 0 || category.dbKind;
             return hasContent ? (
@@ -106,9 +93,9 @@ export default function LessonsPage() {
       {/* TTMIK 푸터 (시안 294:18025) — 밝은 영역이 끝나고 55px 아래에서 시작, 하단 40px.
           시안은 마지막 버튼 아래 130px 에서 어두운 영역이 시작한다 (위 pb). 배경 아트 하단은
           고른 연보라 격자라 어디서 잘려도 어색하지 않다. */}
-      <div className="relative bg-[#36454d] px-4 pt-[55px] pb-[40px]">
+      <div className='relative bg-[#36454d] px-4 pt-[55px] pb-[40px]'>
         <div aria-hidden className={`${BLEED} bg-[#36454d]`} />
-        <div className="mx-auto w-[350px] max-w-full">
+        <div className='mx-auto w-[350px] max-w-full'>
           <TtmikFooter />
         </div>
       </div>
