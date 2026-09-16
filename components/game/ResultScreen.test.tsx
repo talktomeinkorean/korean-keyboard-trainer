@@ -158,20 +158,34 @@ describe('Save — 카드 이미지', () => {
     );
   }
 
-  /** 카드 이미지는 비동기로 받아온다 — 받을 때까지 Save 는 잠겨 있다 */
-  async function readySave() {
-    const button = screen.getByTestId('result-save');
-    await waitFor(() => expect(button).toBeEnabled());
-    return button;
-  }
-
   afterEach(() => vi.restoreAllMocks());
 
-  it('이미지를 받기 전에는 Save 가 잠겨 있다', async () => {
-    // 카드 요청이 실패하면 끝내 열리지 않는다
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 500 }) as Response));
+  it('이미지가 도착하기 전에 눌러도 기다렸다 저장한다', async () => {
+    stubFetchWithCard();
+    const share = vi.fn(async () => {});
+    vi.stubGlobal('navigator', { share, canShare: () => true });
     open();
-    expect(screen.getByTestId('result-save')).toBeDisabled();
+
+    // 화면이 뜨자마자 누른다 — 아직 카드가 안 왔을 시점이다
+    fireEvent.click(screen.getByTestId('result-save'));
+
+    await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+    expect((share.mock.calls[0][0] as { files: File[] }).files[0].name).toBe(
+      'hangeul-typing-race.png',
+    );
+  });
+
+  it('이미지를 끝내 못 받아도 Save 는 잠기지 않는다 (누르면 아무 일도 없다)', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 500 }) as Response));
+    const share = vi.fn(async () => {});
+    vi.stubGlobal('navigator', { share, canShare: () => true });
+    open();
+
+    const button = screen.getByTestId('result-save');
+    expect(button).toBeEnabled();
+    fireEvent.click(button);
+
+    await waitFor(() => expect(share).not.toHaveBeenCalled());
   });
 
   it('모바일에서는 카드 이미지를 공유 시트로 넘긴다 (사진첩 저장 경로)', async () => {
@@ -180,7 +194,7 @@ describe('Save — 카드 이미지', () => {
     vi.stubGlobal('navigator', { share, canShare: () => true });
     open();
 
-    fireEvent.click(await readySave());
+    fireEvent.click(screen.getByTestId('result-save'));
 
     await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
     const arg = share.mock.calls[0][0] as { files: File[]; text?: string };
@@ -206,9 +220,9 @@ describe('Save — 카드 이미지', () => {
     });
 
     open();
-    fireEvent.click(await readySave());
+    fireEvent.click(screen.getByTestId('result-save'));
 
-    expect(downloaded).toBe('hangeul-typing-race.png');
+    await waitFor(() => expect(downloaded).toBe('hangeul-typing-race.png'));
     // 저장은 저장으로 끝난다 — 링크 팝업은 뜨지 않는다
     expect(screen.queryByTestId('share-popup')).not.toBeInTheDocument();
   });
