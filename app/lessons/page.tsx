@@ -52,11 +52,18 @@ export default function LessonsPage() {
         style={{ backgroundImage: `url(${BG_SRC})`, backgroundSize: '100% auto' }}
       >
         {/* 데스크톱 좌우 채움 — 이 섹션과 높이가 같아 아래 다크 푸터와 경계가 저절로 맞는다.
-            섹션이 이미지보다 길 수 있어, 바탕을 이미지 끝 색으로 깔아 이어붙인다. */}
+            그라디언트가 컬럼과 어긋나지 않게 크기·시작점을 컬럼 배경에 맞춘다:
+            데스크톱에서 컬럼은 항상 --app-width 라 컬럼 이미지(786x1700)는 그 폭에서
+            높이 850px 로 그려지고, bg-origin-content + pt-[15%] 때문에 15% 아래에서 시작한다.
+            섹션이 그보다 길 수 있어 바탕은 이미지 끝 색으로 깔아 이어붙인다. */}
         <div
           aria-hidden
-          className={`${BLEED} bg-[#ebe7ff] bg-top bg-no-repeat`}
-          style={{ backgroundImage: `url(${DESKTOP_BG_SRC})`, backgroundSize: '100% auto' }}
+          className={`${BLEED} bg-[#ebe7ff] bg-no-repeat`}
+          style={{
+            backgroundImage: `url(${DESKTOP_BG_SRC})`,
+            backgroundSize: '100% calc(var(--app-width) * 1700 / 786)',
+            backgroundPosition: 'center calc(var(--app-width) * 0.15)',
+          }}
         />
 
         {/* 이벤트 배너 — 배경 위에 겹쳐 띄운다. 누르면 홈(레이스)으로 */}
