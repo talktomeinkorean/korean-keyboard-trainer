@@ -1,3 +1,4 @@
+import sharp from 'sharp';
 import { ImageResponse } from 'next/og';
 import { decodeResultCode } from '@/lib/game/resultCode';
 import { loadCardAssets, resultCardElement } from '@/lib/og/resultCard';
@@ -26,7 +27,7 @@ export async function GET(_request: Request, ctx: RouteContext<'/result/[code]/c
   const { timeMs, keysPerMin } = value;
   const assets = await loadCardAssets(value);
 
-  return new ImageResponse(
+  const image = new ImageResponse(
     (
       <div
         style={{
@@ -56,11 +57,25 @@ export async function GET(_request: Request, ctx: RouteContext<'/result/[code]/c
         </div>
       </div>
     ),
-    {
-      ...SIZE,
-      fonts: assets.fonts,
-      // 코드만으로 결과가 정해지므로 영구 캐시해도 안전하다
-      headers: { 'Cache-Control': 'public, max-age=31536000, immutable' },
-    },
+    { ...SIZE, fonts: assets.fonts },
   );
+
+  /*
+   * ImageResponse 는 32비트 PNG 를 내놓는다 — 861x1500 에 750KB 다.
+   * 결과 화면은 이걸 미리 받아두고 그동안 Save 를 잠그므로, 크기가 곧 잠김 시간이다.
+   * 팔레트로 다시 구우면 250KB 로 줄면서 육안 차이가 없다.
+   * 색 수를 128 까지 내리면 폴라로이드 사진의 색이 무너지니 256 아래로 내리지 말 것.
+   * effort 는 7 이 적정선 — 10 은 80ms 를 더 쓰고 6KB 만 더 줄인다.
+   */
+  const png = await sharp(Buffer.from(await image.arrayBuffer()))
+    .png({ palette: true, colors: 256, effort: 7 })
+    .toBuffer();
+
+  return new Response(new Uint8Array(png), {
+    headers: {
+      'content-type': 'image/png',
+      // 코드만으로 결과가 정해지므로 영구 캐시해도 안전하다
+      'cache-control': 'public, max-age=31536000, immutable',
+    },
+  });
 }
