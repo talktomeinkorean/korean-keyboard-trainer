@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { CATEGORIES } from '@/lib/curriculum/categories';
 import { pageMetadata } from '@/lib/seo';
 import { TtmikFooter } from '@/components/event/TtmikFooter';
-import { SKY_WITH_GRID } from '@/components/lessonsSky';
+import { LessonSky } from '@/components/LessonSky';
 
 export const metadata = pageMetadata({
   title: 'Korean Typing Practice — Hangeul Keyboard Lessons',
@@ -34,11 +34,7 @@ export default function LessonsPage() {
           고정 px 이면 393px 보다 좁은 화면에서 간격이 틀어진다. */}
       <div className='relative flex flex-1 flex-col items-center pt-[15%] pb-[130px]'>
         {/* 배경 — 컬럼과 좌우를 한 겹으로 칠한다 */}
-        <div
-          aria-hidden
-          className={BLEED}
-          style={{ backgroundImage: SKY_WITH_GRID }}
-        />
+        <LessonSky variant='home' className={BLEED} />
 
         {/* 이벤트 배너 — 배경 위에 겹쳐 띄운다. 누르면 홈(레이스)으로 */}
         <Link
