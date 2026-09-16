@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다. */
 'use client';
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { DUBEOLSIK, SPACE_KEY } from '@/lib/keyboard/dubeolsik';
 
 const BASIC_ROWS: string[][] = [
@@ -10,25 +10,37 @@ const BASIC_ROWS: string[][] = [
   ['KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period'],
 ];
 
-// 문장/긴글용 — 숫자열과 따옴표/물음표 키 추가
+// 문장/긴글용 — 숫자열과 세미콜론/따옴표/물음표 키가 붙는다 (시안 1171:9048)
 const EXTENDED_ROWS: string[][] = [
   ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'],
   BASIC_ROWS[0],
-  [...BASIC_ROWS[1], 'Quote'],
+  [...BASIC_ROWS[1], 'Semicolon', 'Quote'],
   [...BASIC_ROWS[2], 'Slash'],
 ];
 
 const byCode = new Map(DUBEOLSIK.map((k) => [k.code, k]));
 
+/**
+ * 키캡 글자 — 위(큰 글자)와 아래(작은 파란 글자).
+ * 기본 규칙은 [자모, 영문 자판]이고, 아래 키들만 시안이 따로 정해 두었다.
+ * 숫자키는 1 에만 !, 나머지는 아랫글자가 없다.
+ */
+const CAPS: Record<string, [main: string, sub: string]> = {
+  Digit1: ['1', '!'],
+  Semicolon: [':', ';'],
+  Quote: ['"', "'"],
+  Slash: ['?', ''],
+};
+
 // 시안 기준 흰 키 + 진한 테두리. 다음에 칠 키만 연두로 강조한다.
-// 폭은 --key-w (시안 34px, 좁은 화면에선 비율대로 축소). 브레이크포인트를 쓰지 않아
-// PC 와 모바일이 같은 레이아웃을 유지한다.
+// 폭은 --kw (자모 34px, 문장 30px. 좁은 화면에선 비율대로 축소). 브레이크포인트를
+// 쓰지 않아 PC 와 모바일이 같은 레이아웃을 유지한다.
 const KEY_BASE =
   'h-[40px] rounded-[5px] border-[0.75px] border-[#36454d] ' +
   'flex flex-col items-center justify-center select-none touch-manipulation ' +
   'transition active:scale-95';
 
-function keyClasses(isNext: boolean, widthClass = 'w-[var(--key-w)]'): string {
+function keyClasses(isNext: boolean, widthClass = 'w-[var(--kw)]'): string {
   return `${KEY_BASE} ${widthClass} ${isNext ? 'bg-[#8ceb97]' : 'bg-white active:bg-neutral-100'}`;
 }
 
@@ -36,7 +48,7 @@ interface Props {
   nextCode: string | null;
   /** 다음 입력에 Shift 가 필요한지 — Shift 키 강조용 */
   nextShift?: boolean;
-  /** basic: 자모/단어 연습용, extended: 문장/긴글용(숫자·따옴표·물음표 포함) */
+  /** basic: 자모/단어 연습용, extended: 문장/긴글용(숫자·문장부호 포함) */
   layout?: 'basic' | 'extended';
   /** 끄면 다음에 칠 키를 강조하지 않는다 (게임의 Key Guide 토글) */
   keyGuide?: boolean;
@@ -48,6 +60,7 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
   // 화면 키보드 전용 Shift 토글 (모바일 탭 입력용). 키 입력 후 자동 해제.
   const [shiftOn, setShiftOn] = useState(false);
   const rows = layout === 'extended' ? EXTENDED_ROWS : BASIC_ROWS;
+  const keyWidth = layout === 'extended' ? 'var(--key-w-ext)' : 'var(--key-w)';
 
   function press(code: string) {
     onKeyPress?.(code, shiftOn);
@@ -61,13 +74,17 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
       : 'bg-white active:bg-neutral-100';
 
   return (
-    <div className="flex flex-col gap-[var(--key-gap)] items-center">
+    <div
+      className="flex flex-col gap-[var(--key-row-gap)] items-center"
+      style={{ '--kw': keyWidth } as CSSProperties}
+    >
       {rows.map((row, ri) => (
         <div key={ri} className="flex gap-[var(--key-gap)]">
           {row.map((code) => {
             const k = byCode.get(code)!;
             const isNext = keyGuide && code === nextCode;
-            const cap = shiftOn && k.shift ? k.shift : k.jamo;
+            const [main, sub] = CAPS[code] ?? [k.jamo, code.startsWith('Key') ? code.slice(3) : ''];
+            const cap = shiftOn && k.shift ? k.shift : main;
             return (
               <button
                 key={code}
@@ -77,23 +94,21 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
                 onClick={() => press(code)}
                 className={keyClasses(isNext)}
               >
-                <span className="text-[14px] font-bold text-[#36454d]">{cap}</span>
-                <span className="text-[10px] font-bold text-[#5c8499]">
-                  {code.startsWith('Key') ? code.slice(3) : code.startsWith('Digit') ? code.slice(5) : ''}
-                </span>
+                <span className="font-pretendard text-[14px] font-bold text-[#36454d]">{cap}</span>
+                <span className="font-dmsans text-[10px] font-bold text-[#5c8499]">{sub}</span>
               </button>
             );
           })}
         </div>
       ))}
+      {/* shift 70px · Space 150px 는 키 폭과 무관한 고정값이다 (시안 237:9894) */}
       <div className="flex gap-[var(--key-gap)]">
         <button
           type="button"
           data-testid="kbd-key-Shift"
           data-kbd-key
           onClick={() => setShiftOn((s) => !s)}
-          style={{ width: 'calc(var(--key-w) * 2 + var(--key-gap))' }}
-          className={`h-[40px] rounded-[5px] border-[0.75px] border-[#36454d] flex items-center justify-center gap-[7px] text-[14px] font-semibold text-[#36454d] select-none touch-manipulation transition active:scale-95 ${shiftButtonClass}`}
+          className={`h-[40px] w-[70px] rounded-[3.708px] border-[0.75px] border-[#36454d] flex items-center justify-center gap-[7px] font-dmsans text-[14px] font-semibold text-[#36454d] select-none touch-manipulation transition active:scale-95 ${shiftButtonClass}`}
         >
           shift
           {/* 시안에서 내보낸 아이콘 — 유니코드 ⇧ 로 대체하면 모양이 달라진다 */}
@@ -110,10 +125,9 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
           data-testid="kbd-key-Space"
           data-kbd-key
           onClick={() => press(SPACE_KEY.code)}
-          style={{ width: 'calc(var(--key-w) * 4 + var(--key-gap) * 3)' }}
-          className={keyClasses(keyGuide && nextCode === SPACE_KEY.code, '')}
+          className={keyClasses(keyGuide && nextCode === SPACE_KEY.code, 'w-[150px] !rounded-[3.708px]')}
         >
-          <span className="text-[14px] font-semibold text-[#36454d]">Space</span>
+          <span className="font-dmsans text-[14px] font-semibold text-[#36454d]">Space</span>
         </button>
       </div>
     </div>
