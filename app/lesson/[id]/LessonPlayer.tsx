@@ -144,7 +144,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         <PracticeCard className="mt-[19px] h-[200px] gap-[20px]">
           {isWord ? (
             <div className="flex w-full flex-col items-center text-center">
-              <p className="text-[50px] tracking-[5px]">
+              {/* 시안 415:10849 — Pretendard Bold 50 */}
+              <p className="font-pretendard text-[50px] font-bold tracking-[5px] text-[#36454d]">
                 {done}
                 {current}
                 <span className="text-[#36454d]/50">{todo}</span>
@@ -159,7 +160,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               )}
             </div>
           ) : (
-            <p className="text-center text-[50px] tracking-[5px]">{session.currentItem}</p>
+            <p className="text-center font-pretendard text-[50px] font-bold tracking-[5px] text-[#36454d]">
+              {session.currentItem}
+            </p>
           )}
           {(isWord || lesson.stage === 'syllable') && (
             <JamoTrack
