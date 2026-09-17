@@ -46,51 +46,61 @@ export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }:
   }, [errorCount, typedJamoCount]);
 
   return (
+    // 시안 415:10739 — 250x149. Figma 좌표는 테두리 바깥 기준이라 여백은 테두리 1px 를 뺀 값이다.
     <div
       data-testid="word-card"
-      className="w-[250px] max-w-[calc(100%-2rem)] rounded-b-[2px] border border-[#36454d] bg-white/70 px-[5px] pt-[5px] pb-[20px]"
+      className="relative w-[250px] max-w-[calc(100%-2rem)] rounded-[2px] border border-[#36454d] bg-white/70 px-[4px] py-[19px]"
     >
+      {/* 문제 번호는 흐름 밖에 띄운다 — 단어 자리를 밀어내지 않는다 */}
       <p
         data-testid="word-counter"
-        className="pr-[5px] text-right font-pixel text-[15px] text-[#36454d]/80"
+        className="absolute top-[2.06px] right-[7.78px] text-right font-dunggeunmo text-[12px] leading-[1.8] text-[#36454d]/80"
       >
         {index}/{total}
       </p>
 
-      <p className="text-center text-[30px] font-bold tracking-[3px] leading-[1.4]">
-        {/* 친 글자는 진하게, 지금 칠 음절은 진하게 깜빡이고, 남은 글자는 흐리게.
-            '동작 줄이기' 설정이면 깜빡이지 않는다. */}
-        <span data-testid="word-typed" className="text-[#36454d]">{done}</span>
-        <span
-          data-testid="word-current"
-          className="text-[#36454d] animate-soft-pulse motion-reduce:animate-none"
-        >
-          {active}
-        </span>
-        <span data-testid="word-remaining" className="text-[#36454d]/40">{rest}</span>
-      </p>
-
-      {word.english && (
-        <p data-testid="word-english" className="text-center font-pixel text-[15px] text-[#36454d]/80">
-          {word.english}
-        </p>
-      )}
-
-      <div className="mt-[10px] flex items-center justify-center gap-[5px]">
-        {jamos.map((jamo, i) => {
-          const state: ChipState =
-            i < typedCount ? 'correct' : i === typedCount && wrong ? 'wrong' : 'todo';
-          return (
+      <div className="flex flex-col items-center gap-[15px]">
+        <div className="flex w-full flex-col text-center">
+          {/* 친 글자는 진하게, 지금 칠 음절은 진하게 깜빡이고, 남은 글자는 흐리게.
+              '동작 줄이기' 설정이면 깜빡이지 않는다.
+              줄간격 1.8 에 아래 -10px — 시안대로 영어 뜻이 단어 줄에 살짝 겹친다. */}
+          <p className="mb-[-10px] font-pretendard text-[30px] font-bold tracking-[3px] leading-[1.8]">
+            <span data-testid="word-typed" className="text-[#36454d]">{done}</span>
             <span
-              key={i}
-              data-testid={`syllable-jamo-${i}`}
-              data-state={state}
-              className={`flex h-[29px] w-[25px] items-center justify-center rounded-[5px] border-[0.75px] text-[16px] font-bold ${CHIP_STATE[state]}`}
+              data-testid="word-current"
+              className="text-[#36454d] animate-soft-pulse motion-reduce:animate-none"
             >
-              {jamo}
+              {active}
             </span>
-          );
-        })}
+            <span data-testid="word-remaining" className="text-[#36454d]/50">{rest}</span>
+          </p>
+
+          {word.english && (
+            <p
+              data-testid="word-english"
+              className="font-dmmono text-[14px] font-medium leading-[1.8] text-[#7d9fb2]"
+            >
+              {word.english}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-center gap-[5px]">
+          {jamos.map((jamo, i) => {
+            const state: ChipState =
+              i < typedCount ? 'correct' : i === typedCount && wrong ? 'wrong' : 'todo';
+            return (
+              <span
+                key={i}
+                data-testid={`syllable-jamo-${i}`}
+                data-state={state}
+                className={`flex size-[25px] items-center justify-center rounded-[5px] border-[0.75px] font-dmsans text-[16px] font-normal ${CHIP_STATE[state]}`}
+              >
+                {jamo}
+              </span>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
