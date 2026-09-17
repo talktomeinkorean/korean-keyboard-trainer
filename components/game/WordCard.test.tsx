@@ -11,11 +11,24 @@ describe('WordCard', () => {
     expect(screen.getByTestId('word-english')).toHaveTextContent('Hangeul');
   });
 
-  it('입력한 글자는 진하게, 남은 글자는 흐리게 나눈다', () => {
-    // 한글: ㅎㅏㄴ(3) 입력 → '한' 완료, '글' 남음
+  it('친 글자 / 지금 칠 음절 / 남은 글자로 나눈다', () => {
+    // 한글: ㅎㅏㄴ(3) 입력 → '한' 완료, 다음은 '글'
     render(<WordCard word={word} typedJamoCount={3} index={1} total={10} />);
-    expect(screen.getByTestId('word-typed')).toHaveTextContent('한');
-    expect(screen.getByTestId('word-remaining')).toHaveTextContent('글');
+    expect(screen.getByTestId('word-typed')).toHaveTextContent(/^한$/);
+    expect(screen.getByTestId('word-current')).toHaveTextContent(/^글$/);
+    expect(screen.getByTestId('word-remaining')).toHaveTextContent(/^$/);
+  });
+
+  it('지금 칠 음절만 깜빡인다 — 시작 전엔 첫 글자, 조합 중엔 그 글자', () => {
+    const { rerender } = render(<WordCard word={word} typedJamoCount={0} index={1} total={10} />);
+    expect(screen.getByTestId('word-current')).toHaveTextContent(/^한$/);
+    expect(screen.getByTestId('word-current').className).toContain('animate-soft-pulse');
+    expect(screen.getByTestId('word-remaining')).toHaveTextContent(/^글$/);
+
+    // ㅎㅏ 까지 — 아직 '한' 을 조합 중
+    rerender(<WordCard word={word} typedJamoCount={2} index={1} total={10} />);
+    expect(screen.getByTestId('word-typed')).toHaveTextContent(/^$/);
+    expect(screen.getByTestId('word-current')).toHaveTextContent(/^한$/);
   });
 
   it('현재 음절의 자모만 칩으로 보여준다', () => {
