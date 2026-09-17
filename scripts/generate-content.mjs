@@ -19,8 +19,15 @@ const OUT = 'lib/content/practiceTexts.json';
 // 큰 데이터와 파일을 나눠 두는 이유가 그것이다 (한 글자짜리 항목뿐이라 몇 KB).
 const BASICS_OUT = 'lib/content/basics.json';
 
-function toRow(record) {
-  const korean = (record.text_korean ?? '').trim();
+/**
+ * 단어 시트는 동음이의어를 번호로 구분한다 (눈1 eye · 눈2 snow). 뜻은 영어 칸에 따로 있으니
+ * 화면에 칠 한국어에서는 번호를 뗀다. 문장·지문의 숫자(990원 등)는 실제 내용이라 건드리지 않는다.
+ */
+const HOMONYM_NUMBER = /(?<=[가-힣])\d+$/;
+
+function toRow(record, kind) {
+  const raw = (record.text_korean ?? '').trim();
+  const korean = kind === 'vocabulary' ? raw.replace(HOMONYM_NUMBER, '') : raw;
   if (!korean) return null; // 빈 행 스킵
   const level = parseInt(record.level, 10);
   return {
@@ -48,7 +55,7 @@ for (const { path, kind } of FILES) {
     skip_empty_lines: true,
     relax_column_count: true, // long-text 헤더의 메모 컬럼 등 여분 컬럼 허용
   });
-  out[kind] = sortRows(records.map(toRow).filter(Boolean));
+  out[kind] = sortRows(records.map((r) => toRow(r, kind)).filter(Boolean));
   console.log(`${path}: ${out[kind].length}행`);
 }
 
