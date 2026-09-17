@@ -1,4 +1,4 @@
-import { TIME_MS_MAX, TIME_MS_MIN } from './score';
+import { KEYS_PER_MIN_MAX, TIME_MS_MAX, TIME_MS_MIN } from './score';
 
 export interface ResultCodeValue {
   timeMs: number;
@@ -6,8 +6,6 @@ export interface ResultCodeValue {
   /** 뛴 배경 id. 이 칸이 생기기 전에 만들어진 링크에는 없다. */
   backgroundId?: string;
 }
-
-const KEYS_PER_MIN_MAX = 2000;
 
 /**
  * 공유 링크용 결과 코드. 기록·타수·배경을 담는다 — 예: 33120-112-uljiro

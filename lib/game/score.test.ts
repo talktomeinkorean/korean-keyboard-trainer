@@ -62,6 +62,25 @@ describe('parseScoreSubmission', () => {
     expect(no.ok && no.value.consentMarketing).toBe(false);
   });
 
+  it('분당 타수를 그대로 보존한다', () => {
+    const r = parseScoreSubmission({ ...valid, keysPerMin: 132 });
+    expect(r.ok && r.value.keysPerMin).toBe(132);
+  });
+
+  it('분당 타수가 없으면 null — 이 필드가 생기기 전 화면의 요청도 받는다', () => {
+    const r = parseScoreSubmission(valid);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.keysPerMin).toBeNull();
+  });
+
+  it('분당 타수가 0~2000 정수가 아니면 거부한다', () => {
+    for (const keysPerMin of [-1, 2001, 12.5, '120', null]) {
+      expect(parseScoreSubmission({ ...valid, keysPerMin }).ok).toBe(false);
+    }
+    expect(parseScoreSubmission({ ...valid, keysPerMin: 0 }).ok).toBe(true);
+    expect(parseScoreSubmission({ ...valid, keysPerMin: 2000 }).ok).toBe(true);
+  });
+
   it('마케팅 동의가 없으면 미동의로 처리한다', () => {
     const { consentMarketing: _omit, ...withoutMarketing } = valid;
     const r = parseScoreSubmission(withoutMarketing);
