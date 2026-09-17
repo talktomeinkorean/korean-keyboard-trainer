@@ -17,6 +17,11 @@ const LOGO_SRC = '/logo.png';
 /** 컬럼 밖으로 번져 좌우를 채우는 층. 섹션 높이를 그대로 따라간다. */
 const BLEED = 'absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2';
 const BANNER_SRC = '/lessons/promotion-banner.webp';
+/**
+ * 데스크톱 배너 — 1920x85 (2x 로 3840 px). 양옆은 단색이라 좁은 화면에서는 가운데만 보인다.
+ * 글자는 가운데 약 800 폭에 있어서, 860 보다 좁으면 잘리지 않게 이미지 전체를 줄인다 (1920 / 860 ≈ 223.3vw).
+ */
+const DESKTOP_BANNER_SRC = '/lessons/desktop-banner.webp';
 
 // 시안 버튼: 300x55, #ab99ff, 진한 테두리, 위아래 안쪽 그림자로 입체감
 const CATEGORY_BUTTON =
@@ -45,8 +50,17 @@ export default function LessonsPage() {
           <img
             src={BANNER_SRC}
             alt='Hangeul Day Typing Race, until Oct 11th. More records, more chances to win!'
-            className='w-full'
+            className='w-full sm:hidden'
           />
+          {/* 데스크톱은 컬럼이 아니라 화면 폭 전체에 깐다 */}
+          <div className='absolute left-1/2 top-0 hidden w-screen -translate-x-1/2 justify-center overflow-hidden sm:flex'>
+            <img
+              src={DESKTOP_BANNER_SRC}
+              alt='Hangeul Day Typing Race, until Oct 11th. More records, more chances to win!'
+              className='max-w-none shrink-0'
+              style={{ width: 'min(1920px, 223.3vw)' }}
+            />
+          </div>
         </Link>
 
         {/* 로고·문구 — 배경에 구워져 있던 것을 요소로 꺼냈다. 폭에 비례해 함께 줄어들도록 비율로 잡는다. */}
