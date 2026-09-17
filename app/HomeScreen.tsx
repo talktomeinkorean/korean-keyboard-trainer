@@ -9,7 +9,7 @@ import { TtmikFooter } from '@/components/event/TtmikFooter';
 // 아래에서 HTML 로 얹는다.
 const HOME_ART = '/home/Home.webp';
 
-// 데스크톱 홈 배경 시안 (1359:10058). 1920 폭 1x 로 가운데 393 에 위 아트와 같은 그림이 들어 있다.
+// 데스크톱 홈 배경 시안 (1359:10058). 1920 폭(2x 로 3840 px) 으로 가운데 393 에 위 아트와 같은 그림이 들어 있다.
 // 하늘(832)과 그 아래로 걸친 캐릭터 발까지만 잘라 864 높이다 — 그 아래는 단색이라 CSS 로 칠한다.
 const DESKTOP_ART = '/home/desktop-home.webp';
 const DESKTOP_ART_WIDTH = 1920;
@@ -138,7 +138,6 @@ export function HomeScreen({ runnerCount }: { runnerCount: number | null }) {
  * 세로선이 보였다. 두 그림은 같은 장면이지만 Figma 프레임마다 격자 시작점이 달라 세로 격자가
  * 반 칸(9px) 어긋나고, 컬럼 경계가 이미지 안에서 763.5 로 반 픽셀에 걸려 선명도도 달라진다.
  * /lessons 도 같은 이유로 한 장을 쓴다 (LessonSky).
- * 대신 가운데 아트가 1x 라 레티나에서는 2x 아트보다 조금 부드럽다.
  *
  * - 하늘 구간: 원래 크기로 가운데 맞춰 깐다. 확대·축소하지 않아야 이미지 속 가운데 그림이 컬럼 위
  *   HTML 요소(버튼·숫자)와 어느 화면 폭에서나 겹친다. 1920 보다 넓은 화면 바깥은 같은 하늘 그라디언트.
@@ -158,6 +157,7 @@ function DesktopBackdrop() {
           width: DESKTOP_ART_WIDTH,
           height: DESKTOP_ART_HEIGHT,
           backgroundImage: `url(${DESKTOP_ART})`,
+          backgroundSize: '100% 100%',
         }}
       />
     </div>
