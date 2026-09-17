@@ -33,11 +33,14 @@ export const getCachedFinishStats = unstable_cache(fetchFinishStats, ['race-fini
   tags: ['race-finishes'],
 });
 
-/** 홈 화면 "Runners so far" 숫자. 저장소가 없거나 조회에 실패하면 null — 화면이 깨지지 않게 한다. */
-export async function getParticipantCount(): Promise<number | null> {
+/**
+ * 홈 화면 "Runners so far" 숫자 — 완주 횟수(행 수). 같은 사람이 여러 판 뛰어도 판마다 센다.
+ * 저장소가 없거나 조회에 실패하면 null — 화면이 깨지지 않게 한다.
+ */
+export async function getRunnerCount(): Promise<number | null> {
   if (!getServiceClient()) return null;
   try {
-    return (await getCachedFinishStats()).participants;
+    return (await getCachedFinishStats()).finishes;
   } catch {
     return null;
   }
