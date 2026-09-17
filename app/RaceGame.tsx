@@ -18,6 +18,10 @@ import { WordCard } from '@/components/game/WordCard';
 import { KeyGuideToggle } from '@/components/game/KeyGuideToggle';
 import type { RaceWord } from '@/lib/game/raceWord';
 
+/** 게임 화면 흰 바탕 — 컬럼(393px) 밖까지 화면 폭으로, 내용 뒤에 깐다 */
+const RACE_BACKDROP =
+  'pointer-events-none absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2 bg-white';
+
 /** 한 판에 출제할 단어 수 (DB 미설정 시 폴백 풀에서 뽑는 개수) */
 const RACE_WORD_COUNT = 10;
 
@@ -163,7 +167,11 @@ function RaceRound({
         );
 
   return (
-    <main className="flex min-h-screen flex-col items-center gap-4">
+    <main className="relative flex min-h-screen flex-col items-center gap-4">
+      {/* 키보드 좌우·아래 여백은 다크 모드에서도 흰색이다. 페이지 기본 배경(--background)이
+          다크 모드에서 검게 바뀌므로, 컬럼 밖까지 화면 폭으로 흰 바탕을 깐다.
+          위쪽은 RaceScene 이 배경 이미지로 덮는다. */}
+      <div aria-hidden className={RACE_BACKDROP} />
       {/* 시안: 상단 바와 단어 카드가 배경 씬 안에 겹쳐 들어간다 */}
       <RaceScene
         backgroundSrc={background.src}
@@ -236,7 +244,14 @@ export function RaceGame() {
     startRound();
   }, [startRound]);
 
-  if (!round) return <main className="min-h-screen" />;
+  // 단어를 불러오는 동안에도 다크 모드에서 검은 화면이 번쩍이지 않게 같은 흰 바탕을 깐다
+  if (!round) {
+    return (
+      <main className="relative min-h-screen">
+        <div aria-hidden className={RACE_BACKDROP} />
+      </main>
+    );
+  }
 
   // 단어·배경을 key 로 사용 — Retry 시 세션 전체 리마운트
   return (
