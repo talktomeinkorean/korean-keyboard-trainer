@@ -56,22 +56,26 @@ describe('WordCard', () => {
     expect(screen.getByTestId('syllable-jamo-0')).toHaveAttribute('data-state', 'correct');
   });
 
-  it('올바르게 입력해 진행하면 틀림 표시가 풀린다', () => {
+  it('틀린 자모 칩은 ERROR_FLASH_MS 뒤 todo 로 돌아온다', () => {
+    vi.useFakeTimers();
     const { rerender } = render(
-      <WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={1} />,
+      <WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={0} />,
     );
-    rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={2} />);
+    rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={1} />);
     expect(screen.getByTestId('syllable-jamo-1')).toHaveAttribute('data-state', 'wrong');
 
-    rerender(<WordCard word={word} typedJamoCount={2} index={1} total={10} errorCount={2} />);
-    expect(screen.getByTestId('syllable-jamo-2')).toHaveAttribute('data-state', 'todo');
+    act(() => vi.advanceTimersByTime(ERROR_FLASH_MS - 1));
+    expect(screen.getByTestId('syllable-jamo-1')).toHaveAttribute('data-state', 'wrong');
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByTestId('syllable-jamo-1')).toHaveAttribute('data-state', 'todo');
+    vi.useRealTimers();
   });
 
   describe('오타 테두리', () => {
     afterEach(() => vi.useRealTimers());
     const card = () => screen.getByTestId('word-card');
 
-    it('오타가 나면 테두리가 0.5초 주황이었다가 돌아온다', () => {
+    it('오타가 나면 테두리가 ERROR_FLASH_MS 동안 주황이었다가 돌아온다', () => {
       vi.useFakeTimers();
       const { rerender } = render(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={0} />);
       expect(card().className).toContain('border-[#36454d]');
@@ -86,15 +90,17 @@ describe('WordCard', () => {
       expect(card().className).toContain('border-[#36454d]');
     });
 
-    it('연달아 틀리면 마지막 오타부터 다시 0.5초를 센다', () => {
+    it('연달아 틀리면 마지막 오타부터 다시 ERROR_FLASH_MS 를 센다', () => {
       vi.useFakeTimers();
       const { rerender } = render(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={0} />);
       rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={1} />);
-      act(() => vi.advanceTimersByTime(400));
+      // 첫 오타가 끝나기 직전에 또 틀린다
+      act(() => vi.advanceTimersByTime(ERROR_FLASH_MS - 100));
       rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={2} />);
-      act(() => vi.advanceTimersByTime(400));
+      // 첫 오타 기준으로는 이미 끝났을 시점이지만 아직 주황이다
+      act(() => vi.advanceTimersByTime(ERROR_FLASH_MS - 1));
       expect(card().className).toContain('border-[#ff5e23]');
-      act(() => vi.advanceTimersByTime(100));
+      act(() => vi.advanceTimersByTime(1));
       expect(card().className).toContain('border-[#36454d]');
     });
   });
