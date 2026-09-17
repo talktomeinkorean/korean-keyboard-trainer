@@ -9,6 +9,12 @@ import { TtmikFooter } from '@/components/event/TtmikFooter';
 // 아래에서 HTML 로 얹는다.
 const HOME_ART = '/home/Home.webp';
 
+// 데스크톱 홈 배경 시안 (1359:10058). 1920 폭 1x 로 가운데 393 에 위 아트와 같은 그림이 들어 있다.
+// 하늘(832)과 그 아래로 걸친 캐릭터 발까지만 잘라 864 높이다 — 그 아래는 단색이라 CSS 로 칠한다.
+const DESKTOP_ART = '/home/desktop-home.webp';
+const DESKTOP_ART_WIDTH = 1920;
+const DESKTOP_ART_HEIGHT = 864;
+
 // 시안 캔버스 크기. 아래 좌표들은 모두 이 캔버스 기준이다.
 const CANVAS_WIDTH = 393;
 const HERO_HEIGHT = 832.158;
@@ -99,23 +105,61 @@ function PrizeSection() {
 
 export function HomeScreen({ runnerCount }: { runnerCount: number | null }) {
   return (
-    <main className="relative flex-1 overflow-x-clip bg-[#36454d]">
-      {/* 캔버스보다 넓은 화면에서 좌우가 비지 않도록 하늘 그라디언트를 깔아둔다. */}
+    // 바깥 상자는 데스크톱 좌우 배경을 담는 자리다 — main 은 가로를 잘라내므로 거기 두면 컬럼 밖이 잘린다.
+    <div className="relative flex flex-1 flex-col">
+      <DesktopBackdrop />
+      {/* 데스크톱에서는 컬럼이 투명해지고 뒤의 DesktopBackdrop 한 장이 컬럼까지 덮는다 */}
+      <main className="relative flex-1 overflow-x-clip bg-[#36454d] sm:bg-transparent">
+        {/* 캔버스보다 넓은 화면에서 좌우가 비지 않도록 하늘 그라디언트를 깔아둔다. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 top-0 bg-[linear-gradient(180deg,#8ceb97_34.859%,#90cfff_105.22%)] sm:hidden"
+          style={{ height: HERO_HEIGHT }}
+        />
+        {/* 배경 아트(모바일). 하단 어두운 영역은 섹션 배경색과 같아 Q&A 뒤로 자연스럽게 이어진다. */}
+        <img
+          src={HOME_ART}
+          alt=""
+          aria-hidden
+          className="absolute left-1/2 top-0 max-w-none -translate-x-1/2 sm:hidden"
+          style={{ width: CANVAS_WIDTH }}
+        />
+        <Hero runnerCount={runnerCount} />
+        <PrizeSection />
+      </main>
+    </div>
+  );
+}
+
+/**
+ * 데스크톱(640px 이상) 홈 배경 — 컬럼과 좌우를 **한 장으로 함께** 덮는다. 모바일은 그리지 않는다.
+ *
+ * 처음에는 좌우만 이 이미지로 채우고 가운데는 기존 2x 아트(Home.webp)를 올렸는데, 컬럼 경계에
+ * 세로선이 보였다. 두 그림은 같은 장면이지만 Figma 프레임마다 격자 시작점이 달라 세로 격자가
+ * 반 칸(9px) 어긋나고, 컬럼 경계가 이미지 안에서 763.5 로 반 픽셀에 걸려 선명도도 달라진다.
+ * /lessons 도 같은 이유로 한 장을 쓴다 (LessonSky).
+ * 대신 가운데 아트가 1x 라 레티나에서는 2x 아트보다 조금 부드럽다.
+ *
+ * - 하늘 구간: 원래 크기로 가운데 맞춰 깐다. 확대·축소하지 않아야 이미지 속 가운데 그림이 컬럼 위
+ *   HTML 요소(버튼·숫자)와 어느 화면 폭에서나 겹친다. 1920 보다 넓은 화면 바깥은 같은 하늘 그라디언트.
+ * - 아래 Q&A·푸터 구간: 섹션과 같은 어두운 색.
+ */
+function DesktopBackdrop() {
+  return (
+    // overflow-hidden: 1920 이미지가 화면보다 넓으면 가로 스크롤이 생긴다 — 화면 폭에서 잘라낸다
+    <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-screen -translate-x-1/2 overflow-hidden bg-[#36454d] sm:block">
       <div
-        aria-hidden
         className="absolute inset-x-0 top-0 bg-[linear-gradient(180deg,#8ceb97_34.859%,#90cfff_105.22%)]"
         style={{ height: HERO_HEIGHT }}
       />
-      {/* 배경 아트. 하단 어두운 영역은 섹션 배경색과 같아 Q&A 뒤로 자연스럽게 이어진다. */}
-      <img
-        src={HOME_ART}
-        alt=""
-        aria-hidden
-        className="absolute left-1/2 top-0 max-w-none -translate-x-1/2"
-        style={{ width: CANVAS_WIDTH }}
+      <div
+        className="absolute left-1/2 top-0 -translate-x-1/2 bg-no-repeat"
+        style={{
+          width: DESKTOP_ART_WIDTH,
+          height: DESKTOP_ART_HEIGHT,
+          backgroundImage: `url(${DESKTOP_ART})`,
+        }}
       />
-      <Hero runnerCount={runnerCount} />
-      <PrizeSection />
-    </main>
+    </div>
   );
 }
