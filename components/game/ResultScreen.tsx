@@ -195,6 +195,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
         <SubmitRecordPopup
           timeMs={timeMs}
           accuracy={accuracy}
+          keysPerMin={keysPerMin}
           onClose={() => setShowSubmit(false)}
           onSubmitted={() => setSubmitted(true)}
         />

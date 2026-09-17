@@ -7,6 +7,8 @@ import { PIXEL_BUTTON } from './pixelButton';
 interface Props {
   timeMs: number;
   accuracy: number;
+  /** 분당 타수 — 기록과 함께 저장한다 */
+  keysPerMin: number;
   onClose: () => void;
   /** 저장에 성공한 순간 알린다 — 결과 화면의 제출 버튼을 잠그는 데 쓴다 */
   onSubmitted?: () => void;
@@ -41,7 +43,7 @@ const CHECKBOX =
   'size-[11.557px] shrink-0 appearance-none border-[1.111px] border-[#6b8999] checked:border-[#36454d] checked:bg-[#36454d]';
 
 /** 기록 저장 폼 (시안 519:14583). */
-export function SubmitRecordPopup({ timeMs, accuracy, onClose, onSubmitted }: Props) {
+export function SubmitRecordPopup({ timeMs, accuracy, keysPerMin, onClose, onSubmitted }: Props) {
   const [email, setEmail] = useState('');
   const [nickname, setNickname] = useState('');
   const [state, setState] = useState<SubmitState>({ step: 'form' });
@@ -68,6 +70,7 @@ export function SubmitRecordPopup({ timeMs, accuracy, onClose, onSubmitted }: Pr
           nickname,
           timeMs,
           accuracy,
+          keysPerMin,
           consentRequired,
           consentMarketing,
         }),

@@ -15,7 +15,7 @@ function stubFetch(onScorePost?: (body: unknown) => void) {
 }
 
 function open() {
-  render(<SubmitRecordPopup timeMs={15000} accuracy={98} onClose={() => {}} />);
+  render(<SubmitRecordPopup timeMs={15000} accuracy={98} keysPerMin={120} onClose={() => {}} />);
 }
 
 describe('SubmitRecordPopup 동의 항목', () => {
@@ -64,13 +64,13 @@ describe('SubmitRecordPopup 동의 항목', () => {
     fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     await waitFor(() => expect(sent).toBeDefined());
-    expect(sent).toMatchObject({ consentRequired: true, consentMarketing: true });
+    expect(sent).toMatchObject({ timeMs: 15000, accuracy: 98, keysPerMin: 120, consentRequired: true, consentMarketing: true });
   });
 
   it('동의는 저장하지 않아 다음 판에서 다시 받는다', () => {
     stubFetch();
     const { unmount } = render(
-      <SubmitRecordPopup timeMs={15000} accuracy={98} onClose={() => {}} />,
+      <SubmitRecordPopup timeMs={15000} accuracy={98} keysPerMin={120} onClose={() => {}} />,
     );
     fireEvent.click(screen.getByTestId('consent-required'));
     unmount();
@@ -84,7 +84,7 @@ describe('SubmitRecordPopup 동의 항목', () => {
     const onClose = vi.fn();
     const onSubmitted = vi.fn();
     render(
-      <SubmitRecordPopup timeMs={15000} accuracy={98} onClose={onClose} onSubmitted={onSubmitted} />,
+      <SubmitRecordPopup timeMs={15000} accuracy={98} keysPerMin={120} onClose={onClose} onSubmitted={onSubmitted} />,
     );
     fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
