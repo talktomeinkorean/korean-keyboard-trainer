@@ -29,6 +29,9 @@ type ChipState = keyof typeof CHIP_STATE;
  */
 export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }: Props) {
   const { done, current, todo } = splitByJamoProgress(word.korean, typedJamoCount);
+  // 지금 칠 음절 — 조합 중이면 그 글자, 아니면 다음 글자
+  const active = current || todo.slice(0, 1);
+  const rest = current ? todo : todo.slice(1);
   const { jamos, typedCount } = currentSyllableJamos(word.korean, typedJamoCount);
 
   // 오타가 나면 표시했다가, 올바른 입력으로 진행하면 해제한다.
@@ -55,9 +58,16 @@ export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }:
       </p>
 
       <p className="text-center text-[30px] font-bold tracking-[3px] leading-[1.4]">
-        {/* 입력이 끝났거나 진행 중인 글자는 진하게, 아직 안 친 글자는 흐리게 */}
-        <span data-testid="word-typed" className="text-[#36454d]">{done + current}</span>
-        <span data-testid="word-remaining" className="text-[#36454d]/40">{todo}</span>
+        {/* 친 글자는 진하게, 지금 칠 음절은 진하게 깜빡이고, 남은 글자는 흐리게.
+            '동작 줄이기' 설정이면 깜빡이지 않는다. */}
+        <span data-testid="word-typed" className="text-[#36454d]">{done}</span>
+        <span
+          data-testid="word-current"
+          className="text-[#36454d] animate-soft-pulse motion-reduce:animate-none"
+        >
+          {active}
+        </span>
+        <span data-testid="word-remaining" className="text-[#36454d]/40">{rest}</span>
       </p>
 
       {word.english && (

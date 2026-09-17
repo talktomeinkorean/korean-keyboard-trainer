@@ -32,11 +32,19 @@
 
 @theme {
   --animate-caret-blink: caret-blink 1s step-end infinite;
+  --animate-soft-pulse: soft-pulse 1.2s ease-in-out infinite;
 }
 
 @keyframes caret-blink {
   50% {
     opacity: 0;
+  }
+}
+
+/* 레이스에서 지금 칠 음절 — 사라지지 않고 옅어졌다 돌아와 치면서도 읽힌다 */
+@keyframes soft-pulse {
+  50% {
+    opacity: 0.35;
   }
 }
 
