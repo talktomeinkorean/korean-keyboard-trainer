@@ -135,7 +135,7 @@ function HomeBackdrop() {
         className="absolute inset-x-0 top-0 bg-[linear-gradient(180deg,#8ceb97_34.859%,#90cfff_105.22%)]"
         style={{ height: HERO_HEIGHT }}
       />
-      <div className="absolute left-1/2 top-0 h-[864px] w-[640px] -translate-x-1/2 bg-[url(/home/desktop-home-sm.webp)] bg-size-[100%_100%] bg-no-repeat sm:w-[1920px] sm:bg-[url(/home/desktop-home.webp)]" />
+      <div className="absolute left-1/2 top-0 h-[864px] w-[640px] -translate-x-1/2 bg-[url(/home/home-bg-sm@2x.webp)] bg-size-[100%_100%] bg-no-repeat sm:w-[1920px] sm:bg-[url(/home/home-bg@2x.webp)]" />
     </div>
   );
 }
