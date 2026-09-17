@@ -174,9 +174,11 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         {/* 다음 줄 미리보기와 출처 배지는 키보드 바로 위에 붙는다 */}
         <div className="mt-auto flex w-full flex-col items-center gap-[15px]">
           {isLongText && nextLine && (
+            // 시안 487:11867 — 회색 상자 전체를 50% 로 흐리게 해 아직 칠 차례가 아님을 보인다.
+            // Figma 는 테두리를 안쪽에 그려 40 높이다 — CSS 테두리는 바깥이라 위아래 여백을 1px 씩 줄였다
             <p
               data-testid="next-line"
-              className="w-[330px] max-w-full truncate rounded-[2px] bg-[#36454d]/8 px-[15px] py-[12px] text-[14px] text-[#36454d]/45"
+              className="w-[330px] max-w-full break-words rounded-[2px] border border-[#36454d] bg-[#e6e6e6] px-[20px] py-[9px] font-pretendard text-[14px] font-bold leading-[1.4] text-[#36454d] opacity-50"
             >
               {nextLine}
             </p>

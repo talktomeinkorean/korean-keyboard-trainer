@@ -23,7 +23,7 @@ const byCode = new Map(DUBEOLSIK.map((k) => [k.code, k]));
 /**
  * 키캡 글자 — 위(큰 글자)와 아래(작은 파란 글자).
  * 기본 규칙은 [자모, 영문 자판]이고, 아래 키들만 시안이 따로 정해 두었다.
- * 숫자키는 1 에만 !, 나머지는 아랫글자가 없다.
+ * 숫자키는 1 에만 !, 나머지는 아랫글자가 없다 — 대신 빈 줄을 남겨 1 과 높이를 맞춘다 (시안 487:11870).
  */
 const CAPS: Record<string, [main: string, sub: string]> = {
   Digit1: ['1', '!'],
@@ -106,7 +106,10 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
                 className={keyClasses(isNext, `rounded-[5px] ${keyWidth}`)}
               >
                 <span className="font-pretendard text-[14px] font-bold text-[#36454d]">{cap}</span>
-                <span className="font-dmsans text-[10px] font-bold text-[#5c8499]">{sub}</span>
+                {/* 빈 span 은 높이가 0 이라 숫자가 가운데로 내려간다 — 숫자열은 줄바꿈 없는 공백으로 자리를 채운다 */}
+                <span className="font-dmsans text-[10px] font-bold text-[#5c8499]">
+                  {sub || (code.startsWith('Digit') ? '\u00a0' : '')}
+                </span>
               </button>
             );
           })}
