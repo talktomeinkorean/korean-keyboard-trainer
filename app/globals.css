@@ -17,9 +17,19 @@
   --font-pretendard: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
     "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
   --font-pixel: "NeoDunggeunmo Pro", var(--font-dm-mono);
+  /* 레이스 단어 카드의 문제 번호 (시안 415:10748) */
+  --font-dunggeunmo: "DungGeunMo", var(--font-dm-mono);
   /* 숫자 전용 — 한글이 없으니 숫자에만 쓸 것 */
   --font-vt323: var(--font-vt323-src), var(--font-dm-mono);
   --font-silkscreen: var(--font-silkscreen-src), var(--font-dm-mono);
+}
+
+/* 문제 번호(10/10)에만 쓰므로 숫자와 / 만 남긴 서브셋이다. */
+@font-face {
+  font-family: "DungGeunMo";
+  src: url("/fonts/DungGeunMo-digits.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
 }
 
 /* 홈 화면 카운터 숫자용 픽셀 폰트. 파일이 없으면 DM Mono 로 자동 폴백된다. */
