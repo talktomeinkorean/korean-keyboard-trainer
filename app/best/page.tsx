@@ -6,7 +6,7 @@ import { getServiceClient } from '@/lib/supabase/server';
 import { AutoRefresh } from './AutoRefresh';
 
 /**
- * 사내 대회용 최고 기록 1~5위 화면.
+ * 사내 대회용 최고 기록 1~10위 화면.
  *
  * 기획에서 공개 리더보드는 빠졌으므로 앱 어디에서도 링크하지 않고, 검색에도 올리지 않는다
  * (사이트맵에도 넣지 않는다). 주소를 아는 사람만 들어온다.
@@ -20,7 +20,8 @@ export const metadata: Metadata = {
 // 데이터는 60초 캐시(기록 저장 시 즉시 무효화)라 페이지도 같은 주기로 다시 만든다
 export const revalidate = 60;
 
-const TOP_COUNT = 5;
+// 조회는 상위 10개까지만 한다 (lib/leaderboard/top) — 더 늘리려면 그쪽 limit 도 같이 올릴 것
+const TOP_COUNT = 10;
 const REFRESH_MS = 30_000;
 
 async function loadTop(): Promise<LeaderboardEntry[] | null> {
