@@ -14,6 +14,9 @@ interface Props {
   errorCount?: number;
 }
 
+/** 오타가 나면 카드 테두리와 지금 칠 자모 칩을 이만큼 주황으로 보여준다 */
+export const ERROR_FLASH_MS = 700;
+
 /** 시안의 자모음 블럭 3가지 상태 */
 const CHIP_STATE = {
   correct: 'bg-[#eae5ff] border-[#8166ff] text-[#8166ff]',
@@ -34,22 +37,28 @@ export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }:
   const rest = current ? todo : todo.slice(1);
   const { jamos, typedCount } = currentSyllableJamos(word.korean, typedJamoCount);
 
-  // 오타가 나면 표시했다가, 올바른 입력으로 진행하면 해제한다.
+  // 오타가 나면 ERROR_FLASH_MS 동안 틀림 상태 — 카드 테두리와 지금 칠 자모 칩이 주황이 된다.
+  // 연달아 틀리면 마지막 오타부터 다시 센다.
   const [wrong, setWrong] = useState(false);
   const prevError = useRef(errorCount);
-  const prevTyped = useRef(typedJamoCount);
   useEffect(() => {
-    if (errorCount > prevError.current) setWrong(true);
-    else if (typedJamoCount !== prevTyped.current) setWrong(false);
+    const isNewError = errorCount > prevError.current;
     prevError.current = errorCount;
-    prevTyped.current = typedJamoCount;
-  }, [errorCount, typedJamoCount]);
+    if (!isNewError) return;
+    setWrong(true);
+    // 다음 오타가 나거나 화면을 벗어나면 이전 타이머는 치운다
+    const timer = setTimeout(() => setWrong(false), ERROR_FLASH_MS);
+    return () => clearTimeout(timer);
+  }, [errorCount]);
 
   return (
     // 시안 415:10739 — 250x149. Figma 좌표는 테두리 바깥 기준이라 여백은 테두리 1px 를 뺀 값이다.
     <div
       data-testid="word-card"
-      className="relative w-[250px] max-w-[calc(100%-2rem)] rounded-[2px] border border-[#36454d] bg-white/70 px-[4px] py-[19px]"
+      data-wrong={wrong || undefined}
+      className={`relative w-[250px] max-w-[calc(100%-2rem)] rounded-[2px] border bg-white/70 px-[4px] py-[19px] ${
+        wrong ? 'border-[#ff5e23]' : 'border-[#36454d]'
+      }`}
     >
       {/* 문제 번호는 흐름 밖에 띄운다 — 단어 자리를 밀어내지 않는다 */}
       <p
