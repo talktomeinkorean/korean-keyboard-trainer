@@ -160,7 +160,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               )}
             </div>
           ) : (
-            <p className="text-center text-[50px] tracking-[5px]">{session.currentItem}</p>
+            <p className="text-center font-pretendard text-[50px] font-bold tracking-[5px] text-[#36454d]">
+              {session.currentItem}
+            </p>
           )}
           {(isWord || lesson.stage === 'syllable') && (
             <JamoTrack
