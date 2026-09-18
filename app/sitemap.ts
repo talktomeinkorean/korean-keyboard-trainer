@@ -27,6 +27,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.8,
     });
+    // 단어·문장은 카테고리 화면에서 바로 랜덤 연습을 해서 개별 레슨 페이지로 가는 링크가 없다.
+    // 앱이 링크하지 않는 한 항목짜리 얇은 페이지 수백 개를 색인시키면 사이트 품질 평가만 깎인다.
+    if (category.randomSet) continue;
     for (const lesson of lessons) {
       entries.push({
         url: `${BASE_URL}/lesson/${lesson.id}`,
