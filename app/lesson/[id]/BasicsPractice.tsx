@@ -25,6 +25,8 @@ function drawItems(lesson: Lesson, firstTime: boolean): string[] {
  */
 export function BasicsPractice({ lesson }: { lesson: Lesson }) {
   const [set, setSet] = useState<Lesson | null>(null);
+  // Try Again 을 누를 때마다 올려 새 판을 뽑는다
+  const [draw, setDraw] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -34,8 +36,9 @@ export function BasicsPractice({ lesson }: { lesson: Lesson }) {
     return () => {
       alive = false;
     };
-  }, [lesson]);
+  }, [lesson, draw]);
 
   if (!set) return <main className="min-h-screen" />;
-  return <LessonPlayer lesson={set} />;
+  // key 를 바꿔 화면을 새로 띄운다 — 진행 상태가 깨끗하게 초기화된다
+  return <LessonPlayer key={draw} lesson={set} onRedraw={() => setDraw((n) => n + 1)} />;
 }

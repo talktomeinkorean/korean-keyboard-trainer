@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { LessonPlayer } from './LessonPlayer';
 import type { Lesson, Stage } from '@/lib/curriculum/types';
 
@@ -35,5 +35,49 @@ describe('LessonPlayer — Key Guide', () => {
 
     render(<LessonPlayer lesson={lessonOf('sentence')} />);
     expect(screen.getByTestId('kbd-key-Digit1')).toBeInTheDocument();
+  });
+});
+
+describe('LessonPlayer — Key Guide 기억', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('껐으면 다음에 들어와도 꺼진 채로 시작한다', () => {
+    const { unmount } = render(<LessonPlayer lesson={lessonOf('consonant')} />);
+    fireEvent.click(screen.getByTestId('key-guide-toggle'));
+    expect(hasHighlight()).toBe(false);
+    unmount();
+
+    render(<LessonPlayer lesson={lessonOf('consonant')} />);
+    expect(screen.getByTestId('key-guide-toggle')).toHaveAttribute('aria-checked', 'false');
+    expect(hasHighlight()).toBe(false);
+  });
+});
+
+describe('LessonPlayer — Try Again', () => {
+  beforeEach(() => localStorage.clear());
+
+  /** '가나' 를 끝까지 친다 — ㄱㅏㄴㅏ */
+  function finishLesson() {
+    for (const code of ['KeyR', 'KeyK', 'KeyS', 'KeyK']) {
+      fireEvent.keyDown(window, { code });
+    }
+  }
+
+  it('무작위 세트인 연습은 Try Again 이 새 판을 뽑게 한다', () => {
+    const onRedraw = vi.fn();
+    render(<LessonPlayer lesson={lessonOf('consonant')} onRedraw={onRedraw} />);
+    finishLesson();
+
+    fireEvent.click(screen.getByTestId('practice-result-retry'));
+    expect(onRedraw).toHaveBeenCalledTimes(1);
+  });
+
+  it('지정된 지문은 Try Again 이 같은 글을 다시 친다 (세트를 뽑지 않는다)', () => {
+    render(<LessonPlayer lesson={lessonOf('consonant')} />);
+    finishLesson();
+
+    fireEvent.click(screen.getByTestId('practice-result-retry'));
+    // 결과 팝업이 닫히고 처음부터 다시 시작한다
+    expect(screen.queryByTestId('practice-result-retry')).not.toBeInTheDocument();
   });
 });

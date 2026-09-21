@@ -18,10 +18,17 @@ import { PracticeBackground } from '@/components/PracticeBackground';
 import { LocalProgressStore } from '@/lib/progress/localStore';
 import { categoryForStage } from '@/lib/curriculum/categories';
 import { keysPerMinute } from '@/lib/game/rank';
+import { loadKeyGuide, saveKeyGuide } from '@/lib/game/keyGuidePreference';
 
 const store = new LocalProgressStore();
 
-export function LessonPlayer({ lesson }: { lesson: Lesson }) {
+interface PlayerProps {
+  lesson: Lesson;
+  /** Try Again 을 누르면 호출 — 무작위 세트인 연습은 여기서 새로 뽑는다 */
+  onRedraw?: () => void;
+}
+
+export function LessonPlayer({ lesson, onRedraw }: PlayerProps) {
   const session = useLessonSession({ items: lesson.items });
   const savedRef = useRef(false);
   const isLongText = lesson.stage === 'long_text';
@@ -29,6 +36,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const isExtendedStage = lesson.stage === 'sentence' || isLongText;
   const isBasics = !isExtendedStage && lesson.stage !== 'word';
   const [keyGuide, setKeyGuide] = useState(true);
+  // 레이스와 같은 저장값을 쓴다 — 껐으면 다음 연습에도 꺼진 채로 시작한다
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR 과 초기 HTML 을 맞추려 마운트 후에 읽는다 (muted 와 같은 방식)
+  useEffect(() => setKeyGuide(loadKeyGuide()), []);
   // 시안은 지금 치는 항목의 영어 뜻과 출처를 함께 보여준다
   const gloss = lesson.glosses?.[session.currentIndex] ?? null;
   const source = lesson.sources?.[session.currentIndex] ?? null;
@@ -96,7 +106,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       backHref={backHref}
       onRetry={() => {
         savedRef.current = false;
-        session.reset();
+        // 무작위 세트는 부모가 다시 뽑아 새 판으로 갈아 끼운다 (그때 이 화면이 새로 뜬다)
+        if (onRedraw) onRedraw();
+        else session.reset();
       }}
     />
   );
@@ -202,7 +214,13 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         {/* 문장·긴글에는 Key Guide 가 없다 (시안 1171:9029). 글자를 보고 치는 단계라
             다음 키를 짚어 주지 않는다 — 토글을 감추는 데 그치지 않고 강조도 끈다. */}
         {!isExtendedStage && (
-          <KeyGuideToggle on={keyGuide} onToggle={() => setKeyGuide((v) => !v)} />
+          <KeyGuideToggle
+            on={keyGuide}
+            onToggle={() => setKeyGuide((v) => {
+              saveKeyGuide(!v);
+              return !v;
+            })}
+          />
         )}
       </div>
 
