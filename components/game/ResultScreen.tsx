@@ -187,14 +187,13 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
             />
           </Link>
 
-          {/* 시안: Practice Typing 아래 65.68px (부모 gap 10 + 55.68). 결과 화면은 Q&A 를 접어 두고
-              트로피를 홈보다 18% 크게 쓴다 */}
+          {/* 시안: Practice Typing 아래 65.68px (부모 gap 10 + 55.68). 트로피는 홈보다 18% 크다 */}
           <div className="mt-[55.68px] flex w-[350px] max-w-full flex-col gap-[60px]">
             <div className="flex flex-col gap-[40px]">
               <div ref={prizeRef} data-testid="result-prize-heading" className="scroll-mb-[20px]">
                 <PrizeDrawHeading trophyScale={33.049 / 27.972} />
               </div>
-              <Faq defaultOpen={false} />
+              <Faq />
             </div>
             <TtmikFooter />
           </div>

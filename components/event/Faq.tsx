@@ -87,7 +87,7 @@ const FAQ: { question: string; cardGap: string; answer: ReactNode }[] = [
 ];
 
 /**
- * 이벤트 Q&A. 홈은 전부 펼친 상태(1220:25353), 결과 화면은 전부 접힌 상태(1194:7784).
+ * 이벤트 Q&A. 첫 항목("What can I win?" — 상품 안내)만 펼친 상태로 시작하고 나머지는 접어 둔다.
  * details 로 접고 펼 수 있게 한다.
  *
  * 항목 사이 간격이 상태마다 다르다 — 접힌 시안은 12px, 펼친 시안은 카드 뒤로 22px.
@@ -95,17 +95,17 @@ const FAQ: { question: string; cardGap: string; answer: ReactNode }[] = [
  * 전체 높이가 늘지 않게 한다).
  * 구분선은 details 밖에 둔다 — summary 가 details 의 첫 자식이어야 기본 "Details" 요약이 안 생긴다.
  */
-export function Faq({ defaultOpen }: { defaultOpen: boolean }) {
+export function Faq() {
   return (
     <div className="flex flex-col gap-[12px]">
-      {FAQ.map(({ question, cardGap, answer }) => (
+      {FAQ.map(({ question, cardGap, answer }, i) => (
         <div key={question} className="group/item flex flex-col gap-[12px]">
           {/* 시안: 흰색 0.5px 점선(2px 선 · 2px 틈). 선은 자리를 차지하지 않고 위로 그려진다 —
               높이를 주면 네 줄에서 2px 가 밀린다 */}
           <div aria-hidden className="relative h-0 w-full">
             <div className="absolute inset-x-0 -top-[0.5px] h-[0.5px] bg-[repeating-linear-gradient(90deg,#fff_0_2px,transparent_2px_4px)]" />
           </div>
-          <details open={defaultOpen} className="group">
+          <details open={i === 0} className="group">
             <summary className="flex cursor-pointer list-none items-center gap-[10px] [&::-webkit-details-marker]:hidden">
               {/* 접히면 오른쪽을 본다 — 시안의 pixel-arrow-right 는 이 화살표를 돌린 모양과 같다 */}
               <PixelArrowDown className="size-[20px] shrink-0 -rotate-90 text-[#8ceb97] transition-transform group-open:rotate-0" />
