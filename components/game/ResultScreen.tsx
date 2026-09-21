@@ -32,6 +32,18 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
   // 이미지 처리가 끝난 뒤 뜨는 링크 공유 팝업
   const [showShareLink, setShowShareLink] = useState(false);
 
+  // 저장 직후 이벤트 안내(시안 1278:7091)까지 내려 준다 — 저장한 사람에게 추첨 기간을 바로 보여주기 위해
+  const prizeRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!submitted) return;
+    const smooth = !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    // 팝업이 닫히며 다시 그려진 뒤에 움직여야 위치가 맞는다
+    const id = requestAnimationFrame(() => {
+      prizeRef.current?.scrollIntoView?.({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [submitted]);
+
   const code = encodeResultCode({ timeMs, keysPerMin, backgroundId });
   // 이 주소를 열면 결과 카드가 보이고, 링크 미리보기에도 카드 이미지가 뜬다.
   // 렌더 중에는 window 를 읽지 않는다 (서버 렌더와 어긋난다)
@@ -175,11 +187,12 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
             />
           </Link>
 
-          {/* 시안: Practice Typing 아래 65.68px (부모 gap 10 + 55.68). 결과 화면은 Q&A 를 접어 두고
-              트로피를 홈보다 18% 크게 쓴다 */}
+          {/* 시안: Practice Typing 아래 65.68px (부모 gap 10 + 55.68). 트로피는 홈보다 18% 크다 */}
           <div className="mt-[55.68px] flex w-[350px] max-w-full flex-col gap-[60px]">
             <div className="flex flex-col gap-[40px]">
-              <PrizeDrawHeading trophyScale={33.049 / 27.972} />
+              <div ref={prizeRef} data-testid="result-prize-heading" className="scroll-mb-[20px]">
+                <PrizeDrawHeading trophyScale={33.049 / 27.972} />
+              </div>
               <Faq />
             </div>
             <TtmikFooter />
