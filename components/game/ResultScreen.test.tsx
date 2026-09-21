@@ -184,7 +184,7 @@ describe('Save — 카드 이미지', () => {
   it('이미지가 도착하기 전에 눌러도 기다렸다 저장한다', async () => {
     stubFetchWithCard();
     const share = vi.fn(async () => {});
-    vi.stubGlobal('navigator', { share, canShare: () => true });
+    vi.stubGlobal('navigator', { share, canShare: () => true, maxTouchPoints: 5 });
     open();
 
     // 화면이 뜨자마자 누른다 — 아직 카드가 안 왔을 시점이다
@@ -199,7 +199,7 @@ describe('Save — 카드 이미지', () => {
   it('이미지를 끝내 못 받아도 Save 는 잠기지 않는다 (누르면 아무 일도 없다)', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 500 }) as Response));
     const share = vi.fn(async () => {});
-    vi.stubGlobal('navigator', { share, canShare: () => true });
+    vi.stubGlobal('navigator', { share, canShare: () => true, maxTouchPoints: 5 });
     open();
 
     const button = screen.getByTestId('result-save');
@@ -212,7 +212,7 @@ describe('Save — 카드 이미지', () => {
   it('모바일에서는 카드 이미지를 공유 시트로 넘긴다 (사진첩 저장 경로)', async () => {
     stubFetchWithCard();
     const share = vi.fn(async () => {});
-    vi.stubGlobal('navigator', { share, canShare: () => true });
+    vi.stubGlobal('navigator', { share, canShare: () => true, maxTouchPoints: 5 });
     open();
 
     fireEvent.click(screen.getByTestId('result-save'));
@@ -246,5 +246,27 @@ describe('Save — 카드 이미지', () => {
     await waitFor(() => expect(downloaded).toBe('hangeul-typing-race.png'));
     // 저장은 저장으로 끝난다 — 링크 팝업은 뜨지 않는다
     expect(screen.queryByTestId('share-popup')).not.toBeInTheDocument();
+  });
+
+  it('PC 에 공유 시트가 있어도(맥 사파리) 시트 대신 내려받는다', async () => {
+    stubFetchWithCard();
+    const share = vi.fn(async () => {});
+    // 공유 기능은 있지만 터치 기기가 아니다
+    vi.stubGlobal('navigator', { share, canShare: () => true, maxTouchPoints: 0 });
+    URL.createObjectURL = vi.fn(() => 'blob:card');
+    URL.revokeObjectURL = vi.fn();
+
+    let downloaded: string | null = null;
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      downloaded = this.download;
+    });
+
+    open();
+    fireEvent.click(screen.getByTestId('result-save'));
+
+    await waitFor(() => expect(downloaded).toBe('hangeul-typing-race.png'));
+    expect(share).not.toHaveBeenCalled();
   });
 });
