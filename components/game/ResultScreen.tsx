@@ -25,6 +25,14 @@ interface Props {
 /** 시안 버튼 폭 (265px) */
 const BUTTON = 'w-[265px] max-w-full';
 
+/** 손가락으로 쓰는 기기인지 — 마우스가 있는 PC 는 공유 시트 대신 다운로드를 쓴다 */
+function isTouchDevice(): boolean {
+  return (
+    (navigator.maxTouchPoints ?? 0) > 0 &&
+    (window.matchMedia?.('(pointer: coarse)').matches ?? true)
+  );
+}
+
 export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRetry }: Props) {
   const [showSubmit, setShowSubmit] = useState(false);
   // 이번 기록을 이미 저장했는지 — 한 판에 한 번만 등록되게 한다
@@ -91,7 +99,9 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
     const file = cardFileRef.current ?? (await cardPendingRef.current);
     if (!file) return; // 끝내 못 받은 경우
 
-    if (navigator.canShare?.({ files: [file] })) {
+    // 맥 사파리처럼 PC 에도 공유 시트가 있는 브라우저가 있다 — 시트는 터치 기기에서만 쓴다.
+    // PC 는 곧바로 내려받는 편이 빠르고, 사진첩에 넣을 일도 없다.
+    if (isTouchDevice() && navigator.canShare?.({ files: [file] })) {
       try {
         await navigator.share({ files: [file] });
       } catch {
