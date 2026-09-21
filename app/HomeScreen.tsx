@@ -93,7 +93,7 @@ function PrizeSection() {
       <div className="mx-auto flex w-[350px] max-w-[calc(100%-32px)] flex-col gap-[60px]">
         <div className="flex flex-col gap-[40px]">
           <PrizeDrawHeading id="prize-draw" />
-          <Faq defaultOpen />
+          <Faq />
         </div>
         <TtmikFooter />
       </div>

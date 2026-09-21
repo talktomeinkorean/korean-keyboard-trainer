@@ -180,7 +180,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
           <div className="mt-[55.68px] flex w-[350px] max-w-full flex-col gap-[60px]">
             <div className="flex flex-col gap-[40px]">
               <PrizeDrawHeading trophyScale={33.049 / 27.972} />
-              <Faq defaultOpen={false} />
+              <Faq />
             </div>
             <TtmikFooter />
           </div>
