@@ -51,6 +51,13 @@ export default async function Image({ params }: { params: Promise<{ code: string
         </div>
       </div>
     ),
-    { ...size, fonts: assets.fonts },
+    {
+      ...size,
+      fonts: assets.fonts,
+      // 결과 코드마다 그림이 고정이라 한 번 만들면 다시 만들 일이 없다.
+      // 캐시가 없으면 링크를 긁을 때마다 1초 넘게 그려야 해서, 기다려 주는 시간이
+      // 짧은 미리보기 크롤러(카톡 등)가 이미지를 포기할 수 있다.
+      headers: { 'cache-control': 'public, max-age=31536000, immutable' },
+    },
   );
 }
