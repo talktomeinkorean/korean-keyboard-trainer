@@ -13,9 +13,26 @@ function PixelArrowDown({ className }: { className?: string }) {
 const PURPLE = 'text-[#8166ff]';
 const PURPLE_SOFT = 'text-[#8d78f1]';
 
-/** 목록의 상품명 — 굵게 밑줄 */
-function Product({ children }: { children: string }) {
-  return <strong className="font-bold underline [text-decoration-thickness:10%]">{children}</strong>;
+/** 상품 소개 페이지 — 밑줄 친 상품명에 건다 */
+const PRIZE_LINK = {
+  bootcamp: 'https://ttmik.me/4y2eMdr',
+  courses: 'https://ttmik.me/46EXbfA',
+  stories: 'https://ttmikstories.onelink.me/Mj4f/wormuehx',
+  seyo: 'https://seyo.onelink.me/xicV/wir1spay',
+} as const;
+
+/** 목록의 상품명 — 굵게 밑줄. 누르면 상품 페이지가 새 탭에서 열린다 */
+function Product({ href, children }: { href: string; children: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-bold underline [text-decoration-thickness:10%] hover:text-[#8166ff]"
+    >
+      {children}
+    </a>
+  );
 }
 
 const FAQ: { question: string; cardGap: string; answer: ReactNode }[] = [
@@ -27,16 +44,16 @@ const FAQ: { question: string; cardGap: string; answer: ReactNode }[] = [
         <p className={`leading-[1.5] ${PURPLE}`}>Choose one prize, worth up to $129</p>
         <ul className="list-disc leading-[1.5]">
           <li className="ms-[21px]">
-            Korean <Product>Bootcamp</Product> for Beginners (6 weeks)
+            Korean <Product href={PRIZE_LINK.bootcamp}>Bootcamp</Product> for Beginners (6 weeks)
           </li>
           <li className="ms-[21px]">
-            TTMIK <Product>Courses</Product> (6-month Subscription)
+            TTMIK <Product href={PRIZE_LINK.courses}>Courses</Product> (6-month Subscription)
           </li>
           <li className="ms-[21px]">
-            TTMIK <Product>Stories</Product> (6-month Subscription)
+            TTMIK <Product href={PRIZE_LINK.stories}>Stories</Product> (6-month Subscription)
           </li>
           <li className="ms-[21px]">
-            <Product>Seyo</Product> (6-month Subscription)
+            <Product href={PRIZE_LINK.seyo}>Seyo</Product> (6-month Subscription)
           </li>
         </ul>
       </>
