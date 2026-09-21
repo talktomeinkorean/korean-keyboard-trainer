@@ -41,15 +41,28 @@ export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }:
   // 연달아 틀리면 마지막 오타부터 다시 센다.
   const [wrong, setWrong] = useState(false);
   const prevError = useRef(errorCount);
+  // 어디서 틀렸는지 — 칩은 그 자리에 머물러 있을 때만 주황으로 둔다.
+  // 시간만 보고 칠하면 바로 맞게 쳤을 때 다음 칩이나 다음 단어가 주황이 된다.
+  const [wrongSpot, setWrongSpot] = useState<string | null>(null);
+  const spot = `${word.korean}:${typedJamoCount}`;
+  const spotRef = useRef(spot);
+  useEffect(() => {
+    spotRef.current = spot;
+  }, [spot]);
   useEffect(() => {
     const isNewError = errorCount > prevError.current;
     prevError.current = errorCount;
     if (!isNewError) return;
     setWrong(true);
+    // 오타는 입력을 진행시키지 않으므로 지금 렌더된 자리가 곧 틀린 자리다
+    setWrongSpot(spotRef.current);
     // 다음 오타가 나거나 화면을 벗어나면 이전 타이머는 치운다
     const timer = setTimeout(() => setWrong(false), ERROR_FLASH_MS);
     return () => clearTimeout(timer);
   }, [errorCount]);
+
+  // 칩은 틀린 자리에 그대로 있을 때만 — 테두리는 시간이 다 될 때까지 (오타를 놓치지 않게)
+  const wrongHere = wrong && wrongSpot === spot;
 
   return (
     // 시안 415:10739 — 250x149. Figma 좌표는 테두리 바깥 기준이라 여백은 테두리 1px 를 뺀 값이다.
@@ -97,7 +110,7 @@ export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }:
         <div className="flex items-center justify-center gap-[5px]">
           {jamos.map((jamo, i) => {
             const state: ChipState =
-              i < typedCount ? 'correct' : i === typedCount && wrong ? 'wrong' : 'todo';
+              i < typedCount ? 'correct' : i === typedCount && wrongHere ? 'wrong' : 'todo';
             return (
               <span
                 key={i}

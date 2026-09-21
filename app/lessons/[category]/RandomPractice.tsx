@@ -43,14 +43,17 @@ function drawSet({ pool, size, title, id }: Props): Lesson {
  */
 export function RandomPractice(props: Props) {
   const [lesson, setLesson] = useState<Lesson | null>(null);
+  // Try Again 을 누를 때마다 올려 새 세트를 뽑는다
+  const [draw, setDraw] = useState(0);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 마운트 후 한 번만 뽑는다. 렌더 중에는 뽑을 수 없다.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 마운트 후에 뽑는다. 렌더 중에는 뽑을 수 없다.
     setLesson(drawSet(props));
-    // props 는 서버에서 내려온 고정값이라 한 번만 뽑으면 된다
+    // props 는 서버에서 내려온 고정값이라 id 나 draw 가 바뀔 때만 다시 뽑는다
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.id]);
+  }, [props.id, draw]);
 
   if (!lesson) return <main className="min-h-screen" />;
-  return <LessonPlayer lesson={lesson} />;
+  // key 를 바꿔 화면을 새로 띄운다 — 진행 상태가 깨끗하게 초기화된다
+  return <LessonPlayer key={draw} lesson={lesson} onRedraw={() => setDraw((n) => n + 1)} />;
 }

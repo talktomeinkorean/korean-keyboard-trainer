@@ -6,6 +6,7 @@ import { pickRaceBackground, type RaceBackground } from '@/lib/game/backgrounds'
 import { keysPerMinute } from '@/lib/game/rank';
 import { playSfx, startBgm, pauseBgm, stopBgm } from '@/lib/audio/sounds';
 import { loadMuted, saveMuted } from '@/lib/audio/mutePreference';
+import { loadKeyGuide, saveKeyGuide } from '@/lib/game/keyGuidePreference';
 import { useLessonSession } from '@/lib/session/useLessonSession';
 import { LocalProgressStore } from '@/lib/progress/localStore';
 import { RaceScene } from '@/components/RaceScene';
@@ -52,8 +53,16 @@ function RaceRound({
   onRetry: () => void;
 }) {
   const session = useLessonSession({ items: words.map((w) => w.korean) });
-  // Key Guide — 기본 켜짐
+  // Key Guide — 기본 켜짐. 소리 설정과 같이 저장해 두고 다음 판에도 이어 쓴다.
   const [keyGuide, setKeyGuide] = useState(true);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR 과 초기 HTML 을 맞추려 마운트 후에 읽는다 (muted 와 같은 방식)
+  useEffect(() => setKeyGuide(loadKeyGuide()), []);
+  const toggleKeyGuide = useCallback(() => {
+    setKeyGuide((prev) => {
+      saveKeyGuide(!prev);
+      return !prev;
+    });
+  }, []);
   const [nowMs, setNowMs] = useState<number | null>(null);
   // 시작 팝업을 닫아야 게임이 시작된다
   const [showStartPopup, setShowStartPopup] = useState(true);
@@ -204,7 +213,7 @@ function RaceRound({
         keyGuide={keyGuide}
         onKeyPress={session.handleKey}
       />
-      <KeyGuideToggle on={keyGuide} onToggle={() => setKeyGuide((v) => !v)} />
+      <KeyGuideToggle on={keyGuide} onToggle={toggleKeyGuide} />
 
       {showStartPopup && <StartPopup onStart={() => setShowStartPopup(false)} />}
 

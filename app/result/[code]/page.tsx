@@ -17,7 +17,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const rank = rankFor(value.timeMs);
   return {
-    title: `${formatRaceTime(value.timeMs)} · ${rank.emoji} ${rank.korean} (${rank.english}) — Hangeul Typing Race`,
+    // 링크 미리보기 제목 — 등급 이모지와 기록만 앞세워 도전 의식을 자극한다
+    title: `${rank.emoji} ${formatRaceTime(value.timeMs)} — Think you can beat this?`,
     description: `${rank.message} Type Korean words and race across Seoul.`,
     // 공유 링크마다 페이지가 생기지만 색인 대상은 아니다
     robots: { index: false, follow: true },

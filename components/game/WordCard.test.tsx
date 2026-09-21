@@ -71,6 +71,44 @@ describe('WordCard', () => {
     vi.useRealTimers();
   });
 
+  it('틀린 뒤 바로 맞게 치면 다음 칩은 주황이 아니다 (테두리는 남는다)', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={0} />,
+    );
+    rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={1} />);
+    expect(screen.getByTestId('syllable-jamo-1')).toHaveAttribute('data-state', 'wrong');
+
+    // 타이머가 끝나기 전에 올바르게 입력해 다음 자모로 넘어간다
+    act(() => vi.advanceTimersByTime(100));
+    rerender(<WordCard word={word} typedJamoCount={2} index={1} total={10} errorCount={1} />);
+    expect(screen.getByTestId('syllable-jamo-2')).toHaveAttribute('data-state', 'todo');
+    // 오타를 놓치지 않도록 테두리는 남는다
+    expect(screen.getByTestId('word-card').className).toContain('border-[#ff5e23]');
+    vi.useRealTimers();
+  });
+
+  it('틀린 뒤 다음 단어로 넘어가면 주황 칩이 따라오지 않는다', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={0} />,
+    );
+    rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={1} />);
+
+    act(() => vi.advanceTimersByTime(100));
+    rerender(
+      <WordCard
+        word={{ korean: '사과', english: 'apple' }}
+        typedJamoCount={0}
+        index={2}
+        total={10}
+        errorCount={1}
+      />,
+    );
+    expect(screen.getByTestId('syllable-jamo-0')).toHaveAttribute('data-state', 'todo');
+    vi.useRealTimers();
+  });
+
   describe('오타 테두리', () => {
     afterEach(() => vi.useRealTimers());
     const card = () => screen.getByTestId('word-card');
