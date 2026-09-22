@@ -38,15 +38,15 @@ const FIELD_ROW =
 const FIELD_LABEL = 'shrink-0 text-[10px] tracking-[-0.19px] text-[#6b8999]';
 const FIELD_INPUT =
   'min-w-0 flex-1 text-[12px] tracking-[-0.228px] text-[#36454d] outline-none placeholder:text-[#b8c5cc]';
-// 시안 체크박스: 20x20 영역 안의 11.5px 사각형.
-// 체크하면 칸을 칠하지 않고 안에 체크 표시를 그린다 (시안: ☑).
+// 시안 체크박스 (20x20 아이콘) — 체크하면 칸이 연한 파랑으로 차고 체크 표시가 칸 밖까지 뻗는다.
+// 기본 체크박스 모양을 끄고 아이콘을 배경으로 깐다.
 const CHECKBOX =
-  'relative size-[11.557px] shrink-0 appearance-none border-[1.111px] border-[#6b8999] ' +
-  'checked:border-[#36454d] ' +
-  "checked:after:absolute checked:after:left-[3.2px] checked:after:top-[0.4px] " +
-  'checked:after:h-[6.5px] checked:after:w-[3.2px] checked:after:rotate-45 ' +
-  'checked:after:border-b-[1.4px] checked:after:border-r-[1.4px] checked:after:border-[#36454d] ' +
-  "checked:after:content-['']";
+  'size-[20px] shrink-0 appearance-none bg-contain bg-center bg-no-repeat';
+const CHECKBOX_ICON = { on: '/race/checkbox-on.svg', off: '/race/checkbox-off.svg' } as const;
+
+function checkboxStyle(checked: boolean) {
+  return { backgroundImage: `url(${checked ? CHECKBOX_ICON.on : CHECKBOX_ICON.off})` };
+}
 
 /** 기록 저장 폼 (시안 519:14583). */
 export function SubmitRecordPopup({ timeMs, accuracy, keysPerMin, onClose, onSubmitted }: Props) {
@@ -158,31 +158,29 @@ export function SubmitRecordPopup({ timeMs, accuracy, keysPerMin, onClose, onSub
 
             <div className="flex w-[250px] max-w-full flex-col gap-[10px]">
               <label className="flex items-start gap-[10px]">
-                <span className="flex size-[20px] shrink-0 items-center justify-center">
-                  <input
-                    type="checkbox"
-                    required
-                    data-testid="consent-required"
-                    checked={consentRequired}
-                    onChange={(e) => setConsentRequired(e.target.checked)}
-                    className={CHECKBOX}
-                  />
-                </span>
+                <input
+                  type="checkbox"
+                  required
+                  data-testid="consent-required"
+                  checked={consentRequired}
+                  onChange={(e) => setConsentRequired(e.target.checked)}
+                  style={checkboxStyle(consentRequired)}
+                  className={CHECKBOX}
+                />
                 <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
                   (Required) I agree to have my name and email used for the Hangeul Day drawing
                   and winner announcements.
                 </span>
               </label>
               <label className="flex items-start gap-[10px]">
-                <span className="flex size-[20px] shrink-0 items-center justify-center">
-                  <input
-                    type="checkbox"
-                    data-testid="consent-marketing"
-                    checked={consentMarketing}
-                    onChange={(e) => setConsentMarketing(e.target.checked)}
-                    className={CHECKBOX}
-                  />
-                </span>
+                <input
+                  type="checkbox"
+                  data-testid="consent-marketing"
+                  checked={consentMarketing}
+                  onChange={(e) => setConsentMarketing(e.target.checked)}
+                  style={checkboxStyle(consentMarketing)}
+                  className={CHECKBOX}
+                />
                 <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
                   (Optional) Subscribe to the TTMIK newsletter and{' '}
                   <strong className="font-bold">get 50% OFF</strong> a TTMIK Courses yearly plan 🎁
