@@ -13,6 +13,8 @@ import { RaceScene } from '@/components/RaceScene';
 import { Keyboard } from '@/components/Keyboard';
 import { ResultScreen } from '@/components/game/ResultScreen';
 import { StartPopup } from '@/components/StartPopup';
+import { Coachmark } from '@/components/game/Coachmark';
+import { hasSeenCoachmark, markCoachmarkSeen } from '@/lib/game/coachmarkSeen';
 import { ExitPopup } from '@/components/game/ExitPopup';
 import { GameTopBar } from '@/components/game/GameTopBar';
 import { WordCard } from '@/components/game/WordCard';
@@ -68,6 +70,8 @@ function RaceRound({
   const [showStartPopup, setShowStartPopup] = useState(true);
   // 나가기 확인 팝업
   const [showExitPopup, setShowExitPopup] = useState(false);
+  // 조작 안내 — 시작 팝업을 닫은 뒤 처음 한 번만 뜬다
+  const [showCoachmark, setShowCoachmark] = useState(false);
 
   // 소리 설정 — 기본 켜짐. SSR 과 초기 HTML 을 맞추려 마운트 후 저장값을 읽는다.
   const [muted, setMuted] = useState(false);
@@ -128,7 +132,7 @@ function RaceRound({
   // 키 입력 캡처 — LessonPlayer 와 동일 (IME 회피)
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (showStartPopup || showExitPopup) return; // 팝업이 떠 있는 동안은 게임 입력을 받지 않는다
+      if (showStartPopup || showExitPopup || showCoachmark) return; // 팝업·안내가 떠 있는 동안은 게임 입력을 받지 않는다
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       // 폼 입력(닉네임/이메일 등)에 포커스가 있으면 게임 키 캡처를 하지 않는다
       const target = e.target as HTMLElement;
@@ -144,7 +148,7 @@ function RaceRound({
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [session, showStartPopup, showExitPopup]);
+  }, [session, showStartPopup, showExitPopup, showCoachmark]);
 
   // 나가기 팝업이 떠 있는 동안 흐른 시간의 합 — 기록에서 빼야 시간이 멈춘 것처럼 보인다
   const [pausedMs, setPausedMs] = useState(0);
@@ -215,7 +219,24 @@ function RaceRound({
       />
       <KeyGuideToggle on={keyGuide} onToggle={toggleKeyGuide} />
 
-      {showStartPopup && <StartPopup onStart={() => setShowStartPopup(false)} />}
+      {showStartPopup && (
+        <StartPopup
+          onStart={() => {
+            setShowStartPopup(false);
+            // 저장값은 이 시점에 읽는다 — 서버 렌더와 초기 HTML 을 맞추기 위해서다
+            if (!hasSeenCoachmark()) setShowCoachmark(true);
+          }}
+        />
+      )}
+
+      {showCoachmark && (
+        <Coachmark
+          onClose={() => {
+            markCoachmarkSeen();
+            setShowCoachmark(false);
+          }}
+        />
+      )}
 
       {showExitPopup && (
         <ExitPopup

@@ -26,6 +26,9 @@ async function startRace() {
 
   // 시작 팝업을 닫아야 입력을 받는다
   fireEvent.click(await screen.findByRole('button', { name: 'Game Start' }));
+  // 첫 방문이면 조작 안내가 덮으므로 닫고 시작한다
+  const coachmark = screen.queryByTestId('coachmark');
+  if (coachmark) fireEvent.click(coachmark);
   // 아무 두벌식 키나 누르면 타이머가 시작된다 (오타여도 시작 시각은 기록된다)
   act(() => {
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyR', bubbles: true }));
@@ -38,6 +41,28 @@ function advance(ms: number) {
     vi.advanceTimersByTime(ms);
   });
 }
+
+describe('조작 안내(코치마크)', () => {
+  it('첫 판 시작 직후 한 번만 뜨고, 닫으면 다시 뜨지 않는다', async () => {
+    localStorage.clear();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, json: async () => ({ words: [{ korean: '사과', english: 'apple' }] }) })),
+    );
+
+    const first = render(<RaceGame />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Game Start' }));
+    const coachmark = screen.getByTestId('coachmark');
+    fireEvent.click(coachmark);
+    expect(screen.queryByTestId('coachmark')).not.toBeInTheDocument();
+    first.unmount();
+
+    // 두 번째 방문 — 저장값이 남아 있어 뜨지 않는다
+    render(<RaceGame />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Game Start' }));
+    expect(screen.queryByTestId('coachmark')).not.toBeInTheDocument();
+  });
+});
 
 describe('레이스 타이머와 BGM 일시정지', () => {
   beforeEach(() => {
