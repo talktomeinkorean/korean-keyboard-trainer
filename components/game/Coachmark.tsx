@@ -15,7 +15,7 @@ interface Props {
  * 첫 판 시작 직후 한 번만 뜨는 조작 안내.
  *
  * 이미지 안에 카드·키보드 그림이 함께 들어 있어(시안 그대로) 실제 화면 위에 덮어 쓴다.
- * 시안의 어두운 막은 지워서 뒤 게임 화면이 그대로 비친다 — 안내 문구와 그림만 얹힌다.
+ * 어두운 막(#36454D, 70%)은 이미지에서 빼고 CSS 로 깐다 — 진하기를 코드에서 조절할 수 있다.
  * 화면 비율이 시안과 달라도 잘리기만 하도록 cover 로 채운다.
  */
 export function Coachmark({ onClose }: Props) {
@@ -31,7 +31,7 @@ export function Coachmark({ onClose }: Props) {
         e.preventDefault();
         onClose();
       }}
-      className="fixed inset-0 z-[70] cursor-pointer"
+      className="fixed inset-0 z-[70] cursor-pointer bg-[#36454DB2]"
     >
       <picture>
         <source media="(min-width: 640px)" srcSet={DESKTOP_SRC} />
