@@ -224,7 +224,7 @@ function RaceRound({
           onStart={() => {
             setShowStartPopup(false);
             // 저장값은 이 시점에 읽는다 — 서버 렌더와 초기 HTML 을 맞추기 위해서다
-            if (!hasSeenCoachmark()) setShowCoachmark(true);
+            if (hasSeenCoachmark()) setShowCoachmark(true);
           }}
         />
       )}
