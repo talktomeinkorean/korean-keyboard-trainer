@@ -38,9 +38,15 @@ const FIELD_ROW =
 const FIELD_LABEL = 'shrink-0 text-[10px] tracking-[-0.19px] text-[#6b8999]';
 const FIELD_INPUT =
   'min-w-0 flex-1 text-[12px] tracking-[-0.228px] text-[#36454d] outline-none placeholder:text-[#b8c5cc]';
-// 시안 체크박스: 20x20 영역 안의 11.5px 사각형
+// 시안 체크박스: 20x20 영역 안의 11.5px 사각형.
+// 체크하면 칸을 칠하지 않고 안에 체크 표시를 그린다 (시안: ☑).
 const CHECKBOX =
-  'size-[11.557px] shrink-0 appearance-none border-[1.111px] border-[#6b8999] checked:border-[#36454d] checked:bg-[#36454d]';
+  'relative size-[11.557px] shrink-0 appearance-none border-[1.111px] border-[#6b8999] ' +
+  'checked:border-[#36454d] ' +
+  "checked:after:absolute checked:after:left-[3.2px] checked:after:top-[0.4px] " +
+  'checked:after:h-[6.5px] checked:after:w-[3.2px] checked:after:rotate-45 ' +
+  'checked:after:border-b-[1.4px] checked:after:border-r-[1.4px] checked:after:border-[#36454d] ' +
+  "checked:after:content-['']";
 
 /** 기록 저장 폼 (시안 519:14583). */
 export function SubmitRecordPopup({ timeMs, accuracy, keysPerMin, onClose, onSubmitted }: Props) {
@@ -178,8 +184,8 @@ export function SubmitRecordPopup({ timeMs, accuracy, keysPerMin, onClose, onSub
                   />
                 </span>
                 <span className="font-dmsans text-[14px] leading-[1.4] text-[#6b8999]">
-                  (Optional) Subscribe to the TTMIK newsletter and get 50% OFF a yearly Courses
-                  subscription 🎁
+                  (Optional) Subscribe to the TTMIK newsletter and{' '}
+                  <strong className="font-bold">get 50% OFF</strong> a TTMIK Courses yearly plan 🎁
                 </span>
               </label>
             </div>

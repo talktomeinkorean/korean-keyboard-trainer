@@ -35,9 +35,17 @@ describe('SubmitRecordPopup 동의 항목', () => {
     expect(
       screen.getByText(/I agree to have my name and email used for the Hangeul Day drawing/),
     ).toBeInTheDocument();
+    // "get 50% OFF" 만 굵게 들어가 요소가 나뉘므로 문구 전체로 찾는다
     expect(
-      screen.getByText(/Subscribe to the TTMIK newsletter and get 50% OFF a yearly Courses/),
+      screen.getByText(
+        (_, el) =>
+          el?.tagName === 'SPAN' &&
+          /Subscribe to the TTMIK newsletter and get 50% OFF a TTMIK Courses yearly plan/.test(
+            el.textContent ?? '',
+          ),
+      ),
     ).toBeInTheDocument();
+    expect(screen.getByText('get 50% OFF').tagName).toBe('STRONG');
   });
 
   it('필수 동의 전에는 저장 버튼이 비활성이다', () => {
