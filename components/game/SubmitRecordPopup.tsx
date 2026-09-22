@@ -196,7 +196,7 @@ export function SubmitRecordPopup({ timeMs, accuracy, keysPerMin, onClose, onSub
             disabled={state.step === 'submitting' || !consentRequired}
             className={`${PIXEL_BUTTON} w-[200px] disabled:opacity-50`}
           >
-            {state.step === 'submitting' ? 'Saving…' : 'Submit Record'}
+            {state.step === 'submitting' ? 'Saving…' : 'Save Record'}
           </button>
           {state.step === 'error' && (
             <p data-testid="submit-error" className="font-dmsans text-[12px] text-[#ff5e23]">
