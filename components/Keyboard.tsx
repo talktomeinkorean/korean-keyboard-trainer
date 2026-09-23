@@ -24,9 +24,6 @@ const byCode = new Map(DUBEOLSIK.map((k) => [k.code, k]));
  * 키캡 글자 — 위(큰 글자)와 아래(작은 파란 글자).
  * 기본 규칙은 [자모, 영문 자판]이고, 아래 키들만 시안이 따로 정해 두었다.
  * 숫자키는 1 에만 !, 나머지는 아랫글자가 없다 — 대신 빈 줄을 남겨 1 과 높이를 맞춘다 (시안 487:11870).
- *
- * `:` `"` `?` 처럼 윗글자를 크게 적는 키는 눌렀을 때도 그 글자가 나와야 한다 —
- * 보이는 대로 눌렀는데 `/` 가 나오면 Shift 를 따로 눌러야 하는 줄 모른다.
  */
 const CAPS: Record<string, [main: string, sub: string]> = {
   Digit1: ['1', '!'],
@@ -34,6 +31,14 @@ const CAPS: Record<string, [main: string, sub: string]> = {
   Quote: ['"', "'"],
   Slash: ['?', ''],
 };
+
+/**
+ * 탭만 해도 윗글자가 나오는 키 — 물리 자판과 다르게 두는 예외다.
+ * 연습 내용에 `?` 는 160번 나오는데 `/` 는 한 번도 안 나온다. 키캡에도 `?` 만 적혀 있어서,
+ * 물리 키보드가 없는 모바일에서는 Shift 를 눌러야 하는 줄 알 방법이 없다.
+ * `'` `"` 는 둘 다 쓰이므로(긴 글에서 43번·38번) 자판 그대로 Shift 를 눌러야 `"` 가 나온다.
+ */
+const TAP_TYPES_SHIFT = new Set(['Slash']);
 
 /**
  * 시안 키 폭 — 자모 34px, 문장 30px(한 줄이 11키라 더 좁다).
@@ -99,8 +104,7 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
             const isNext = keyGuide && code === nextCode;
             const [main, sub] = CAPS[code] ?? [k.jamo, code.startsWith('Key') ? code.slice(3) : ''];
             const cap = shiftOn && k.shift ? k.shift : main;
-            // 키캡에 윗글자가 적힌 키는 탭만 해도 그 글자가 나오게 한다
-            const capNeedsShift = main === k.shift;
+            const capNeedsShift = TAP_TYPES_SHIFT.has(code);
             return (
               <button
                 key={code}
