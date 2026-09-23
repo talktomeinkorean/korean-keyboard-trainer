@@ -118,8 +118,13 @@ export function Faq() {
       {FAQ.map(({ question, cardGap, answer }, i) => (
         <div key={question} className="group/item flex flex-col gap-[12px]">
           {/* 시안: 흰색 0.5px 점선(2px 선 · 2px 틈). 선은 자리를 차지하지 않고 위로 그려진다 —
-              높이를 주면 네 줄에서 2px 가 밀린다 */}
-          <div aria-hidden className="relative h-0 w-full">
+              높이를 주면 네 줄에서 2px 가 밀린다.
+              첫 점선은 결과 화면이 저장 직후 여기까지 스크롤하는 기준이다 (ResultScreen) */}
+          <div
+            aria-hidden
+            data-testid={i === 0 ? 'faq-first-divider' : undefined}
+            className="relative h-0 w-full"
+          >
             <div className="absolute inset-x-0 -top-[0.5px] h-[0.5px] bg-[repeating-linear-gradient(90deg,#fff_0_2px,transparent_2px_4px)]" />
           </div>
           <details open={i === 0} className="group">
@@ -128,10 +133,8 @@ export function Faq() {
               <PixelArrowDown className="size-[20px] shrink-0 -rotate-90 text-[#8ceb97] transition-transform group-open:rotate-0" />
               <span className="font-dmsans text-[15px] font-bold leading-[1.5] text-white">{question}</span>
             </summary>
-            {/* 첫 항목(상품 안내)은 결과 화면이 저장 직후 여기까지 스크롤한다 (ResultScreen) */}
             <div
-              data-testid={i === 0 ? 'faq-first-answer' : undefined}
-              className={`mt-[12px] mb-[10px] flex flex-col ${cardGap} scroll-mb-[20px] rounded-[10px] bg-white p-[20px] font-dmsans text-[14px] text-black group-last/item:mb-0`}
+              className={`mt-[12px] mb-[10px] flex flex-col ${cardGap} rounded-[10px] bg-white p-[20px] font-dmsans text-[14px] text-black group-last/item:mb-0`}
             >
               {answer}
             </div>

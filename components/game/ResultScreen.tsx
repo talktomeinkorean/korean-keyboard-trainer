@@ -41,9 +41,10 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
   const [showShareLink, setShowShareLink] = useState(false);
 
   /**
-   * 저장 직후 이벤트 안내(시안 1278:7091)까지 내려 준다 — 저장한 사람에게 상품과 추첨 기간을 바로 보여준다.
+   * 저장 직후 이벤트 안내(시안 1278:7091)까지 내려 준다 — 저장한 사람에게 추첨 안내를 바로 보여준다.
    * 내려가는 양을 px 로 정하면 화면 높이마다 보이는 범위가 달라지므로,
-   * "What can I win?" 답변 카드의 아래끝을 화면 아래에 맞춘다 — 어떤 화면에서도 상품 목록까지는 보인다.
+   * Q&A 첫 점선을 화면 맨 아래에 맞춘다 — 어떤 화면에서도 트로피부터 추첨 기간까지는 보이고
+   * Q&A 가 화면 경계에서 시작해 더 볼 게 있다는 것이 드러난다.
    */
   const prizeRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -52,7 +53,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
     // 팝업이 닫히며 다시 그려진 뒤에 움직여야 위치가 맞는다
     const id = requestAnimationFrame(() => {
       const target =
-        prizeRef.current?.querySelector('[data-testid="faq-first-answer"]') ?? prizeRef.current;
+        prizeRef.current?.querySelector('[data-testid="faq-first-divider"]') ?? prizeRef.current;
       target?.scrollIntoView?.({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
     });
     return () => cancelAnimationFrame(id);
