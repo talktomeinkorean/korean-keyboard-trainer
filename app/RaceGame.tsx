@@ -211,13 +211,16 @@ function RaceRound({
         </div>
       </RaceScene>
 
-      <Keyboard
-        nextCode={session.nextCode}
-        nextShift={session.nextShift}
-        keyGuide={keyGuide}
-        onKeyPress={session.handleKey}
-      />
-      <KeyGuideToggle on={keyGuide} onToggle={toggleKeyGuide} />
+      {/* 코치마크가 이 덩어리에 구멍을 뚫는다 — main 의 gap-4 를 그대로 물려받아 간격은 그대로다 */}
+      <div data-testid="race-keyboard-block" className="flex flex-col items-center gap-4">
+        <Keyboard
+          nextCode={session.nextCode}
+          nextShift={session.nextShift}
+          keyGuide={keyGuide}
+          onKeyPress={session.handleKey}
+        />
+        <KeyGuideToggle on={keyGuide} onToggle={toggleKeyGuide} />
+      </div>
 
       {showStartPopup && (
         <StartPopup
