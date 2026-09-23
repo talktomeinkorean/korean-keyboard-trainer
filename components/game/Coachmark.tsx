@@ -3,12 +3,29 @@
 /* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 화살표라 최적화가 필요 없다. */
 import { useCallback, useEffect, useState } from 'react';
 
-/** 시안에서 내보낸 점선 화살표 (흰색) */
-const ARROW = {
-  word: '/race/coachmark/arrow-word.svg',
-  hint: '/race/coachmark/arrow-hint.svg',
-  start: '/race/coachmark/arrow-start.svg',
+/**
+ * 시안에서 내보낸 점선 화살표 (흰색).
+ * tail 은 SVG 안에서 꼬리 끝이 있는 자리(0~1)다 — 이 점을 구멍 테두리에 붙인다.
+ * 화살촉은 반대쪽 끝에 있어 자연히 문구를 가리킨다.
+ */
+const ARROWS = {
+  // 아래쪽에서 오른쪽으로 빠져나와 단어 구멍의 왼쪽 테두리에 닿는다
+  word: { src: '/race/coachmark/arrow-word.svg', w: 34.616, h: 48.747, tail: { x: 0.336, y: 0.988 } },
+  // 위쪽 왼편에서 시작해 자모 칩 구멍의 오른쪽 테두리에 닿는다
+  hint: { src: '/race/coachmark/arrow-hint.svg', w: 44.99, h: 60.195, tail: { x: 0.011, y: 0 } },
+  // 아래로 내려와 키보드 구멍의 윗 테두리에 닿는다
+  start: { src: '/race/coachmark/arrow-start.svg', w: 21.121, h: 40.588, tail: { x: 0, y: 0.986 } },
 } as const;
+
+/** 꼬리 끝을 (x, y) 에 맞춰 화살표를 놓는 좌표 */
+function arrowAt(arrow: (typeof ARROWS)[keyof typeof ARROWS], x: number, y: number) {
+  return {
+    left: x - arrow.tail.x * arrow.w,
+    top: y - arrow.tail.y * arrow.h,
+    width: arrow.w,
+    height: arrow.h,
+  };
+}
 
 const ALT =
   'Type the word shown. The letter chips are a hint if you need it. To start, tap the first letter or press it on your keyboard.';
@@ -59,14 +76,24 @@ function measureHoles(): { word: Rect; chips: Rect; keyboard: Rect } | null {
   // 가로는 글자 폭(Range), 세로는 줄 상자에서 위아래 3.5 씩 깎은 값 — 시안의 47px 이 된다
   const line = wordLine.getBoundingClientRect();
 
+  const chipsRect = chipRow.getBoundingClientRect();
+  /** 시안 크기를 지키되 내용이 더 넓으면 그만큼 넓혀 가운데에 맞춘다 */
+  const centered = (r: DOMRect, min: number, padX: number) => {
+    const width = Math.max(min, r.width + padX * 2);
+    return { left: r.left + r.width / 2 - width / 2, width };
+  };
+
   return {
     word: {
-      left: ink.left - 3,
-      width: ink.width + 6,
+      ...centered(ink, MIN_HOLE.word, 3),
       top: line.top + 3.5,
       height: line.height - 7,
     },
-    chips: pad(chipRow.getBoundingClientRect(), 2.5, 11),
+    chips: {
+      ...centered(chipsRect, MIN_HOLE.chips, 2.5),
+      top: chipsRect.top - 11,
+      height: chipsRect.height + 22,
+    },
     keyboard: pad(keyboard.getBoundingClientRect(), 4.5, 5),
   };
 }
@@ -89,8 +116,14 @@ function holePath({ left, top, width, height }: Rect): string {
  */
 const TEXT = 'absolute inset-x-0 text-center text-[15px] leading-[1.2] text-[#75ff85]';
 
-/** 시안에서 화살표가 놓인 가로 위치 — 컬럼 가운데(196.5)를 기준으로 한 값 */
-const ARROW_X = { word: -98.9, hint: 107.74, start: -135.12 } as const;
+/**
+ * 시안의 구멍 크기 (1604:11683~11685). 글자가 더 길면 그만큼 넓힌다 —
+ * 글자 폭에 딱 맞추면 짧은 단어에서 구멍이 확 줄어 화살표가 문구를 덮는다.
+ */
+const MIN_HOLE = { word: 170, chips: 120 } as const;
+
+/** 키보드 구멍 왼쪽에서 화살표까지 (시안 61.38 - 4) */
+const START_ARROW_X = 57.38;
 
 /**
  * 첫 판 시작 직후 한 번만 뜨는 조작 안내 (시안 1562:17159).
@@ -118,7 +151,6 @@ export function Coachmark({ onClose }: Props) {
   const word = holes?.word;
   const chips = holes?.chips;
   const keyboard = holes?.keyboard;
-  const center = size.w / 2;
 
   return (
     <div
@@ -152,35 +184,28 @@ export function Coachmark({ onClose }: Props) {
 
       {holes && (
         <>
-          {/* 단어 — 구멍 왼쪽 위에서 올라가 문구를 가리킨다 */}
+          {/* 단어 — 구멍 왼쪽 테두리에서 시작해 문구를 가리킨다 */}
           <img
-            src={ARROW.word}
+            src={ARROWS.word.src}
             alt=""
             aria-hidden
-            style={{
-              // 짧은 단어는 구멍이 좁아 화살표가 문구를 덮는다 — 시안 자리보다 오른쪽으로는 안 간다
-              left: Math.min(word!.left - 13.9, center + ARROW_X.word),
-              top: word!.top - 25.1,
-              width: 34.616,
-              height: 48.747,
-            }}
+            style={arrowAt(ARROWS.word, word!.left, word!.top + word!.height / 2)}
             className="absolute"
           />
           <p className={`${TEXT} font-dmsans font-semibold`} style={{ top: word!.top - 34.1 }}>
             Type this word
           </p>
 
-          {/* 자모 칩 — 구멍 오른쪽으로 내려가 문구를 가리킨다 */}
+          {/* 자모 칩 — 구멍 오른쪽 테두리에서 시작해 아래 문구를 가리킨다 */}
           <img
-            src={ARROW.hint}
+            src={ARROWS.hint.src}
             alt=""
             aria-hidden
-            style={{
-              left: Math.max(chips!.left + chips!.width + 47.74, center + ARROW_X.hint),
-              top: chips!.top + 82.45,
-              width: 44.99,
-              height: 60.195,
-            }}
+            style={arrowAt(
+              ARROWS.hint,
+              chips!.left + chips!.width,
+              chips!.top + chips!.height / 2,
+            )}
             className="absolute"
           />
           <p
@@ -192,17 +217,12 @@ export function Coachmark({ onClose }: Props) {
             letter by letter
           </p>
 
-          {/* 키보드 */}
+          {/* 키보드 — 구멍 윗 테두리에서 시작해 문구를 가리킨다 */}
           <img
-            src={ARROW.start}
+            src={ARROWS.start.src}
             alt=""
             aria-hidden
-            style={{
-              left: keyboard!.left + 57.38,
-              top: keyboard!.top - 43.18,
-              width: 21.121,
-              height: 40.588,
-            }}
+            style={arrowAt(ARROWS.start, keyboard!.left + START_ARROW_X, keyboard!.top)}
             className="absolute"
           />
           <p className={`${TEXT} font-dmsans font-bold`} style={{ top: keyboard!.top - 69.71 }}>
