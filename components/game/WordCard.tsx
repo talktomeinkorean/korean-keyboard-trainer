@@ -66,10 +66,12 @@ export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }:
 
   return (
     // 시안 415:10739 — 250x149. Figma 좌표는 테두리 바깥 기준이라 여백은 테두리 1px 를 뺀 값이다.
+    // 카드 뒤 배경을 흐리게 깐다 — 시안 Glass 의 Frost 20 에 해당한다.
+    // Frost 가 몇 px 인지는 Figma 가 알려주지 않아 시안과 눈으로 맞춰 12px 로 정했다.
     <div
       data-testid="word-card"
       data-wrong={wrong || undefined}
-      className={`relative w-[250px] max-w-[calc(100%-2rem)] rounded-[2px] border bg-white/70 px-[4px] py-[19px] ${
+      className={`relative w-[250px] max-w-[calc(100%-2rem)] rounded-[2px] border bg-white/90 px-[4px] py-[19px] backdrop-blur-[12px] ${
         wrong ? 'border-[#ff5e23]' : 'border-[#36454d]'
       }`}
     >
