@@ -193,7 +193,8 @@ function RaceRound({
         running={isPlaying}
         errorCount={session.errorCount}
       >
-        <div className="absolute inset-x-0 top-[29.55px] flex justify-center">
+        {/* 시안 320:22623 — 내비게이션 바 위 여백 24px (원이 50→40 으로 줄며 함께 올라갔다) */}
+        <div className="absolute inset-x-0 top-[24px] flex justify-center">
           <GameTopBar
             elapsedMs={elapsedMs}
             muted={muted}
