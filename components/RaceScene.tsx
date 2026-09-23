@@ -26,6 +26,14 @@ const RUN_SHEET_SRC = '/race/run_sheet.webp';
 // 최근접(pixelated)을 쓰면 축소할 때 1px 디테일이 통째로 날아간다.
 const CHAR_PX = 64;
 
+/**
+ * 캐릭터가 서는 높이 — 씬 아래에서부터의 비율.
+ * 원래 10% 였는데 10px 내려 달라는 요청으로 7.7% 가 됐다 (시안 높이 435 에서 10px = 2.3%).
+ * px 가 아니라 % 로 두는 이유는 씬이 화면 폭에 따라 비례해 줄기 때문이다 —
+ * 좁은 화면에서도 발이 같은 길 위에 떨어진다.
+ */
+const RUNNER_BOTTOM = '7.7%';
+
 /** 오타 느낌표 (시안 에셋, 30x30) */
 const ERROR_POP_SRC = '/race/icons/error-pop.svg';
 /** 느낌표가 떠 있는 시간 — globals.css 의 error-pop 길이와 같아야 한다 */
@@ -105,8 +113,9 @@ export function RaceScene({
           data-testid="race-runner"
           role="img"
           aria-label="runner"
-          className="absolute bottom-[10%] left-[40%]"
+          className="absolute left-[40%]"
           style={{
+            bottom: RUNNER_BOTTOM,
             width: CHAR_PX,
             height: CHAR_PX,
             backgroundImage: `url(${RUN_SHEET_SRC})`,
@@ -127,7 +136,10 @@ export function RaceScene({
             aria-hidden
             data-testid="race-error-pop"
             className="absolute size-[30px] animate-error-pop"
-            style={{ left: `calc(40% + ${CHAR_PX / 2}px)`, bottom: `calc(10% + ${CHAR_PX}px)` }}
+            style={{
+              left: `calc(40% + ${CHAR_PX / 2}px)`,
+              bottom: `calc(${RUNNER_BOTTOM} + ${CHAR_PX}px)`,
+            }}
           />
         )}
       </div>
