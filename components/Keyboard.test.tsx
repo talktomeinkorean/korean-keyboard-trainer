@@ -38,6 +38,27 @@ describe('Keyboard', () => {
     expect(screen.getByTestId('kbd-key-KeyQ').className).toContain('w-[min(30px,');
   });
 
+  // 모바일은 화면 키보드만 쓴다 — 키캡에 ? 가 적혀 있으면 Shift 없이 눌러도 ? 가 나와야 한다
+  it.each([
+    ['kbd-key-Slash', 'Slash'],
+    ['kbd-key-Quote', 'Quote'],
+    ['kbd-key-Semicolon', 'Semicolon'],
+  ])('%s 는 탭만 해도 윗글자로 입력된다', (testId, code) => {
+    const onKeyPress = vi.fn();
+    render(<Keyboard nextCode={null} layout="extended" onKeyPress={onKeyPress} />);
+    fireEvent.click(screen.getByTestId(testId));
+    expect(onKeyPress).toHaveBeenCalledWith(code, true);
+  });
+
+  it('밑글자만 적힌 키는 그대로 Shift 없이 입력된다', () => {
+    const onKeyPress = vi.fn();
+    render(<Keyboard nextCode={null} layout="extended" onKeyPress={onKeyPress} />);
+    fireEvent.click(screen.getByTestId('kbd-key-Comma'));
+    expect(onKeyPress).toHaveBeenCalledWith('Comma', false);
+    fireEvent.click(screen.getByTestId('kbd-key-Digit1'));
+    expect(onKeyPress).toHaveBeenCalledWith('Digit1', false);
+  });
+
   it('nextCode 키에 강조 표시를 한다', () => {
     render(<Keyboard nextCode="KeyR" />);
     expect(screen.getByTestId('kbd-key-KeyR').className).toContain('bg-[#8ceb97]');
