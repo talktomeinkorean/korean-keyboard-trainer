@@ -170,7 +170,7 @@ export function Coachmark({ onClose }: Props) {
             Type this word
           </p>
 
-          {/* 자모 칩 — 구멍 오른쪽으로 내려가 문구를 가리킨다 (시안은 같은 화살표를 180도 돌려 쓴다) */}
+          {/* 자모 칩 — 구멍 오른쪽으로 내려가 문구를 가리킨다 */}
           <img
             src={ARROW.hint}
             alt=""
@@ -181,7 +181,7 @@ export function Coachmark({ onClose }: Props) {
               width: 44.99,
               height: 60.195,
             }}
-            className="absolute rotate-180"
+            className="absolute"
           />
           <p
             className={`${TEXT} font-dmsans font-bold`}
