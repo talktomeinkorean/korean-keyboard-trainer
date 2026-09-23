@@ -9,13 +9,15 @@ interface Props {
   onExit: () => void;
 }
 
+// 시안 320:22623 — 원은 40px 이고 아이콘 크기는 그대로다. 원이 줄어든 만큼 아이콘이 커 보인다.
 const ROUND_BTN =
-  'flex size-[50px] shrink-0 items-center justify-center rounded-full border-[0.75px] ' +
+  'flex size-[40px] shrink-0 items-center justify-center rounded-full border-[0.75px] ' +
   'border-[#36454d] bg-white shadow-[0px_2.5px_5px_-2.5px_rgba(0,0,0,0.1)]';
 
 export function GameTopBar({ elapsedMs, muted, onToggleMuted, onExit }: Props) {
   return (
-    <div className="flex w-full max-w-[347px] items-center justify-between">
+    // 시안은 393 화면에 좌우 24px 여백 — 안쪽 폭 345px
+    <div className="flex w-full max-w-[345px] items-center justify-between">
       <button
         type="button"
         onClick={onToggleMuted}
@@ -45,7 +47,8 @@ export function GameTopBar({ elapsedMs, muted, onToggleMuted, onExit }: Props) {
         <img src="/race/icons/hourglass.svg" alt="" className="h-[24px] w-[15px]" aria-hidden />
         <span
           data-testid="race-timer"
-          className="font-vt323 text-[30px] tabular-nums text-[#36454d]"
+          // leading-none: 줄 상자(45px)가 40px 버튼보다 높아 줄 전체를 2.5px 내려 앉혔다
+          className="font-vt323 text-[30px] leading-none tabular-nums text-[#36454d]"
         >
           {formatRaceTime(elapsedMs)}
         </span>
