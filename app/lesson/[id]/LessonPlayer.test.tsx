@@ -81,3 +81,20 @@ describe('LessonPlayer — Try Again', () => {
     expect(screen.queryByTestId('practice-result-retry')).not.toBeInTheDocument();
   });
 });
+
+describe('LessonPlayer — 화면 키보드로 문장부호 치기', () => {
+  beforeEach(() => localStorage.clear());
+
+  // 모바일은 화면 키보드만 쓴다. 키캡에 ? 가 적혀 있으니 Shift 없이 눌러도 ? 가 들어가야 한다
+  it('? 키를 탭하면 Shift 없이 바로 입력된다', () => {
+    const lesson: Lesson = { id: 'sentence-1', stage: 'sentence', title: 'sentence', items: ['가?'] };
+    render(<LessonPlayer lesson={lesson} />);
+
+    // '가' 를 물리 키보드로 친 뒤, 물음표만 화면 키보드로 탭한다
+    fireEvent.keyDown(window, { code: 'KeyR' });
+    fireEvent.keyDown(window, { code: 'KeyK' });
+    fireEvent.click(screen.getByTestId('kbd-key-Slash'));
+
+    expect(screen.getByTestId('typing-echo')).toHaveTextContent('가?');
+  });
+});

@@ -33,6 +33,14 @@ const CAPS: Record<string, [main: string, sub: string]> = {
 };
 
 /**
+ * 탭만 해도 윗글자가 나오는 키 — 물리 자판과 다르게 두는 예외다.
+ * 연습 내용에 `?` 는 160번 나오는데 `/` 는 한 번도 안 나온다. 키캡에도 `?` 만 적혀 있어서,
+ * 물리 키보드가 없는 모바일에서는 Shift 를 눌러야 하는 줄 알 방법이 없다.
+ * `'` `"` 는 둘 다 쓰이므로(긴 글에서 43번·38번) 자판 그대로 Shift 를 눌러야 `"` 가 나온다.
+ */
+const TAP_TYPES_SHIFT = new Set(['Slash']);
+
+/**
  * 시안 키 폭 — 자모 34px, 문장 30px(한 줄이 11키라 더 좁다).
  * 좁은 화면에선 비율대로 줄어든다. 브레이크포인트를 쓰지 않아 PC 와 모바일이
  * 같은 레이아웃을 유지한다. CSS 변수로 빼지 않는 건 여기서만 쓰기 때문이다 —
@@ -76,8 +84,8 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
   const rows = layout === 'extended' ? EXTENDED_ROWS : BASIC_ROWS;
   const keyWidth = KEY_WIDTH[layout];
 
-  function press(code: string) {
-    onKeyPress?.(code, shiftOn);
+  function press(code: string, shift = false) {
+    onKeyPress?.(code, shiftOn || shift);
     setShiftOn(false);
   }
 
@@ -96,13 +104,14 @@ export function Keyboard({ nextCode, nextShift = false, layout = 'basic', keyGui
             const isNext = keyGuide && code === nextCode;
             const [main, sub] = CAPS[code] ?? [k.jamo, code.startsWith('Key') ? code.slice(3) : ''];
             const cap = shiftOn && k.shift ? k.shift : main;
+            const capNeedsShift = TAP_TYPES_SHIFT.has(code);
             return (
               <button
                 key={code}
                 type="button"
                 data-testid={`kbd-key-${code}`}
                 data-kbd-key
-                onClick={() => press(code)}
+                onClick={() => press(code, capNeedsShift)}
                 className={keyClasses(isNext, `rounded-[5px] ${keyWidth}`)}
               >
                 <span className="font-pretendard text-[14px] font-bold text-[#36454d]">{cap}</span>
