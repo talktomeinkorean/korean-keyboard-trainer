@@ -55,7 +55,7 @@ describe('ResultScreen', () => {
     fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
-    fireEvent.click(screen.getByRole('button', { name: /save record/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     expect(await screen.findByTestId('submit-error')).toHaveTextContent(/isn't open yet/);
     // 실패했으므로 버튼은 잠기지 않는다
@@ -84,7 +84,7 @@ describe('ResultScreen', () => {
     fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
-    fireEvent.click(screen.getByRole('button', { name: /save record/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     // 팝업은 바로 닫히고 결과 화면으로 돌아온다
     await waitFor(() => expect(screen.queryByTestId('submit-popup')).not.toBeInTheDocument());
@@ -109,7 +109,7 @@ describe('ResultScreen', () => {
     fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
-    fireEvent.click(screen.getByRole('button', { name: /save record/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     await waitFor(() => expect(scrollIntoView).toHaveBeenCalled());
     expect(scrollIntoView.mock.calls[0][0]).toMatchObject({ block: 'end' });

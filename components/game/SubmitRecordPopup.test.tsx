@@ -51,7 +51,7 @@ describe('SubmitRecordPopup 동의 항목', () => {
   it('필수 동의 전에는 저장 버튼이 비활성이다', () => {
     stubFetch();
     open();
-    const submit = screen.getByRole('button', { name: /save record/i });
+    const submit = screen.getByRole('button', { name: /submit record/i });
     expect(submit).toBeDisabled();
 
     fireEvent.click(screen.getByTestId('consent-required'));
@@ -69,7 +69,7 @@ describe('SubmitRecordPopup 동의 항목', () => {
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
     fireEvent.click(screen.getByTestId('consent-marketing'));
-    fireEvent.click(screen.getByRole('button', { name: /save record/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     await waitFor(() => expect(sent).toBeDefined());
     expect(sent).toMatchObject({ timeMs: 15000, accuracy: 98, keysPerMin: 120, consentRequired: true, consentMarketing: true });
@@ -97,7 +97,7 @@ describe('SubmitRecordPopup 동의 항목', () => {
     fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
-    fireEvent.click(screen.getByRole('button', { name: /save record/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
     expect(onSubmitted).toHaveBeenCalledTimes(1);
