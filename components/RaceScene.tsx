@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
 import { RACE_BACKGROUNDS } from '@/lib/game/backgrounds';
 
 interface Props {
@@ -9,6 +12,8 @@ interface Props {
   total: number;
   /** 달리기 애니메이션 재생 여부 (게임 진행 중) */
   running?: boolean;
+  /** 누적 오타 수 — 늘어나면 캐릭터 머리 위에 느낌표가 뿅 떴다 사라진다 */
+  errorCount?: number;
   /** 씬 위에 겹쳐 놓을 내용 (상단 바·단어 카드). 시안대로 절대 배치된다. */
   children?: React.ReactNode;
 }
@@ -20,6 +25,11 @@ const RUN_SHEET_SRC = '/race/run_sheet.webp';
 // imageRendering 을 지정하지 않는 이유: 어느 화면에서도 확대가 아니라 1:1 이거나 축소라,
 // 최근접(pixelated)을 쓰면 축소할 때 1px 디테일이 통째로 날아간다.
 const CHAR_PX = 64;
+
+/** 오타 느낌표 (시안 에셋, 30x30) */
+const ERROR_POP_SRC = '/race/icons/error-pop.svg';
+/** 느낌표가 떠 있는 시간 — globals.css 의 error-pop 길이와 같아야 한다 */
+export const ERROR_POP_MS = 600;
 
 /**
  * 레이스 배경 씬 — 서울 파노라마(1983×793, 한강·광화문·을지로 중 하나)를 창(뷰포트)으로 잘라 보여주고,
@@ -33,10 +43,25 @@ export function RaceScene({
   progress,
   total,
   running = false,
+  errorCount = 0,
   children,
 }: Props) {
   const ratio = total > 0 ? Math.min(Math.max(progress / total, 0), 1) : 0;
   const positionX = `${ratio * 100}%`;
+
+  // 오타마다 느낌표를 다시 띄운다. key 를 바꿔 다시 붙여야 연달아 틀려도 처음부터 튀어오른다.
+  const [pop, setPop] = useState(0);
+  const prevError = useRef(errorCount);
+  useEffect(() => {
+    const isNewError = errorCount > prevError.current;
+    prevError.current = errorCount;
+    if (!isNewError) return;
+    setPop((n) => n + 1);
+    // 애니메이션이 끝나면 치운다 ('동작 줄이기' 설정이면 애니메이션이 안 돌아
+    // onAnimationEnd 를 못 믿는다 — 시간으로 지운다)
+    const timer = setTimeout(() => setPop(0), ERROR_POP_MS);
+    return () => clearTimeout(timer);
+  }, [errorCount]);
 
   return (
     // 시안: 화면 최상단부터 435px. 상단 바·단어 카드가 이 안에 겹쳐 들어간다.
@@ -91,6 +116,20 @@ export function RaceScene({
             animation: running ? 'sprite-run 0.5s steps(4) infinite' : undefined,
           }}
         />
+
+        {/* 오타 — 캐릭터 머리 위. 시안 에셋(흰 테두리를 두른 느낌표)이라 어두운 배경에서도 읽힌다 */}
+        {pop > 0 && (
+          // eslint-disable-next-line @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다.
+          <img
+            key={pop}
+            src={ERROR_POP_SRC}
+            alt=""
+            aria-hidden
+            data-testid="race-error-pop"
+            className="absolute size-[30px] animate-error-pop"
+            style={{ left: `calc(40% + ${CHAR_PX / 2}px)`, bottom: `calc(10% + ${CHAR_PX}px)` }}
+          />
+        )}
       </div>
     </div>
   );

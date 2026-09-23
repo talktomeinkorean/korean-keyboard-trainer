@@ -87,7 +87,12 @@ export function WordCard({
       data-testid="word-card"
       data-wrong={wrong || undefined}
       className={`relative w-[250px] max-w-[calc(100%-2rem)] rounded-[2px] border bg-white/70 px-[4px] py-[19px] backdrop-blur-[12px] ${
-        wrong ? "border-[#ff5e23]" : "border-[#36454d]"
+        // 오타 선은 2px 주황빨강 — 1px #ff5e23 은 광화문·을지로 배경에서 묻혔다.
+        // 테두리를 굵히는 대신 안쪽으로 1px 그림자를 덧대 2px 로 보이게 한다 —
+        // border-width 를 바꾸면 카드 높이가 2px 늘었다 줄어 글자가 흔들린다.
+        wrong
+          ? "border-[#FF2B00] shadow-[inset_0_0_0_1px_#FF2B00]"
+          : "border-[#36454d]"
       }`}
     >
       {/* 문제 번호는 흐름 밖에 띄운다 — 단어 자리를 밀어내지 않는다 */}

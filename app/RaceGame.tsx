@@ -191,6 +191,7 @@ function RaceRound({
         progress={session.currentIndex + (session.isComplete ? 1 : 0)}
         total={words.length}
         running={isPlaying}
+        errorCount={session.errorCount}
       >
         <div className="absolute inset-x-0 top-[29.55px] flex justify-center">
           <GameTopBar
