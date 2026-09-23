@@ -19,6 +19,7 @@ import { LocalProgressStore } from '@/lib/progress/localStore';
 import { categoryForStage } from '@/lib/curriculum/categories';
 import { keysPerMinute } from '@/lib/game/rank';
 import { loadKeyGuide, saveKeyGuide } from '@/lib/game/keyGuidePreference';
+import { useErrorFlash } from '@/lib/game/useErrorFlash';
 
 const store = new LocalProgressStore();
 
@@ -114,6 +115,15 @@ export function LessonPlayer({ lesson, onRedraw }: PlayerProps) {
 
   const isWord = lesson.stage === 'word';
   const { done, current, todo } = splitByJamoProgress(session.currentItem, session.typedJamoCount);
+  // 레이스 단어 카드와 같은 표시 — 지금 칠 음절은 깜빡이고, 나머지는 흐리다
+  const active = current || todo.slice(0, 1);
+  const rest = current ? todo : todo.slice(1);
+  // 자모 칩이 있는 연습(자모·단어)은 오타 때 카드 테두리도 함께 빨개진다
+  const { wrong } = useErrorFlash(
+    session.errorCount,
+    `${session.currentItem}:${session.typedJamoCount}`,
+  );
+  const showChips = isWord || lesson.stage === 'syllable';
 
   return (
     // 배경이 밝아서 글자색을 고정한다 — 다크 모드에서 body 색을 물려받으면 안 보인다
@@ -152,14 +162,22 @@ export function LessonPlayer({ lesson, onRedraw }: PlayerProps) {
           )}
         </>
       ) : (
-        <PracticeCard className="mt-[19px] h-[200px] gap-[20px]">
+        <PracticeCard className="mt-[19px] h-[200px] gap-[20px]" wrong={showChips && wrong}>
           {isWord ? (
             <div className="flex w-full flex-col items-center text-center">
-              {/* 시안 415:10849 — Pretendard Bold 50 */}
+              {/* 시안 415:10849 — Pretendard Bold 50.
+                  '동작 줄이기' 설정이면 깜빡이지 않는다 (레이스 단어 카드와 같다) */}
               <p className="font-pretendard text-[50px] font-bold tracking-[5px] text-[#36454d]">
-                {done}
-                {current}
-                <span className="text-[#36454d]/50">{todo}</span>
+                <span data-testid="word-typed">{done}</span>
+                <span
+                  data-testid="word-current"
+                  className="animate-soft-pulse motion-reduce:animate-none"
+                >
+                  {active}
+                </span>
+                <span data-testid="word-remaining" className="text-[#36454d]/50">
+                  {rest}
+                </span>
               </p>
               {gloss && (
                 <p

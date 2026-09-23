@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
-import { WordCard, ERROR_FLASH_MS } from './WordCard';
+import { WordCard } from './WordCard';
+import { ERROR_FLASH_MS } from '@/lib/game/useErrorFlash';
 
 const word = { korean: '한글', english: 'Hangeul' };
 
