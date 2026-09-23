@@ -1,8 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { splitByJamoProgress, currentSyllableJamos } from '@/lib/hangul/jamoGroups';
-import type { RaceWord } from '@/lib/game/raceWord';
+import { useEffect, useRef, useState } from "react";
+import {
+  splitByJamoProgress,
+  currentSyllableJamos,
+} from "@/lib/hangul/jamoGroups";
+import type { RaceWord } from "@/lib/game/raceWord";
 
 interface Props {
   word: RaceWord;
@@ -19,9 +22,9 @@ export const ERROR_FLASH_MS = 700;
 
 /** 시안의 자모음 블럭 3가지 상태 */
 const CHIP_STATE = {
-  correct: 'bg-[#eae5ff] border-[#8166ff] text-[#8166ff]',
-  wrong: 'bg-[#ffece5] border-[#ff5e23] text-[#ff5e23]',
-  todo: 'bg-white border-[#8166ff] text-[#8166ff]',
+  correct: "bg-[#eae5ff] border-[#8166ff] text-[#8166ff]",
+  wrong: "bg-[#ffece5] border-[#ff5e23] text-[#ff5e23]",
+  todo: "bg-white border-[#8166ff] text-[#8166ff]",
 } as const;
 
 type ChipState = keyof typeof CHIP_STATE;
@@ -30,12 +33,24 @@ type ChipState = keyof typeof CHIP_STATE;
  * 배경 씬 위에 겹치는 단어 카드 — 문제 번호, 한글 단어(입력 진행에 따라 진하기 구분),
  * 영어 뜻, 그리고 지금 치고 있는 음절의 자모 칩을 보여준다.
  */
-export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }: Props) {
-  const { done, current, todo } = splitByJamoProgress(word.korean, typedJamoCount);
+export function WordCard({
+  word,
+  typedJamoCount,
+  index,
+  total,
+  errorCount = 0,
+}: Props) {
+  const { done, current, todo } = splitByJamoProgress(
+    word.korean,
+    typedJamoCount,
+  );
   // 지금 칠 음절 — 조합 중이면 그 글자, 아니면 다음 글자
   const active = current || todo.slice(0, 1);
   const rest = current ? todo : todo.slice(1);
-  const { jamos, typedCount } = currentSyllableJamos(word.korean, typedJamoCount);
+  const { jamos, typedCount } = currentSyllableJamos(
+    word.korean,
+    typedJamoCount,
+  );
 
   // 오타가 나면 ERROR_FLASH_MS 동안 틀림 상태 — 카드 테두리와 지금 칠 자모 칩이 주황이 된다.
   // 연달아 틀리면 마지막 오타부터 다시 센다.
@@ -71,8 +86,8 @@ export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }:
     <div
       data-testid="word-card"
       data-wrong={wrong || undefined}
-      className={`relative w-[250px] max-w-[calc(100%-2rem)] rounded-[2px] border bg-white/90 px-[4px] py-[19px] backdrop-blur-[12px] ${
-        wrong ? 'border-[#ff5e23]' : 'border-[#36454d]'
+      className={`relative w-[250px] max-w-[calc(100%-2rem)] rounded-[2px] border bg-white/70 px-[4px] py-[19px] backdrop-blur-[12px] ${
+        wrong ? "border-[#ff5e23]" : "border-[#36454d]"
       }`}
     >
       {/* 문제 번호는 흐름 밖에 띄운다 — 단어 자리를 밀어내지 않는다 */}
@@ -89,14 +104,18 @@ export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }:
               '동작 줄이기' 설정이면 깜빡이지 않는다.
               줄간격 1.8 에 아래 -10px — 시안대로 영어 뜻이 단어 줄에 살짝 겹친다. */}
           <p className="mb-[-10px] font-pretendard text-[30px] font-bold tracking-[3px] leading-[1.8]">
-            <span data-testid="word-typed" className="text-[#36454d]">{done}</span>
+            <span data-testid="word-typed" className="text-[#36454d]">
+              {done}
+            </span>
             <span
               data-testid="word-current"
               className="text-[#36454d] animate-soft-pulse motion-reduce:animate-none"
             >
               {active}
             </span>
-            <span data-testid="word-remaining" className="text-[#36454d]/50">{rest}</span>
+            <span data-testid="word-remaining" className="text-[#36454d]/50">
+              {rest}
+            </span>
           </p>
 
           {word.english && (
@@ -112,7 +131,11 @@ export function WordCard({ word, typedJamoCount, index, total, errorCount = 0 }:
         <div className="flex items-center justify-center gap-[5px]">
           {jamos.map((jamo, i) => {
             const state: ChipState =
-              i < typedCount ? 'correct' : i === typedCount && wrongHere ? 'wrong' : 'todo';
+              i < typedCount
+                ? "correct"
+                : i === typedCount && wrongHere
+                  ? "wrong"
+                  : "todo";
             return (
               <span
                 key={i}
