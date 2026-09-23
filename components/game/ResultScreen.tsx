@@ -40,14 +40,20 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
   // 이미지 처리가 끝난 뒤 뜨는 링크 공유 팝업
   const [showShareLink, setShowShareLink] = useState(false);
 
-  // 저장 직후 이벤트 안내(시안 1278:7091)까지 내려 준다 — 저장한 사람에게 추첨 기간을 바로 보여주기 위해
+  /**
+   * 저장 직후 이벤트 안내(시안 1278:7091)까지 내려 준다 — 저장한 사람에게 상품과 추첨 기간을 바로 보여준다.
+   * 내려가는 양을 px 로 정하면 화면 높이마다 보이는 범위가 달라지므로,
+   * "What can I win?" 답변 카드의 아래끝을 화면 아래에 맞춘다 — 어떤 화면에서도 상품 목록까지는 보인다.
+   */
   const prizeRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!submitted) return;
     const smooth = !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     // 팝업이 닫히며 다시 그려진 뒤에 움직여야 위치가 맞는다
     const id = requestAnimationFrame(() => {
-      prizeRef.current?.scrollIntoView?.({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+      const target =
+        prizeRef.current?.querySelector('[data-testid="faq-first-answer"]') ?? prizeRef.current;
+      target?.scrollIntoView?.({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
     });
     return () => cancelAnimationFrame(id);
   }, [submitted]);
@@ -199,12 +205,9 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
 
           {/* 시안: Practice Typing 아래 65.68px (부모 gap 10 + 55.68). 트로피는 홈보다 18% 크다 */}
           <div className="mt-[55.68px] flex w-[350px] max-w-full flex-col gap-[60px]">
-            <div className="flex flex-col gap-[40px]">
-              {/* 안내를 화면 위쪽으로 올려 추첨 기간과 Q&A 까지 한눈에 들어오게 한다.
-                  140px 를 남겨 두면 바로 위 Practice Typing 버튼이 같이 보여 맥락이 끊기지 않는다. */}
-              <div ref={prizeRef} data-testid="result-prize-heading" className="scroll-mt-[140px]">
-                <PrizeDrawHeading trophyScale={33.049 / 27.972} />
-              </div>
+            {/* 저장 직후 스크롤이 이 덩어리 안의 "What can I win?" 답변까지 내려간다 */}
+            <div ref={prizeRef} data-testid="result-prize-heading" className="flex flex-col gap-[40px]">
+              <PrizeDrawHeading trophyScale={33.049 / 27.972} />
               <Faq />
             </div>
             <TtmikFooter />
