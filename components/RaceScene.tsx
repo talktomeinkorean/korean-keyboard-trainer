@@ -26,6 +26,8 @@ const RUN_SHEET_SRC = '/race/run_sheet.webp';
 // 최근접(pixelated)을 쓰면 축소할 때 1px 디테일이 통째로 날아간다.
 const CHAR_PX = 64;
 
+/** 오타 느낌표 (시안 에셋, 30x30) */
+const ERROR_POP_SRC = '/race/icons/error-pop.svg';
 /** 느낌표가 떠 있는 시간 — globals.css 의 error-pop 길이와 같아야 한다 */
 export const ERROR_POP_MS = 600;
 
@@ -115,19 +117,18 @@ export function RaceScene({
           }}
         />
 
-        {/* 오타 — 캐릭터 머리 위. 픽셀 아트에 맞춰 글꼴 대신 네모 두 개로 그린다.
-            흰 테두리를 둘러 밤거리처럼 어두운 배경에서도 읽히게 한다. */}
+        {/* 오타 — 캐릭터 머리 위. 시안 에셋(흰 테두리를 두른 느낌표)이라 어두운 배경에서도 읽힌다 */}
         {pop > 0 && (
-          <span
+          // eslint-disable-next-line @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다.
+          <img
             key={pop}
+            src={ERROR_POP_SRC}
+            alt=""
             aria-hidden
             data-testid="race-error-pop"
-            className="absolute flex animate-error-pop flex-col items-center gap-[4px]"
+            className="absolute size-[30px] animate-error-pop"
             style={{ left: `calc(40% + ${CHAR_PX / 2}px)`, bottom: `calc(10% + ${CHAR_PX}px)` }}
-          >
-            <span className="block h-[20px] w-[8px] bg-[#FF2B00] shadow-[0_0_0_2px_#fff]" />
-            <span className="block size-[8px] bg-[#FF2B00] shadow-[0_0_0_2px_#fff]" />
-          </span>
+          />
         )}
       </div>
     </div>
