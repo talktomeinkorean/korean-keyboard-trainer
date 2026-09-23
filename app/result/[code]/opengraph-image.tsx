@@ -16,7 +16,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
   const value = decodeResultCode(code);
   if (!value) notFound();
 
-  const { timeMs, keysPerMin } = value;
+  const { timeMs } = value;
   const assets = await loadCardAssets(value);
 
   return new ImageResponse(
@@ -35,7 +35,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
           backgroundImage: 'linear-gradient(180deg, #4d7f92 0%, #36454d 60%)',
         }}
       >
-        {resultCardElement({ timeMs, keysPerMin, height: CARD_HEIGHT, assets })}
+        {resultCardElement({ timeMs, height: CARD_HEIGHT, assets })}
 
         {/* 카드 아래 목표 문구 */}
         <div

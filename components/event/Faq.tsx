@@ -128,8 +128,10 @@ export function Faq() {
               <PixelArrowDown className="size-[20px] shrink-0 -rotate-90 text-[#8ceb97] transition-transform group-open:rotate-0" />
               <span className="font-dmsans text-[15px] font-bold leading-[1.5] text-white">{question}</span>
             </summary>
+            {/* 첫 항목(상품 안내)은 결과 화면이 저장 직후 여기까지 스크롤한다 (ResultScreen) */}
             <div
-              className={`mt-[12px] mb-[10px] flex flex-col ${cardGap} rounded-[10px] bg-white p-[20px] font-dmsans text-[14px] text-black group-last/item:mb-0`}
+              data-testid={i === 0 ? 'faq-first-answer' : undefined}
+              className={`mt-[12px] mb-[10px] flex flex-col ${cardGap} scroll-mb-[20px] rounded-[10px] bg-white p-[20px] font-dmsans text-[14px] text-black group-last/item:mb-0`}
             >
               {answer}
             </div>
