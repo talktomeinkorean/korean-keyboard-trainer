@@ -127,7 +127,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
       <div className="flex min-h-full flex-col">
         {/* 상단 — 뒤의 게임 화면이 블러로 비친다 */}
         <div className="flex shrink-0 flex-col items-center gap-[20px] px-4 pt-[50px] pb-[26px]">
-          <ResultCard timeMs={timeMs} keysPerMin={keysPerMin} backgroundId={backgroundId} />
+          <ResultCard timeMs={timeMs} backgroundId={backgroundId} />
 
           <div className="flex flex-col items-center gap-[10px]">
             {/* 저장 후에는 잠기고 문구가 바뀐다. 새 판을 시작하면 화면이 다시

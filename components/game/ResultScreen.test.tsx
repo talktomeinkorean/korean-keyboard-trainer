@@ -33,7 +33,6 @@ describe('ResultScreen', () => {
     stubFetch();
     open();
     expect(screen.getByTestId('result-time')).toHaveTextContent('00:33.12');
-    expect(screen.getByTestId('result-speed')).toHaveTextContent('112 keys/min');
     expect(screen.getByTestId('result-rank')).toHaveTextContent('토끼');
   });
 
