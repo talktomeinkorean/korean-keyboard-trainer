@@ -47,7 +47,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
     const smooth = !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     // 팝업이 닫히며 다시 그려진 뒤에 움직여야 위치가 맞는다
     const id = requestAnimationFrame(() => {
-      prizeRef.current?.scrollIntoView?.({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
+      prizeRef.current?.scrollIntoView?.({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
     });
     return () => cancelAnimationFrame(id);
   }, [submitted]);
@@ -200,7 +200,9 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
           {/* 시안: Practice Typing 아래 65.68px (부모 gap 10 + 55.68). 트로피는 홈보다 18% 크다 */}
           <div className="mt-[55.68px] flex w-[350px] max-w-full flex-col gap-[60px]">
             <div className="flex flex-col gap-[40px]">
-              <div ref={prizeRef} data-testid="result-prize-heading" className="scroll-mb-[20px]">
+              {/* 안내를 화면 위쪽으로 올려 추첨 기간과 Q&A 까지 한눈에 들어오게 한다.
+                  140px 를 남겨 두면 바로 위 Practice Typing 버튼이 같이 보여 맥락이 끊기지 않는다. */}
+              <div ref={prizeRef} data-testid="result-prize-heading" className="scroll-mt-[140px]">
                 <PrizeDrawHeading trophyScale={33.049 / 27.972} />
               </div>
               <Faq />

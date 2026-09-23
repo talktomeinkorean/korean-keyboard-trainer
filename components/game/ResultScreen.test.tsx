@@ -111,7 +111,7 @@ describe('ResultScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     await waitFor(() => expect(scrollIntoView).toHaveBeenCalled());
-    expect(scrollIntoView.mock.calls[0][0]).toMatchObject({ block: 'end' });
+    expect(scrollIntoView.mock.calls[0][0]).toMatchObject({ block: 'start' });
   });
 
   it('새 판을 시작하면 제출 버튼이 원래대로 돌아온다', async () => {
