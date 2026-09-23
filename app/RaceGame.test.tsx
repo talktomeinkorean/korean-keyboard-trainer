@@ -102,6 +102,45 @@ describe('레이스 타이머와 BGM 일시정지', () => {
     expect(screen.getByTestId('race-timer')).toHaveTextContent('00:04.0');
   });
 
+  it('팝업을 닫는 순간 시계가 뒤로 가지 않는다', async () => {
+    await startRace();
+    advance(2000);
+    expect(screen.getByTestId('race-timer')).toHaveTextContent('00:02.0');
+
+    fireEvent.click(screen.getByTestId('exit-button'));
+    advance(5000);
+    fireEvent.click(screen.getByTestId('exit-popup-close'));
+    // 다음 tick(100ms) 전에도 멈췄던 지점이어야 한다.
+    // 옛 시각에서 늘어난 '멈춘 시간'을 빼면 5초 뒤로 감긴 뒤 다시 튀어오른다.
+    expect(screen.getByTestId('race-timer')).toHaveTextContent('00:02.0');
+    advance(50);
+    expect(screen.getByTestId('race-timer')).toHaveTextContent('00:02.0');
+  });
+
+  it('시작 전에 멈췄던 시간은 기록에서 빼지 않는다', async () => {
+    // 첫 키를 누르기 전에 나가기 팝업을 열었다 닫는다
+    fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ words: [{ korean: '사과', english: 'apple' }] }),
+    }));
+    vi.stubGlobal('fetch', fetchMock as unknown as typeof fetch);
+    render(<RaceGame />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Game Start' }));
+    const coachmark = screen.queryByTestId('coachmark');
+    if (coachmark) fireEvent.click(coachmark);
+
+    fireEvent.click(screen.getByTestId('exit-button'));
+    advance(5000);
+    fireEvent.click(screen.getByTestId('exit-popup-close'));
+
+    // 이제 시작한다 — 시작 전 5초는 뺄 대상이 아니다
+    act(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyR', bubbles: true }));
+    });
+    advance(2000);
+    expect(screen.getByTestId('race-timer')).toHaveTextContent('00:02.0');
+  });
+
   it('팝업을 열면 BGM 은 위치를 남긴 채 멈추고, 닫으면 다시 재생된다', async () => {
     await startRace();
     await waitFor(() => expect(startBgm).toHaveBeenCalled());

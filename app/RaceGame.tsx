@@ -155,14 +155,19 @@ function RaceRound({
   const pauseStartedAtRef = useRef<number | null>(null);
   useEffect(() => {
     if (showExitPopup) {
-      pauseStartedAtRef.current = Date.now();
+      // 아직 첫 키를 누르기 전이면 뺄 시간이 없다 — 재면 시작하자마자 그만큼 0 에 붙어 있게 된다
+      pauseStartedAtRef.current = session.startedAt === null ? null : Date.now();
       return;
     }
     const startedAt = pauseStartedAtRef.current;
-    if (startedAt === null) return; // 첫 렌더 — 아직 멈춘 적이 없다
+    if (startedAt === null) return; // 첫 렌더이거나, 시작 전에 열었다 닫은 경우
     pauseStartedAtRef.current = null;
-    setPausedMs((ms) => ms + (Date.now() - startedAt));
-  }, [showExitPopup]);
+    const now = Date.now();
+    // 멈춘 시간을 더하면서 '지금'도 같이 앞당긴다. 옛 nowMs 에서 늘어난 pausedMs 를 빼면
+    // 다음 tick(100ms) 이 올 때까지 시계가 멈춘 만큼 뒤로 감겼다가 튀어오른다.
+    setPausedMs((ms) => ms + (now - startedAt));
+    setNowMs(now);
+  }, [showExitPopup, session.startedAt]);
 
   // 경과 타이머 — 첫 키 입력부터 완주까지 100ms 간격 갱신 (팝업 중에는 멈춘다)
   useEffect(() => {
