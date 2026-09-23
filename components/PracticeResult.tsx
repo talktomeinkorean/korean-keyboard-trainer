@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘·장식이라 최적화가 필요 없다. */
 import Link from 'next/link';
 import { PIXEL_BUTTON } from './game/pixelButton';
-import { formatRaceTime } from '@/lib/game/rank';
 import { RESULT_LINKS } from '@/lib/content/sources';
 import type { Stage } from '@/lib/curriculum/types';
 
@@ -10,7 +9,6 @@ interface Props {
   stage: Stage;
   /** 레슨 제목. Basics 는 이게 제목이고, 긴 글은 지문 제목으로 쓴다 */
   title: string;
-  timeMs: number;
   /** 분당 타수 — lib/game/rank 의 keysPerMinute 로 계산해서 넘긴다 */
   keysPerMin: number;
   /** Back to Practice 목적지 — 목록이 있는 연습은 그 목록으로 돌아간다 */
@@ -66,7 +64,7 @@ function CardDecoration() {
  * 연습 결과 팝업 (시안 294:18956 · 1171:7822 · 1171:7821 · 519:14075).
  * 틀은 같고, 연습 종류에 따라 제목 구성과 세 번째(보라) 버튼이 달라진다.
  */
-export function PracticeResult({ stage, title, timeMs, keysPerMin, backHref, onRetry }: Props) {
+export function PracticeResult({ stage, title, keysPerMin, backHref, onRetry }: Props) {
   const isBasics = stage === 'consonant' || stage === 'vowel' || stage === 'syllable';
   const isLongText = stage === 'long_text';
   const layout = LAYOUT[isBasics ? 'basics' : isLongText ? 'long' : 'set'];
@@ -103,25 +101,29 @@ export function PracticeResult({ stage, title, timeMs, keysPerMin, backHref, onR
             </p>
           )}
 
-          {/* 기록 */}
+          {/* 기록 — 시안 1562:17191 에서 완주 시간이 빠지고 분당 타수만 남았다 */}
           <div
-            className="flex w-[250px] items-center justify-center rounded-[2px] border border-[#36454d] bg-white px-[5px] py-[15px] shadow-[inset_0_-3px_0_0_rgba(0,0,0,0.25)]"
+            className="flex w-[250px] items-center justify-center rounded-[2px] border border-[#36454d] bg-white px-[25px] py-[16px] shadow-[inset_0_-3px_0_0_rgba(0,0,0,0.25)]"
             style={{ marginTop: layout.titleGap }}
           >
-            <div className="flex flex-col items-center gap-[3px]">
-              <div className="flex items-center gap-[20px] py-[5px]">
-                <img src="/race/icons/hourglass.svg" alt="" aria-hidden className="h-[24.352px] w-[14.685px] shrink-0" />
-                <span data-testid="practice-result-time" className="whitespace-nowrap font-vt323 text-[28px] leading-[1.8]">
-                  {formatRaceTime(timeMs)}
-                </span>
-              </div>
+            <div className="flex w-full flex-col items-center gap-[10px]">
+              <img
+                src="/lessons/result/flag.png"
+                alt=""
+                aria-hidden
+                data-testid="practice-result-flag"
+                className="size-[31.598px] shrink-0"
+              />
               {/* 시안의 선은 자리를 차지하지 않는다 — 높이를 주면 기록 상자가 1px 커진다 */}
-              <div aria-hidden className="relative h-0 w-[200px]">
+              <div aria-hidden className="relative h-0 w-full">
                 <div className="absolute inset-x-0 -top-[0.5px] h-px bg-[#36454d]" />
               </div>
-              <span data-testid="practice-result-speed" className="whitespace-nowrap font-vt323 text-[25px] leading-[1.8]">
+              <span
+                data-testid="practice-result-speed"
+                className="whitespace-nowrap font-dmsans text-[30px] font-bold leading-[1.8]"
+              >
                 {keysPerMin}{' '}
-                <span className="font-dmsans text-[15px] font-medium text-[#6b8999]">keys/min</span>
+                <span className="text-[18px] font-medium text-[#6b8999]">keys/min</span>
               </span>
             </div>
           </div>

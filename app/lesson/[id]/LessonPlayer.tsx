@@ -99,7 +99,6 @@ export function LessonPlayer({ lesson, onRedraw }: PlayerProps) {
     <PracticeResult
       stage={lesson.stage}
       title={lesson.title}
-      timeMs={elapsedMs}
       // 레이스와 같은 기준 — 오타를 뺀 자모 수를 분당으로 환산한다
       keysPerMin={keysPerMinute(session.keystrokes - session.errorCount, elapsedMs)}
       // 끝내고 돌아갈 곳도 헤더 뒤로가기와 같다 — 긴 글은 지문 목록, Basics 는 Basics 목록
