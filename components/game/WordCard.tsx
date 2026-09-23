@@ -86,8 +86,9 @@ export function WordCard({
     <div
       data-testid="word-card"
       data-wrong={wrong || undefined}
-      className={`relative w-[250px] max-w-[calc(100%-2rem)] rounded-[2px] border bg-white/70 px-[4px] py-[19px] backdrop-blur-[12px] ${
-        wrong ? "border-[#ff5e23]" : "border-[#36454d]"
+      className={`relative w-[250px] max-w-[calc(100%-2rem)] rounded-[2px] bg-white/70 px-[4px] py-[19px] backdrop-blur-[12px] ${
+        // 오타 선은 2px 주황빨강 — 1px #ff5e23 은 광화문·을지로 배경에서 묻혔다
+        wrong ? "border-2 border-[#FF2B00]" : "border border-[#36454d]"
       }`}
     >
       {/* 문제 번호는 흐름 밖에 띄운다 — 단어 자리를 밀어내지 않는다 */}

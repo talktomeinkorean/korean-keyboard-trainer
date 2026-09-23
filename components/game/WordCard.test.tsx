@@ -84,7 +84,7 @@ describe('WordCard', () => {
     rerender(<WordCard word={word} typedJamoCount={2} index={1} total={10} errorCount={1} />);
     expect(screen.getByTestId('syllable-jamo-2')).toHaveAttribute('data-state', 'todo');
     // 오타를 놓치지 않도록 테두리는 남는다
-    expect(screen.getByTestId('word-card').className).toContain('border-[#ff5e23]');
+    expect(screen.getByTestId('word-card').className).toContain('border-2 border-[#FF2B00]');
     vi.useRealTimers();
   });
 
@@ -116,16 +116,16 @@ describe('WordCard', () => {
     it('오타가 나면 테두리가 ERROR_FLASH_MS 동안 주황이었다가 돌아온다', () => {
       vi.useFakeTimers();
       const { rerender } = render(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={0} />);
-      expect(card().className).toContain('border-[#36454d]');
+      expect(card().className).toContain('border border-[#36454d]');
 
       rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={1} />);
-      expect(card().className).toContain('border-[#ff5e23]');
-      expect(card().className).not.toContain('border-[#36454d]');
+      expect(card().className).toContain('border-2 border-[#FF2B00]');
+      expect(card().className).not.toContain('border border-[#36454d]');
 
       act(() => vi.advanceTimersByTime(ERROR_FLASH_MS - 1));
-      expect(card().className).toContain('border-[#ff5e23]');
+      expect(card().className).toContain('border-2 border-[#FF2B00]');
       act(() => vi.advanceTimersByTime(1));
-      expect(card().className).toContain('border-[#36454d]');
+      expect(card().className).toContain('border border-[#36454d]');
     });
 
     it('연달아 틀리면 마지막 오타부터 다시 ERROR_FLASH_MS 를 센다', () => {
@@ -137,9 +137,9 @@ describe('WordCard', () => {
       rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={2} />);
       // 첫 오타 기준으로는 이미 끝났을 시점이지만 아직 주황이다
       act(() => vi.advanceTimersByTime(ERROR_FLASH_MS - 1));
-      expect(card().className).toContain('border-[#ff5e23]');
+      expect(card().className).toContain('border-2 border-[#FF2B00]');
       act(() => vi.advanceTimersByTime(1));
-      expect(card().className).toContain('border-[#36454d]');
+      expect(card().className).toContain('border border-[#36454d]');
     });
   });
 
