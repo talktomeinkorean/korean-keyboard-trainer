@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import { currentSyllableJamos } from '@/lib/hangul/jamoGroups';
+import { useErrorFlash } from '@/lib/game/useErrorFlash';
 
 interface Props {
   item: string;
@@ -20,23 +20,13 @@ const CHIP_STATE = {
 export function JamoTrack({ item, typedJamoCount, errorCount }: Props) {
   const { jamos, typedCount } = currentSyllableJamos(item, typedJamoCount);
 
-  // 오타가 나면 지금 칠 칩을 틀림으로 두고, 올바른 입력으로 넘어가면 해제한다.
-  // 마운트 시점의 누적 errorCount 로는 표시하지 않는다.
-  const [wrong, setWrong] = useState(false);
-  const prevError = useRef(errorCount);
-  const prevTyped = useRef(typedJamoCount);
-
-  useEffect(() => {
-    if (errorCount > prevError.current) setWrong(true);
-    else if (typedJamoCount !== prevTyped.current) setWrong(false);
-    prevError.current = errorCount;
-    prevTyped.current = typedJamoCount;
-  }, [errorCount, typedJamoCount]);
+  // 오타 표시는 레이스 단어 카드와 같은 규칙 — 틀린 자리에 머물러 있는 동안만 칠한다
+  const { wrongHere } = useErrorFlash(errorCount, `${item}:${typedJamoCount}`);
 
   return (
     <div data-testid="jamo-track" className="flex items-center gap-[5px]">
       {jamos.map((jamo, i) => {
-        const state = i < typedCount ? 'correct' : i === typedCount && wrong ? 'wrong' : 'todo';
+        const state = i < typedCount ? 'correct' : i === typedCount && wrongHere ? 'wrong' : 'todo';
         return (
           <span
             key={i}

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { ERROR_FLASH_MS } from '@/lib/game/useErrorFlash';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { LessonPlayer } from './LessonPlayer';
 import type { Lesson, Stage } from '@/lib/curriculum/types';
 
@@ -96,5 +97,40 @@ describe('LessonPlayer — 화면 키보드로 문장부호 치기', () => {
     fireEvent.click(screen.getByTestId('kbd-key-Slash'));
 
     expect(screen.getByTestId('typing-echo')).toHaveTextContent('가?');
+  });
+});
+
+describe('LessonPlayer — 단어 연습을 레이스 카드와 같게', () => {
+  beforeEach(() => localStorage.clear());
+
+  function wordLesson(): Lesson {
+    return { id: 'word-1', stage: 'word', title: 'word', items: ['한글'] };
+  }
+
+  it('지금 칠 음절만 깜빡이고 남은 글자는 흐리다', () => {
+    render(<LessonPlayer lesson={wordLesson()} />);
+    expect(screen.getByTestId('word-current')).toHaveTextContent(/^한$/);
+    expect(screen.getByTestId('word-current').className).toContain('animate-soft-pulse');
+    expect(screen.getByTestId('word-remaining')).toHaveTextContent(/^글$/);
+
+    // ㅎㅏㄴ 을 치면 다음 음절로 넘어간다
+    for (const code of ['KeyG', 'KeyK', 'KeyS']) fireEvent.keyDown(window, { code });
+    expect(screen.getByTestId('word-typed')).toHaveTextContent(/^한$/);
+    expect(screen.getByTestId('word-current')).toHaveTextContent(/^글$/);
+  });
+
+  it('틀리면 카드 테두리와 자모 칩이 함께 빨개졌다 돌아온다', () => {
+    vi.useFakeTimers();
+    render(<LessonPlayer lesson={wordLesson()} />);
+    // ㅎ 자리에서 엉뚱한 키를 친다
+    fireEvent.keyDown(window, { code: 'KeyR' });
+
+    expect(screen.getByTestId('practice-card')).toHaveAttribute('data-wrong', 'true');
+    expect(screen.getByTestId('jamo-0')).toHaveAttribute('data-state', 'wrong');
+
+    act(() => vi.advanceTimersByTime(ERROR_FLASH_MS));
+    expect(screen.getByTestId('practice-card')).not.toHaveAttribute('data-wrong');
+    expect(screen.getByTestId('jamo-0')).toHaveAttribute('data-state', 'todo');
+    vi.useRealTimers();
   });
 });
