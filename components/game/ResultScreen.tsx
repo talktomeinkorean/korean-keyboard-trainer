@@ -11,6 +11,7 @@ import { Faq } from '@/components/event/Faq';
 import { TtmikFooter } from '@/components/event/TtmikFooter';
 import { PIXEL_BUTTON, PIXEL_BUTTON_BASE } from './pixelButton';
 import { encodeResultCode } from '@/lib/game/resultCode';
+import { track } from '@/lib/analytics/track';
 
 interface Props {
   timeMs: number;
@@ -99,6 +100,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
    * 사진첩에 넣는 유일한 길이 시트의 "이미지 저장" 이기 때문이다. PC 는 곧바로 내려받는다.
    */
   async function save() {
+    track({ event: 'result_save' });
     // 거의 항상 미리 받아둔 것이 있다. iOS 는 클릭 직후에 share 를 불러야 해서
     // 기다리지 않고 바로 쓰는 것이 중요하다.
     // 아직이면(결과 화면이 뜨자마자 누른 드문 경우) 기다렸다 이어간다 —
@@ -167,7 +169,10 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
               </button>
               <button
                 type="button"
-                onClick={() => setShowShareLink(true)}
+                onClick={() => {
+                  track({ event: 'result_share' });
+                  setShowShareLink(true);
+                }}
                 data-testid="result-share"
                 className={`${PIXEL_BUTTON} flex-1`}
               >

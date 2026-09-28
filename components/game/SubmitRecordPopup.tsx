@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다. */
 import { useEffect, useState } from 'react';
 import { PIXEL_BUTTON } from './pixelButton';
+import { track } from '@/lib/analytics/track';
 
 interface Props {
   timeMs: number;
@@ -88,6 +89,7 @@ export function SubmitRecordPopup({ timeMs, accuracy, keysPerMin, onClose, onSub
       }
       if (!res.ok) throw new Error(String(res.status));
       // 저장 결과 화면 없이 바로 닫는다 — 결과 화면의 제출 버튼이 잠긴 모습으로 알린다
+      track({ event: 'record_submit', consent_marketing: consentMarketing });
       onSubmitted?.();
       onClose();
     } catch {

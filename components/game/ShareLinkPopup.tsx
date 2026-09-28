@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- 시안에서 내보낸 고정 크기 아이콘이라 최적화가 필요 없다. */
 import { useState } from 'react';
 import { PIXEL_BUTTON } from './pixelButton';
+import { track } from '@/lib/analytics/track';
 
 interface Props {
   /** 공유할 결과 주소 */
@@ -26,6 +27,7 @@ export function ShareLinkPopup({ url, onClose }: Props) {
   async function copy() {
     try {
       await navigator.clipboard.writeText(url);
+      track({ event: 'result_link_copy' });
       setCopied(true);
     } catch {
       // 권한이 없거나 보안 컨텍스트가 아니면 복사가 막힌다.

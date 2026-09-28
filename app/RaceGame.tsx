@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { pickRaceWords } from '@/lib/game/words';
 import { pickRaceBackground, type RaceBackground } from '@/lib/game/backgrounds';
-import { keysPerMinute } from '@/lib/game/rank';
+import { keysPerMinute, rankFor } from '@/lib/game/rank';
 import { playSfx, startBgm, pauseBgm, stopBgm } from '@/lib/audio/sounds';
 import { loadMuted, saveMuted } from '@/lib/audio/mutePreference';
 import { loadKeyGuide, saveKeyGuide } from '@/lib/game/keyGuidePreference';
@@ -15,6 +15,7 @@ import { ResultScreen } from '@/components/game/ResultScreen';
 import { StartPopup } from '@/components/StartPopup';
 import { Coachmark } from '@/components/game/Coachmark';
 import { hasSeenCoachmark, markCoachmarkSeen } from '@/lib/game/coachmarkSeen';
+import { track } from '@/lib/analytics/track';
 import { ExitPopup } from '@/components/game/ExitPopup';
 import { GameTopBar } from '@/components/game/GameTopBar';
 import { WordCard } from '@/components/game/WordCard';
@@ -184,6 +185,20 @@ function RaceRound({
           (session.finishedAt ?? nowMs ?? session.startedAt) - session.startedAt - pausedMs,
         );
 
+  // 완주 측정 — 기록 시간이 정해진 뒤라야 해서 elapsedMs 아래에 둔다. 한 판에 한 번만 보낸다.
+  const trackedRef = useRef(false);
+  useEffect(() => {
+    if (!session.isComplete || trackedRef.current) return;
+    trackedRef.current = true;
+    track({
+      event: 'race_finish',
+      time_ms: Math.round(elapsedMs),
+      keys_per_min: keysPerMinute(session.keystrokes - session.errorCount, elapsedMs),
+      accuracy: session.accuracy,
+      rank: rankFor(elapsedMs).id,
+    });
+  }, [session.isComplete, session.keystrokes, session.errorCount, session.accuracy, elapsedMs]);
+
   return (
     <main className="relative flex min-h-screen flex-col items-center gap-4">
       {/* 키보드 좌우·아래 여백은 다크 모드에서도 흰색이다. 페이지 기본 배경(--background)이
@@ -232,6 +247,7 @@ function RaceRound({
       {showStartPopup && (
         <StartPopup
           onStart={() => {
+            track({ event: 'race_start' });
             setShowStartPopup(false);
             // 저장값은 이 시점에 읽는다 — 서버 렌더와 초기 HTML 을 맞추기 위해서다
             if (!hasSeenCoachmark()) setShowCoachmark(true);
