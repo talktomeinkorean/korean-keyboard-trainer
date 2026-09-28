@@ -133,6 +133,19 @@ const START_ARROW_X = 57.38;
  * 문구와 화살표는 그 구멍을 기준으로 시안의 간격만큼 떨어뜨려 놓는다.
  */
 export function Coachmark({ onClose }: Props) {
+  // 안내가 떠 있는 동안 뒤 화면이 스크롤되면 고정된 안내와 어긋나 보인다 — 잠가 둔다.
+  // 이 앱은 html 이 스크롤 주체라 body 만 막으면 소용이 없어 둘 다 막는다.
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = { root: root.style.overflow, body: document.body.style.overflow };
+    root.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      root.style.overflow = previous.root;
+      document.body.style.overflow = previous.body;
+    };
+  }, []);
+
   const [holes, setHoles] = useState<ReturnType<typeof measureHoles>>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
 
@@ -164,7 +177,7 @@ export function Coachmark({ onClose }: Props) {
         e.preventDefault();
         onClose();
       }}
-      className="fixed inset-0 z-[70] cursor-pointer"
+      className="fixed inset-0 z-[70] touch-none cursor-pointer overscroll-contain"
     >
       <span className="sr-only">{ALT}</span>
 

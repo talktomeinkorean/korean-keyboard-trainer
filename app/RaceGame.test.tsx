@@ -53,8 +53,13 @@ describe('조작 안내(코치마크)', () => {
     const first = render(<RaceGame />);
     fireEvent.click(await screen.findByRole('button', { name: 'Game Start' }));
     const coachmark = screen.getByTestId('coachmark');
+    // 떠 있는 동안에는 뒤 화면이 스크롤되지 않는다 (고정된 안내와 어긋나 보인다)
+    expect(document.documentElement.style.overflow).toBe('hidden');
+    expect(document.body.style.overflow).toBe('hidden');
     fireEvent.click(coachmark);
     expect(screen.queryByTestId('coachmark')).not.toBeInTheDocument();
+    expect(document.documentElement.style.overflow).toBe('');
+    expect(document.body.style.overflow).toBe('');
     first.unmount();
 
     // 두 번째 방문 — 저장값이 남아 있어 뜨지 않는다
