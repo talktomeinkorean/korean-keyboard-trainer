@@ -12,7 +12,7 @@ import type { ResultCodeValue } from '@/lib/game/resultCode';
  * 카드 시안은 267x452 이고, 아래 좌표는 전부 그 기준이다. 높이만 주면 배율을 곱해 그린다.
  */
 export const CARD_W = 267;
-export const CARD_H = 452;
+export const CARD_H = 437;
 
 /**
  * Satori 는 webp 를 못 읽어서 OG 전용 png 사본을 쓴다 (팔레트 축소로 용량을 줄였다).
@@ -31,7 +31,7 @@ async function font(name: string) {
  * 폴라로이드 사진 창과 그 안의 캐릭터 — 앱의 ResultCard 와 같은 값이다.
  * (시안 695:7837 의 창 224.756x222.959 를 110.5x109.5 로 줄인 좌표)
  */
-const PHOTO = { left: 78, top: 75.5, width: 110.5, height: 109.5 };
+const PHOTO = { left: 78.5, top: 75.8, width: 110, height: 109 };
 const ANIMAL = { left: 36.63, top: 56.48, width: 37.23, height: 46.49 };
 
 /** 결과 코드에 실린 배경 id → OG 전용 사본. 모르는 값은 첫 배경으로 떨어진다. */
@@ -82,14 +82,13 @@ export async function loadCardAssets({ timeMs, backgroundId }: ResultCodeValue):
 
 interface CardProps {
   timeMs: number;
-  keysPerMin: number;
   /** 그릴 카드 높이(px). 시안 452 기준으로 배율이 정해진다. */
   height: number;
   assets: CardAssets;
 }
 
 /** 결과 카드 한 장. 앱 화면의 ResultCard 와 같은 좌표를 배율만 바꿔 쓴다. */
-export function resultCardElement({ timeMs, keysPerMin, height, assets }: CardProps) {
+export function resultCardElement({ timeMs, height, assets }: CardProps) {
   const width = Math.round((height * CARD_W) / CARD_H);
   const scale = height / CARD_H;
   /** 앱과 같은 px 값을 카드 배율로 옮긴다 */
@@ -134,7 +133,7 @@ export function resultCardElement({ timeMs, keysPerMin, height, assets }: CardPr
         style={{
           position: 'absolute',
           left: 0,
-          top: s(191.8),
+          top: s(191.7),
           width,
           display: 'flex',
           flexDirection: 'column',
@@ -143,8 +142,8 @@ export function resultCardElement({ timeMs, keysPerMin, height, assets }: CardPr
         }}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', gap: s(4) }}>
-          <span style={{ fontFamily: 'Noto Sans KR', fontSize: s(16) }}>{rank.korean}</span>
-          <span style={{ fontFamily: 'DM Mono', fontSize: s(14) }}>{rank.romaja}</span>
+          <span style={{ fontFamily: 'Noto Sans KR', fontSize: s(15) }}>{rank.korean}</span>
+          <span style={{ fontFamily: 'VT323', fontSize: s(17.5) }}>{rank.romaja}</span>
         </div>
         {/* 이모지는 아랫줄 영어 이름 앞에 */}
         <div
@@ -167,43 +166,37 @@ export function resultCardElement({ timeMs, keysPerMin, height, assets }: CardPr
         style={{
           position: 'absolute',
           left: s(38.5),
-          top: s(247.3),
+          top: s(263.35),
           width: s(190),
-          height: s(103.4),
+          height: s(69),
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
           fontFamily: 'DM Sans',
           fontSize: s(14),
-          lineHeight: 1.4,
+          lineHeight: 1.3,
           color: '#36454d',
         }}
       >
         {rank.message}
       </div>
 
-      {/* 기록 */}
+      {/* 기록 — 흰 박스(373~412) 안, 세로 가운데. 시안 1572:11285 에서 타수는 빠졌다 */}
       <div
         style={{
           position: 'absolute',
           left: 0,
-          top: s(386),
+          top: s(373),
           width,
-          height: s(36),
+          height: s(39),
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: s(10),
           color: '#36454d',
         }}
       >
-        <span style={{ fontFamily: 'VT323', fontSize: s(20) }}>{formatRaceTime(timeMs)}</span>
-        <div style={{ display: 'flex', width: 1, height: s(11.5), backgroundColor: '#36454d' }} />
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: s(4) }}>
-          <span style={{ fontFamily: 'VT323', fontSize: s(20) }}>{keysPerMin}</span>
-          <span style={{ fontFamily: 'DM Sans', fontSize: s(12), color: '#6b8999' }}>keys/min</span>
-        </div>
+        <span style={{ fontFamily: 'VT323', fontSize: s(25) }}>{formatRaceTime(timeMs)}</span>
       </div>
     </div>
   );

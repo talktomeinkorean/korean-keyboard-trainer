@@ -7,7 +7,6 @@ function open(over: Partial<Parameters<typeof PracticeResult>[0]> = {}) {
     <PracticeResult
       stage="long_text"
       title="엘리베이터에 4층이 없어요"
-      timeMs={33_120}
       keysPerMin={87}
       backHref="/lessons/long-text"
       onRetry={() => {}}
@@ -17,10 +16,13 @@ function open(over: Partial<Parameters<typeof PracticeResult>[0]> = {}) {
 }
 
 describe('PracticeResult', () => {
-  it('기록을 시안 표기로 보여준다', () => {
+  // 시안 1562:17191 에서 완주 시간이 빠지고 깃발 + 분당 타수만 남았다
+  it('깃발과 분당 타수만 보여준다', () => {
     open();
-    expect(screen.getByTestId('practice-result-time')).toHaveTextContent('00:33.12');
+    expect(screen.getByTestId('practice-result-flag')).toBeInTheDocument();
     expect(screen.getByTestId('practice-result-speed')).toHaveTextContent('87 keys/min');
+    expect(screen.queryByTestId('practice-result-time')).toBeNull();
+    expect(screen.getByTestId('practice-result')).not.toHaveTextContent(/\d\d:\d\d\.\d\d/);
   });
 
   it('Try Again 은 콜백을 호출한다', () => {

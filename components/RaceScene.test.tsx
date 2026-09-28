@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { RaceScene } from './RaceScene';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, act } from '@testing-library/react';
+import { RaceScene, ERROR_POP_MS } from './RaceScene';
 
 function bgPosition(): string {
   return screen.getByTestId('race-scene-bg').style.backgroundPosition;
@@ -52,5 +52,40 @@ describe('RaceScene', () => {
     rerender(<RaceScene progress={0} total={10} running />);
     expect(screen.getByTestId('race-runner').style.animation).toContain('sprite-run');
     expect(screen.getByTestId('race-runner').style.animation).toContain('steps(4)');
+  });
+});
+
+describe('RaceScene 오타 느낌표', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('오타가 나면 캐릭터 위에 느낌표가 떴다가 사라진다', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(<RaceScene progress={0} total={10} errorCount={0} />);
+    expect(screen.queryByTestId('race-error-pop')).toBeNull();
+
+    rerender(<RaceScene progress={0} total={10} errorCount={1} />);
+    expect(screen.getByTestId('race-error-pop')).toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(ERROR_POP_MS - 1));
+    expect(screen.queryByTestId('race-error-pop')).not.toBeNull();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByTestId('race-error-pop')).toBeNull();
+  });
+
+  it('연달아 틀리면 느낌표가 처음부터 다시 튀어오른다', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(<RaceScene progress={0} total={10} errorCount={0} />);
+    rerender(<RaceScene progress={0} total={10} errorCount={1} />);
+    const first = screen.getByTestId('race-error-pop');
+
+    act(() => vi.advanceTimersByTime(ERROR_POP_MS - 100));
+    rerender(<RaceScene progress={0} total={10} errorCount={2} />);
+    // key 가 바뀌어 새 엘리먼트로 다시 붙는다 (같은 엘리먼트면 애니메이션이 이어진다)
+    expect(screen.getByTestId('race-error-pop')).not.toBe(first);
+
+    act(() => vi.advanceTimersByTime(ERROR_POP_MS - 1));
+    expect(screen.queryByTestId('race-error-pop')).not.toBeNull();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByTestId('race-error-pop')).toBeNull();
   });
 });

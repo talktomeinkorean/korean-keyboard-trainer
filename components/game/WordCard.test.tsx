@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
-import { WordCard, ERROR_FLASH_MS } from './WordCard';
+import { WordCard } from './WordCard';
+import { ERROR_FLASH_MS } from '@/lib/game/useErrorFlash';
 
 const word = { korean: '한글', english: 'Hangeul' };
 
@@ -84,7 +85,7 @@ describe('WordCard', () => {
     rerender(<WordCard word={word} typedJamoCount={2} index={1} total={10} errorCount={1} />);
     expect(screen.getByTestId('syllable-jamo-2')).toHaveAttribute('data-state', 'todo');
     // 오타를 놓치지 않도록 테두리는 남는다
-    expect(screen.getByTestId('word-card').className).toContain('border-[#ff5e23]');
+    expect(screen.getByTestId('word-card').className).toContain("shadow-[inset_0_0_0_1px_#FF2B00]");
     vi.useRealTimers();
   });
 
@@ -119,11 +120,11 @@ describe('WordCard', () => {
       expect(card().className).toContain('border-[#36454d]');
 
       rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={1} />);
-      expect(card().className).toContain('border-[#ff5e23]');
+      expect(card().className).toContain("shadow-[inset_0_0_0_1px_#FF2B00]");
       expect(card().className).not.toContain('border-[#36454d]');
 
       act(() => vi.advanceTimersByTime(ERROR_FLASH_MS - 1));
-      expect(card().className).toContain('border-[#ff5e23]');
+      expect(card().className).toContain("shadow-[inset_0_0_0_1px_#FF2B00]");
       act(() => vi.advanceTimersByTime(1));
       expect(card().className).toContain('border-[#36454d]');
     });
@@ -137,7 +138,7 @@ describe('WordCard', () => {
       rerender(<WordCard word={word} typedJamoCount={1} index={1} total={10} errorCount={2} />);
       // 첫 오타 기준으로는 이미 끝났을 시점이지만 아직 주황이다
       act(() => vi.advanceTimersByTime(ERROR_FLASH_MS - 1));
-      expect(card().className).toContain('border-[#ff5e23]');
+      expect(card().className).toContain("shadow-[inset_0_0_0_1px_#FF2B00]");
       act(() => vi.advanceTimersByTime(1));
       expect(card().className).toContain('border-[#36454d]');
     });

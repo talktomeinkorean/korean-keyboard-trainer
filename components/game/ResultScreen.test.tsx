@@ -33,7 +33,6 @@ describe('ResultScreen', () => {
     stubFetch();
     open();
     expect(screen.getByTestId('result-time')).toHaveTextContent('00:33.12');
-    expect(screen.getByTestId('result-speed')).toHaveTextContent('112 keys/min');
     expect(screen.getByTestId('result-rank')).toHaveTextContent('토끼');
   });
 
@@ -55,7 +54,7 @@ describe('ResultScreen', () => {
     fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
-    fireEvent.click(screen.getByRole('button', { name: /save record/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     expect(await screen.findByTestId('submit-error')).toHaveTextContent(/isn't open yet/);
     // 실패했으므로 버튼은 잠기지 않는다
@@ -84,7 +83,7 @@ describe('ResultScreen', () => {
     fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
-    fireEvent.click(screen.getByRole('button', { name: /save record/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     // 팝업은 바로 닫히고 결과 화면으로 돌아온다
     await waitFor(() => expect(screen.queryByTestId('submit-popup')).not.toBeInTheDocument());
@@ -94,7 +93,9 @@ describe('ResultScreen', () => {
     expect(submit).toHaveTextContent('Play again for another entry');
   });
 
-  it('저장에 성공하면 이벤트 안내까지 스크롤한다 (시안 1278:7091)', async () => {
+  // px 로 내려가는 양을 정하면 화면 높이마다 보이는 데까지가 달라진다 —
+  // Q&A 첫 점선을 화면 아래에 맞춰 어떤 화면에서도 같은 자리에서 멈추게 한다
+  it('저장에 성공하면 Q&A 첫 점선까지 스크롤한다 (시안 1278:7091)', async () => {
     stubFetch();
     const scrollIntoView = vi.fn();
     vi.stubGlobal('requestAnimationFrame', (fn: FrameRequestCallback) => {
@@ -103,13 +104,13 @@ describe('ResultScreen', () => {
     });
     vi.stubGlobal('cancelAnimationFrame', () => {});
     open();
-    screen.getByTestId('result-prize-heading').scrollIntoView = scrollIntoView;
+    screen.getByTestId('faq-first-divider').scrollIntoView = scrollIntoView;
 
     fireEvent.click(screen.getByTestId('result-submit'));
     fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
     fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
     fireEvent.click(screen.getByTestId('consent-required'));
-    fireEvent.click(screen.getByRole('button', { name: /save record/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
 
     await waitFor(() => expect(scrollIntoView).toHaveBeenCalled());
     expect(scrollIntoView.mock.calls[0][0]).toMatchObject({ block: 'end' });

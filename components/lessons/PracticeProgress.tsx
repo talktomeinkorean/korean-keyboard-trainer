@@ -5,6 +5,15 @@
 const RUN_SHEET_SRC = '/race/run_sheet.webp';
 const SPRITE = 30;
 
+/**
+ * 캐릭터의 가로 위치 — 채워진 끝을 몸 가운데로 짚는다.
+ * 왼쪽 끝을 맞추면 진행보다 앞서 달리는 것처럼 보인다.
+ * 양 끝에서는 트랙 밖으로 나가지 않도록 붙잡아 둔다.
+ */
+export function runnerLeft(ratio: number, sprite = SPRITE): string {
+  return `clamp(0px, calc(${ratio * 100}% - ${sprite / 2}px), calc(100% - ${sprite}px))`;
+}
+
 interface Props {
   /** 완료한 항목 수 */
   done: number;
@@ -25,14 +34,14 @@ export function PracticeProgress({ done, total, running }: Props) {
       aria-valuenow={done}
       className="relative h-[38px] w-[330px] max-w-full shrink-0"
     >
-      {/* 캐릭터 — 양 끝에서 잘리지 않도록 폭만큼 안쪽으로 당긴다 */}
       <div
         aria-hidden
+        data-testid="practice-progress-runner"
         className="absolute top-0 bg-no-repeat transition-[left] duration-300"
         style={{
           width: SPRITE,
           height: SPRITE,
-          left: `calc(${ratio * 100}% - ${ratio * SPRITE}px)`,
+          left: runnerLeft(ratio),
           backgroundImage: `url(${RUN_SHEET_SRC})`,
           backgroundSize: `${SPRITE * 4}px ${SPRITE}px`,
           animation: running ? 'sprite-run-sm 0.5s steps(4) infinite' : undefined,

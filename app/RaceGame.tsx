@@ -155,14 +155,19 @@ function RaceRound({
   const pauseStartedAtRef = useRef<number | null>(null);
   useEffect(() => {
     if (showExitPopup) {
-      pauseStartedAtRef.current = Date.now();
+      // 아직 첫 키를 누르기 전이면 뺄 시간이 없다 — 재면 시작하자마자 그만큼 0 에 붙어 있게 된다
+      pauseStartedAtRef.current = session.startedAt === null ? null : Date.now();
       return;
     }
     const startedAt = pauseStartedAtRef.current;
-    if (startedAt === null) return; // 첫 렌더 — 아직 멈춘 적이 없다
+    if (startedAt === null) return; // 첫 렌더이거나, 시작 전에 열었다 닫은 경우
     pauseStartedAtRef.current = null;
-    setPausedMs((ms) => ms + (Date.now() - startedAt));
-  }, [showExitPopup]);
+    const now = Date.now();
+    // 멈춘 시간을 더하면서 '지금'도 같이 앞당긴다. 옛 nowMs 에서 늘어난 pausedMs 를 빼면
+    // 다음 tick(100ms) 이 올 때까지 시계가 멈춘 만큼 뒤로 감겼다가 튀어오른다.
+    setPausedMs((ms) => ms + (now - startedAt));
+    setNowMs(now);
+  }, [showExitPopup, session.startedAt]);
 
   // 경과 타이머 — 첫 키 입력부터 완주까지 100ms 간격 갱신 (팝업 중에는 멈춘다)
   useEffect(() => {
@@ -191,8 +196,10 @@ function RaceRound({
         progress={session.currentIndex + (session.isComplete ? 1 : 0)}
         total={words.length}
         running={isPlaying}
+        errorCount={session.errorCount}
       >
-        <div className="absolute inset-x-0 top-[29.55px] flex justify-center">
+        {/* 시안 320:22623 — 내비게이션 바 위 여백 24px (원이 50→40 으로 줄며 함께 올라갔다) */}
+        <div className="absolute inset-x-0 top-[24px] flex justify-center">
           <GameTopBar
             elapsedMs={elapsedMs}
             muted={muted}
@@ -211,13 +218,16 @@ function RaceRound({
         </div>
       </RaceScene>
 
-      <Keyboard
-        nextCode={session.nextCode}
-        nextShift={session.nextShift}
-        keyGuide={keyGuide}
-        onKeyPress={session.handleKey}
-      />
-      <KeyGuideToggle on={keyGuide} onToggle={toggleKeyGuide} />
+      {/* 코치마크가 이 덩어리에 구멍을 뚫는다 — main 의 gap-4 를 그대로 물려받아 간격은 그대로다 */}
+      <div data-testid="race-keyboard-block" className="flex flex-col items-center gap-4">
+        <Keyboard
+          nextCode={session.nextCode}
+          nextShift={session.nextShift}
+          keyGuide={keyGuide}
+          onKeyPress={session.handleKey}
+        />
+        <KeyGuideToggle on={keyGuide} onToggle={toggleKeyGuide} />
+      </div>
 
       {showStartPopup && (
         <StartPopup

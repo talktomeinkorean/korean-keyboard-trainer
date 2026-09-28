@@ -11,8 +11,8 @@ import { SITE_URL } from '@/lib/site';
  * OG 이미지(가로 1200x630)와 달리 카드만 세로로 담고, 이미지 하나만 남아도
  * 어디서 만든 건지 알 수 있게 도메인을 아래에 적는다.
  */
-const CARD_HEIGHT = 1356; // 시안 452 의 3배
-const SIZE = { width: 861, height: 1500 };
+const CARD_HEIGHT = 1311; // 시안 437 의 3배
+const SIZE = { width: 861, height: 1455 };
 
 /** 이미지에 적을 주소 — 프로토콜은 뺀다 */
 const DOMAIN = SITE_URL.replace(/^https?:\/\//, '');
@@ -24,7 +24,7 @@ export async function GET(_request: Request, ctx: RouteContext<'/result/[code]/c
     return new Response('Not Found', { status: 404 });
   }
 
-  const { timeMs, keysPerMin } = value;
+  const { timeMs } = value;
   const assets = await loadCardAssets(value);
 
   const image = new ImageResponse(
@@ -43,7 +43,7 @@ export async function GET(_request: Request, ctx: RouteContext<'/result/[code]/c
           backgroundImage: 'linear-gradient(180deg, #4d7f92 0%, #36454d 60%)',
         }}
       >
-        {resultCardElement({ timeMs, keysPerMin, height: CARD_HEIGHT, assets })}
+        {resultCardElement({ timeMs, height: CARD_HEIGHT, assets })}
 
         <div
           style={{

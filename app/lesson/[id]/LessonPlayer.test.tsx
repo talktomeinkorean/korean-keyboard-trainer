@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { ERROR_FLASH_MS } from '@/lib/game/useErrorFlash';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { LessonPlayer } from './LessonPlayer';
 import type { Lesson, Stage } from '@/lib/curriculum/types';
 
@@ -79,5 +80,57 @@ describe('LessonPlayer — Try Again', () => {
     fireEvent.click(screen.getByTestId('practice-result-retry'));
     // 결과 팝업이 닫히고 처음부터 다시 시작한다
     expect(screen.queryByTestId('practice-result-retry')).not.toBeInTheDocument();
+  });
+});
+
+describe('LessonPlayer — 화면 키보드로 문장부호 치기', () => {
+  beforeEach(() => localStorage.clear());
+
+  // 모바일은 화면 키보드만 쓴다. 키캡에 ? 가 적혀 있으니 Shift 없이 눌러도 ? 가 들어가야 한다
+  it('? 키를 탭하면 Shift 없이 바로 입력된다', () => {
+    const lesson: Lesson = { id: 'sentence-1', stage: 'sentence', title: 'sentence', items: ['가?'] };
+    render(<LessonPlayer lesson={lesson} />);
+
+    // '가' 를 물리 키보드로 친 뒤, 물음표만 화면 키보드로 탭한다
+    fireEvent.keyDown(window, { code: 'KeyR' });
+    fireEvent.keyDown(window, { code: 'KeyK' });
+    fireEvent.click(screen.getByTestId('kbd-key-Slash'));
+
+    expect(screen.getByTestId('typing-echo')).toHaveTextContent('가?');
+  });
+});
+
+describe('LessonPlayer — 단어 연습을 레이스 카드와 같게', () => {
+  beforeEach(() => localStorage.clear());
+
+  function wordLesson(): Lesson {
+    return { id: 'word-1', stage: 'word', title: 'word', items: ['한글'] };
+  }
+
+  it('지금 칠 음절만 깜빡이고 남은 글자는 흐리다', () => {
+    render(<LessonPlayer lesson={wordLesson()} />);
+    expect(screen.getByTestId('word-current')).toHaveTextContent(/^한$/);
+    expect(screen.getByTestId('word-current').className).toContain('animate-soft-pulse');
+    expect(screen.getByTestId('word-remaining')).toHaveTextContent(/^글$/);
+
+    // ㅎㅏㄴ 을 치면 다음 음절로 넘어간다
+    for (const code of ['KeyG', 'KeyK', 'KeyS']) fireEvent.keyDown(window, { code });
+    expect(screen.getByTestId('word-typed')).toHaveTextContent(/^한$/);
+    expect(screen.getByTestId('word-current')).toHaveTextContent(/^글$/);
+  });
+
+  it('틀리면 카드 테두리와 자모 칩이 함께 빨개졌다 돌아온다', () => {
+    vi.useFakeTimers();
+    render(<LessonPlayer lesson={wordLesson()} />);
+    // ㅎ 자리에서 엉뚱한 키를 친다
+    fireEvent.keyDown(window, { code: 'KeyR' });
+
+    expect(screen.getByTestId('practice-card')).toHaveAttribute('data-wrong', 'true');
+    expect(screen.getByTestId('jamo-0')).toHaveAttribute('data-state', 'wrong');
+
+    act(() => vi.advanceTimersByTime(ERROR_FLASH_MS));
+    expect(screen.getByTestId('practice-card')).not.toHaveAttribute('data-wrong');
+    expect(screen.getByTestId('jamo-0')).toHaveAttribute('data-state', 'todo');
+    vi.useRealTimers();
   });
 });

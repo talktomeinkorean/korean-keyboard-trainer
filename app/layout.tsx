@@ -26,7 +26,8 @@ const dmSans = DM_Sans({
 
 const dmMono = DM_Mono({
   variable: "--font-dm-mono",
-  weight: ["400", "500"],
+  // 300 은 코치마크의 "Tap anywhere to continue" (시안 1604:12018)
+  weight: ["300", "400", "500"],
   subsets: ["latin"],
 });
 
