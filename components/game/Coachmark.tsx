@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 /** 시안 안내 오버레이 — 폰용(393x850)과 PC용(1920x1080)을 2x 로 내보낸 것 */
 const MOBILE_SRC = '/race/coachmark-mobile.webp';
 const DESKTOP_SRC = '/race/coachmark-desktop.webp';
@@ -19,6 +21,19 @@ interface Props {
  * 화면 비율이 시안과 달라도 잘리기만 하도록 cover 로 채운다.
  */
 export function Coachmark({ onClose }: Props) {
+  // 안내가 떠 있는 동안 뒤 화면이 스크롤되면 고정된 안내와 어긋나 보인다 — 잠가 둔다.
+  // 이 앱은 html 이 스크롤 주체라 body 만 막으면 소용이 없어 둘 다 막는다.
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = { root: root.style.overflow, body: document.body.style.overflow };
+    root.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      root.style.overflow = previous.root;
+      document.body.style.overflow = previous.body;
+    };
+  }, []);
+
   return (
     <div
       role="button"
@@ -31,7 +46,7 @@ export function Coachmark({ onClose }: Props) {
         e.preventDefault();
         onClose();
       }}
-      className="fixed inset-0 z-[70] cursor-pointer bg-[#36454DB2]"
+      className="fixed inset-0 z-[70] touch-none overscroll-contain cursor-pointer bg-[#36454DB2]"
     >
       <picture>
         <source media="(min-width: 640px)" srcSet={DESKTOP_SRC} />
