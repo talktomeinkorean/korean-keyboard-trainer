@@ -17,6 +17,7 @@ import { PracticeResult } from '@/components/PracticeResult';
 import { PracticeBackground } from '@/components/PracticeBackground';
 import { LocalProgressStore } from '@/lib/progress/localStore';
 import { categoryForStage } from '@/lib/curriculum/categories';
+import { track } from '@/lib/analytics/track';
 import { keysPerMinute } from '@/lib/game/rank';
 import { loadKeyGuide, saveKeyGuide } from '@/lib/game/keyGuidePreference';
 import { useErrorFlash } from '@/lib/game/useErrorFlash';
@@ -79,10 +80,26 @@ export function LessonPlayer({ lesson, onRedraw }: PlayerProps) {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [session]);
 
+  // 연습 시작 — 화면에 들어온 시점에 한 번 (카테고리별 유입 보기).
+  // ref 로 막는 건 개발 모드(StrictMode)에서 이펙트가 두 번 도는 것을 세지 않기 위해서다.
+  const startTrackedRef = useRef(false);
+  useEffect(() => {
+    if (startTrackedRef.current) return;
+    startTrackedRef.current = true;
+    track({ event: 'practice_start', category: categorySlug, stage: lesson.stage });
+  }, [categorySlug, lesson.stage]);
+
   // 완료 시 1회 저장
   useEffect(() => {
     if (session.isComplete && !savedRef.current) {
       savedRef.current = true;
+      track({
+        event: 'practice_finish',
+        category: categorySlug,
+        stage: lesson.stage,
+        wpm: Math.round(session.wpm),
+        accuracy: session.accuracy,
+      });
       void store.saveResult({
         lessonId: lesson.id,
         wpm: session.wpm,
@@ -90,7 +107,7 @@ export function LessonPlayer({ lesson, onRedraw }: PlayerProps) {
         completedAt: Date.now(),
       });
     }
-  }, [session.isComplete, session.wpm, session.accuracy, lesson.id]);
+  }, [session.isComplete, session.wpm, session.accuracy, lesson.id, categorySlug, lesson.stage]);
 
   // Vocabulary·Sentences 는 카테고리 주소가 곧 새 연습이라 뒤로가기가
   // "다른 단어로 이동"처럼 보인다. 목록이 있는 카테고리만 그리로 보낸다.

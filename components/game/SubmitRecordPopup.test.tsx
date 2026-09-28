@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SubmitRecordPopup } from './SubmitRecordPopup';
 
+const track = vi.fn();
+vi.mock('@/lib/analytics/track', () => ({ track: (...args: unknown[]) => track(...args) }));
+
 function stubFetch(onScorePost?: (body: unknown) => void) {
   const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
     if (String(url).startsWith('/api/scores')) {
@@ -56,6 +59,20 @@ describe('SubmitRecordPopup 동의 항목', () => {
 
     fireEvent.click(screen.getByTestId('consent-required'));
     expect(submit).toBeEnabled();
+  });
+
+  it('저장에 성공하면 record_submit 을 측정한다 (개인정보 없이 동의 여부만)', async () => {
+    stubFetch();
+    open();
+    fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
+    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
+    fireEvent.click(screen.getByTestId('consent-required'));
+    fireEvent.click(screen.getByTestId('consent-marketing'));
+    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
+
+    await waitFor(() =>
+      expect(track).toHaveBeenCalledWith({ event: 'record_submit', consent_marketing: true }),
+    );
   });
 
   it('동의 값을 그대로 제출한다', async () => {
