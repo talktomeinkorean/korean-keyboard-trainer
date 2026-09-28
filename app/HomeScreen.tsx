@@ -4,14 +4,14 @@ import { PrizeDrawHeading } from '@/components/event/PrizeDrawHeading';
 import { Faq } from '@/components/event/Faq';
 import { TtmikFooter } from '@/components/event/TtmikFooter';
 
-// 홈 배경 시안 (1359:10058) 을 2x 로 export 한 아트. 1920 폭이고 가운데 393 이 모바일 홈(1220:24828) 과 같은 그림이다.
+// 홈 배경 시안 (1359:10058 · 모바일 1559:11386) 을 2x 로 export 한 아트. 1920 폭이고 가운데 393 이 모바일 홈(1220:24828) 과 같은 그림이다.
 // 이벤트 블록(타이틀·Join Now·See prizes)과 참여인원 숫자는 이 이미지에서 빠져 있어 아래에서 HTML 로 얹는다.
-// 하늘(832)과 그 아래로 걸친 캐릭터 발까지만 잘라 864 높이다 — 그 아래는 단색이라 CSS 로 칠한다.
+// 하늘(812)과 그 아래로 걸친 캐릭터 발까지만 잘라 844 높이다 — 그 아래는 단색이라 CSS 로 칠한다.
 // 640 미만 화면은 1920 이 필요 없으므로 가운데 640 만 잘라낸 -sm 파일을 받는다.
 
 // 시안 캔버스 크기. 아래 좌표들은 모두 이 캔버스 기준이다.
 const CANVAS_WIDTH = 393;
-const HERO_HEIGHT = 832.158;
+const HERO_HEIGHT = 812.158;
 
 
 /** "Runners so far" 숫자. 집계를 못 읽었으면 가짜 숫자 대신 "-" 를 보인다. */
@@ -31,7 +31,7 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
       <h1 className="sr-only">Type a Korean word. Take a step. Race across Seoul!</h1>
 
       {/* 이벤트 블록 — 배경 아트에는 하늘만 있고 여기부터는 전부 HTML 이다. */}
-      <div className="absolute left-[46.5px] top-[530.07px] flex w-[300px] flex-col items-center gap-[20px]">
+      <div className="absolute left-[46.5px] top-[520.07px] flex w-[300px] flex-col items-center gap-[20px]">
         <Link
           href="/race"
           className="flex h-[59px] w-full items-center justify-center rounded-[2px] border border-[#36454d] bg-[#f9f064] font-dmmono text-[25px] font-medium text-[#36454d] shadow-[inset_0px_-3px_0px_0px_rgba(0,0,0,0.2),inset_0px_3px_0px_0px_rgba(255,255,255,0.8)]"
@@ -60,26 +60,26 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
       <img
         src="/home/prize-title.svg"
         alt="Hangeul Day Prize Draw"
-        className="absolute left-[65.26px] top-[486px] h-[22px] w-[262.49px]"
+        className="absolute left-[65.26px] top-[475.99px] h-[22px] w-[262.49px]"
       />
       {/* 선물·게임패드 — Join Now 버튼 모서리에 걸친다. 버튼 위에 그려지므로 클릭을 가로채지 않게 한다.
-          좌표: 시안 프레임(1220:25125) 46.5·486 + 그룹(1220:25167) 0·31 + 그룹 안 위치.
+          좌표: 시안 프레임(1559:11645) 46.5·475.99 + 그룹 0·31 + 그룹 안 위치.
           회전된 아이콘이라 get_metadata 의 x/y 는 회전 전 값이 섞여 틀린다 — get_design_context 의
           렌더 위치(좌 5.14·0, 우 257.55·59.89)를 쓴다. */}
       <img
         src="/home/icon-gift-left.svg"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute left-[51.64px] top-[517px] size-[38px]"
+        className="pointer-events-none absolute left-[51.64px] top-[506.99px] size-[38px]"
       />
       <img
         src="/home/icon-gift-right.svg"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute left-[304.05px] top-[576.89px] h-[33.88px] w-[38.52px]"
+        className="pointer-events-none absolute left-[304.05px] top-[566.88px] h-[33.88px] w-[38.52px]"
       />
 
-      <p className="absolute left-1/2 top-[726.7px] -translate-x-1/2 whitespace-nowrap text-center font-silkscreen text-[40px] leading-[1.3] tracking-[-4px] text-[#36454d]">
+      <p className="absolute left-1/2 top-[706.7px] -translate-x-1/2 whitespace-nowrap text-center font-silkscreen text-[40px] leading-[1.3] tracking-[-4px] text-[#36454d]">
         {formatRunnerCount(runnerCount)}
       </p>
     </section>
@@ -135,7 +135,7 @@ function HomeBackdrop() {
         className="absolute inset-x-0 top-0 bg-[linear-gradient(180deg,#8ceb97_34.859%,#90cfff_105.22%)]"
         style={{ height: HERO_HEIGHT }}
       />
-      <div className="absolute left-1/2 top-0 h-[864px] w-[640px] -translate-x-1/2 bg-[url(/home/home-bg-sm@2x.webp)] bg-size-[100%_100%] bg-no-repeat sm:w-[1920px] sm:bg-[url(/home/home-bg@2x.webp)]" />
+      <div className="absolute left-1/2 top-0 h-[844px] w-[640px] -translate-x-1/2 bg-[url(/home/home-bg-sm@2x.webp)] bg-size-[100%_100%] bg-no-repeat sm:w-[1920px] sm:bg-[url(/home/home-bg@2x.webp)]" />
     </div>
   );
 }
