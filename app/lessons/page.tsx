@@ -22,6 +22,8 @@ const BANNER_SRC = '/lessons/promotion-banner.webp';
  * 글자는 가운데 약 800 폭에 있어서, 860 보다 좁으면 잘리지 않게 이미지 전체를 줄인다 (1920 / 860 ≈ 223.3vw).
  */
 const DESKTOP_BANNER_SRC = '/lessons/desktop-banner.webp';
+/** 배너 양끝 색 — 배너보다 넓은 화면에서 좌우를 이어 칠한다 */
+const BANNER_FILL = 'pointer-events-none absolute left-1/2 top-0 w-screen -translate-x-1/2 bg-[#8ceb97]';
 
 // 시안 버튼: 300x55, #ab99ff, 진한 테두리, 위아래 안쪽 그림자로 입체감
 const CATEGORY_BUTTON =
@@ -47,17 +49,21 @@ export default function LessonsPage() {
           data-testid='promotion-banner'
           className='absolute inset-x-0 top-0 z-10'
         >
+          {/* 배너보다 화면이 넓으면 양옆이 비어 보인다 — 배너 양끝과 같은 초록으로 이어 칠한다.
+              높이는 배너 안 초록 띠 비율(아래 그림자는 빼고)이라 배너가 줄어도 따라간다. */}
+          <div aria-hidden className={`${BANNER_FILL} h-[85.71%] sm:hidden`} />
           <img
             src={BANNER_SRC}
             alt='Hangeul Day Typing Race, until Oct 11th. More records, more chances to win!'
-            className='w-full sm:hidden'
+            className='relative w-full sm:hidden'
           />
           {/* 데스크톱은 컬럼이 아니라 화면 폭 전체에 깐다 */}
           <div className='absolute left-1/2 top-0 hidden w-screen -translate-x-1/2 justify-center overflow-hidden sm:flex'>
+            <div aria-hidden className={`${BANNER_FILL} h-[82.35%]`} />
             <img
               src={DESKTOP_BANNER_SRC}
               alt='Hangeul Day Typing Race, until Oct 11th. More records, more chances to win!'
-              className='max-w-none shrink-0'
+              className='relative max-w-none shrink-0'
               style={{ width: 'min(1920px, 223.3vw)' }}
             />
           </div>
