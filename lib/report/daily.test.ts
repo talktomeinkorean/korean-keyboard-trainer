@@ -23,10 +23,6 @@ describe('formatSlackMessage', () => {
     participants: 567,
     submissions: 89,
     newsletterOptIns: 42,
-    top: [
-      { nickname: 'sw', timeMs: 7100 },
-      { nickname: 'Jan', timeMs: 9265 },
-    ],
     totals: { finishes: 5000, participants: 2500, submissions: 400 },
   };
 
@@ -35,12 +31,6 @@ describe('formatSlackMessage', () => {
     expect(text).toContain('2026-10-01 참여 리포트');
     expect(text).toContain('완주 1,234회 · 참여자 567명');
     expect(text).toContain('뉴스레터 동의 42건');
-    expect(text).toContain('1. sw 00:07.10');
     expect(text).toContain('누계');
-  });
-
-  it('그날 저장된 기록이 없으면 최고 기록 줄을 빼고 보낸다', () => {
-    const text = formatSlackMessage({ ...report, top: [] });
-    expect(text).not.toContain('최고 기록');
   });
 });

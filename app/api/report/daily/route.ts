@@ -59,21 +59,16 @@ async function collect(
       .limit(ROW_LIMIT),
     supabase
       .from('race_scores')
-      .select('nickname, time_ms, consent_marketing')
+      .select('consent_marketing')
       .gte('created_at', from)
       .lt('created_at', to)
-      .order('time_ms', { ascending: true })
       .limit(ROW_LIMIT),
     supabase.from('race_finish_stats').select('finishes, participants').single(),
     supabase.from('race_scores').select('*', { count: 'exact', head: true }),
   ]);
 
   const finishes = finishRows.data ?? [];
-  const scores = (scoreRows.data ?? []) as {
-    nickname: string;
-    time_ms: number;
-    consent_marketing: boolean;
-  }[];
+  const scores = (scoreRows.data ?? []) as { consent_marketing: boolean }[];
 
   return {
     date: window.date,
@@ -82,7 +77,6 @@ async function collect(
     participants: new Set(finishes.map((f, i) => f.session_id ?? `row-${i}`)).size,
     submissions: scores.length,
     newsletterOptIns: scores.filter((s) => s.consent_marketing).length,
-    top: scores.slice(0, 3).map((s) => ({ nickname: s.nickname, timeMs: s.time_ms })),
     totals: {
       finishes: totalStats.data?.finishes ?? 0,
       participants: totalStats.data?.participants ?? 0,

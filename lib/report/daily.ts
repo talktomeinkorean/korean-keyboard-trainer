@@ -1,5 +1,3 @@
-import { formatRaceTime } from '@/lib/game/rank';
-
 /** 리포트에 담는 숫자. 조회가 실패하면 그 항목만 null 로 둔다. */
 export interface DailyReport {
   /** 집계 대상 날짜 (한국 시간 기준, YYYY-MM-DD) */
@@ -8,8 +6,6 @@ export interface DailyReport {
   participants: number;
   submissions: number;
   newsletterOptIns: number;
-  /** 그날의 상위 기록 — 닉네임과 시간 */
-  top: { nickname: string; timeMs: number }[];
   totals: { finishes: number; participants: number; submissions: number };
 }
 
@@ -34,10 +30,6 @@ export function formatSlackMessage(r: DailyReport): string {
     `• 완주 ${r.finishes.toLocaleString('en-US')}회 · 참여자 ${r.participants.toLocaleString('en-US')}명`,
     `• 기록 저장 ${r.submissions.toLocaleString('en-US')}건 · 뉴스레터 동의 ${r.newsletterOptIns.toLocaleString('en-US')}건`,
   ];
-  if (r.top.length > 0) {
-    const top = r.top.map((t, i) => `${i + 1}. ${t.nickname} ${formatRaceTime(t.timeMs)}`).join(' / ');
-    lines.push(`• 그날의 최고 기록 — ${top}`);
-  }
   lines.push(
     `• 누계 — 완주 ${r.totals.finishes.toLocaleString('en-US')}회 · 참여자 ${r.totals.participants.toLocaleString('en-US')}명 · 기록 저장 ${r.totals.submissions.toLocaleString('en-US')}건`,
   );
