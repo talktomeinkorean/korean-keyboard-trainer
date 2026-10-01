@@ -55,8 +55,10 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
         </a>
       </div>
 
-      {/* 이벤트 타이틀 — 픽셀 글자라 에셋으로 넣는다. 40% 검정이라 뒤의 민트가 비쳐 짙은 초록이 된다.
-          (파일 속 mix-blend-mode: plus-darker 는 Safari 전용이지만 검정에는 효과가 없어 브라우저마다 같다) */}
+      {/* 이벤트 타이틀 — 픽셀 글자라 에셋으로 넣는다.
+          시안은 40% 검정 + plus-darker(= 배경에서 102 만큼 빼기)인데, 그 블렌드는 사파리에만 있어
+          크롬에서는 그냥 40% 검정으로 깔려 훨씬 밝게 나왔다. 그래서 결과색(#2B7C58)을 에셋에 그대로 넣는다.
+          (민트 배경 144.6·225.9·190 − 102) */}
       <img
         src="/home/prize-title.svg"
         alt="Hangeul Day Prize Draw"
