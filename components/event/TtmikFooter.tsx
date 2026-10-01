@@ -28,18 +28,6 @@ const TTMIK_APPS = [
   },
 ];
 
-/** 점선 아래 버튼들 (시안 1728:10068). 주소가 아직 없는 버튼은 넣지 않는다 — 눌리지 않는 버튼을 두지 않기 위해서다. */
-const FOOTER_LINKS: { label: string; href: string | null }[] = [
-  { label: 'Feedback & Bug Report', href: 'https://tally.so/r/gDBxJD' },
-  // TODO: 한글 키보드 설치 안내 주소를 받으면 채운다
-  { label: 'How To Install the Korean Keyboard', href: null },
-];
-
-/** 시안 버튼 (1728:10069) — 테두리만 있는 가로 꽉 찬 버튼 */
-const FOOTER_BUTTON =
-  'flex w-full items-center justify-center rounded-[2px] border border-[#8eb6cc] ' +
-  'px-[15px] pt-[10px] pb-[12px] text-center font-dmmono text-[12px] leading-[1.25] text-[#8eb6cc]';
-
 /** 하단 TTMIK 푸터 — 로고, 앱 목록, 저작권 (홈 1277:13618, 결과 화면 1278:7095, 타자연습 1278:7321). */
 export function TtmikFooter() {
   return (
@@ -70,23 +58,8 @@ export function TtmikFooter() {
         ))}
       </ul>
 
-      {/* 시안 1736:9724 — 점선(0.5px 3px 간격) 아래로 버튼 묶음과 저작권 */}
-      <hr className="w-full border-0 border-t-[0.5px] border-dashed border-[#8eb6cc]" />
-
-      <div className="flex w-full flex-col gap-[20px]">
-        <div className="flex w-full flex-col gap-[10px]">
-          {FOOTER_LINKS.filter((link) => link.href).map((link) => (
-            <a
-              key={link.label}
-              href={link.href!}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={FOOTER_BUTTON}
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
+      <div className="flex w-full flex-col gap-[10px]">
+        <hr className="border-t-[0.5px] border-[#8eb6cc]" />
         <p className="text-center font-dmmono text-[11px] font-medium leading-[1.5] text-white">
           © 2026 Talk To Me In Korean. All rights reserved.
         </p>
