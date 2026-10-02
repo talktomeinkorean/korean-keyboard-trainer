@@ -1,5 +1,6 @@
 import { getServiceClient } from '@/lib/supabase/server';
 import { formatSlackMessage, reportWindow, type DailyReport, type ReportWindow } from '@/lib/report/daily';
+import { countParticipants } from '@/lib/report/participants';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
@@ -10,9 +11,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  * 슬랙 웹훅과 비밀값은 환경 변수로만 받는다 — 저장소에 두지 않는다.
  */
 export const dynamic = 'force-dynamic';
-
-/** 한 번에 읽어올 행 수 상한 — 하루치라 넉넉하다 */
-const ROW_LIMIT = 10_000;
 
 export async function GET(request: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET;
@@ -53,34 +51,34 @@ async function collect(supabase: SupabaseClient, window: ReportWindow): Promise<
   const from = window.start.toISOString();
   const to = window.end.toISOString();
 
-  const [finishRows, scoreRows, totalStats, totalSubmissions] = await Promise.all([
+  /**
+   * 세는 일은 저장소에 맡긴다 — 행을 받아와 세면 PostgREST 가 1000행에서 잘라
+   * 그보다 많은 날에는 1000 에서 멈춘 숫자가 나온다.
+   */
+  const countInWindow = (table: string) =>
     supabase
-      .from('race_finishes')
-      .select('session_id')
+      .from(table)
+      .select('*', { count: 'exact', head: true })
       .gte('created_at', from)
-      .lt('created_at', to)
-      .limit(ROW_LIMIT),
-    supabase
-      .from('race_scores')
-      .select('consent_marketing')
-      .gte('created_at', from)
-      .lt('created_at', to)
-      .limit(ROW_LIMIT),
-    supabase.from('race_finish_stats').select('finishes, participants').single(),
-    supabase.from('race_scores').select('*', { count: 'exact', head: true }),
-  ]);
+      .lt('created_at', to);
 
-  const finishes = finishRows.data ?? [];
-  const scores = (scoreRows.data ?? []) as { consent_marketing: boolean }[];
+  const [finishes, submissions, optIns, participants, totalStats, totalSubmissions] =
+    await Promise.all([
+      countInWindow('race_finishes'),
+      countInWindow('race_scores'),
+      countInWindow('race_scores').eq('consent_marketing', true),
+      countParticipants(supabase, from, to),
+      supabase.from('race_finish_stats').select('finishes, participants').single(),
+      supabase.from('race_scores').select('*', { count: 'exact', head: true }),
+    ]);
 
   return {
     date: window.date,
     partial: window.partial,
-    finishes: finishes.length,
-    // 같은 브라우저의 여러 판은 한 명으로 센다 (session_id 가 없던 옛 기록은 각각 센다)
-    participants: new Set(finishes.map((f, i) => f.session_id ?? `row-${i}`)).size,
-    submissions: scores.length,
-    newsletterOptIns: scores.filter((s) => s.consent_marketing).length,
+    finishes: finishes.count ?? 0,
+    participants,
+    submissions: submissions.count ?? 0,
+    newsletterOptIns: optIns.count ?? 0,
     totals: {
       finishes: totalStats.data?.finishes ?? 0,
       participants: totalStats.data?.participants ?? 0,
