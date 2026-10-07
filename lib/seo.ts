@@ -12,14 +12,15 @@ interface PageMeta {
 }
 
 /**
- * 링크 공유 미리보기 이미지 — 홈 배경 아트(public/home/home-bg@2x.webp)의 가운데를 1200x630 으로 잘랐다.
+ * 링크 공유 미리보기 이미지 — 시안에서 받은 로고 아트를 1200x630 으로 구웠다.
+ * 픽셀 아트라 JPEG 로 구우면 가장자리가 뭉개져 팔레트 PNG 를 쓴다.
  * 결과 공유 링크(/result)는 자기 기록 카드를 따로 그린다 (opengraph-image.tsx).
  */
 const OG_IMAGE = {
-  url: '/og.jpg',
+  url: '/og.png',
   width: 1200,
   height: 630,
-  alt: 'Hangeul Typing Race — Type a Korean word. Take a step. Race across Seoul!',
+  alt: 'Hangeul Typing Race — 한글타자',
 };
 
 /**
