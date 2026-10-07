@@ -60,7 +60,16 @@ export async function homeVisitors(until: Date): Promise<number | null> {
   const propertyId = process.env.GA4_PROPERTY_ID;
   const clientEmail = process.env.GA4_CLIENT_EMAIL;
   const privateKey = process.env.GA4_PRIVATE_KEY;
-  if (!propertyId || !clientEmail || !privateKey) return null;
+  if (!propertyId || !clientEmail || !privateKey) {
+    // 어느 값이 비었는지 Vercel 로그에서 보고 고칠 수 있게 남긴다 (값 자체는 찍지 않는다)
+    const missing = [
+      !propertyId && 'GA4_PROPERTY_ID',
+      !clientEmail && 'GA4_CLIENT_EMAIL',
+      !privateKey && 'GA4_PRIVATE_KEY',
+    ].filter(Boolean);
+    console.warn(`[report] GA4 설정 없음 — ${missing.join(', ')}`);
+    return null;
+  }
 
   try {
     const token = await accessToken(clientEmail, privateKey);
@@ -78,11 +87,17 @@ export async function homeVisitors(until: Date): Promise<number | null> {
         }),
       },
     );
-    if (!res.ok) return null;
+    if (!res.ok) {
+      // 403 이면 대개 서비스 계정을 GA4 속성에 뷰어로 추가하지 않은 것이다
+      console.warn(`[report] GA4 runReport ${res.status}: ${(await res.text()).slice(0, 300)}`);
+      return null;
+    }
     const body = (await res.json()) as { rows?: { metricValues?: { value?: string }[] }[] };
     const value = body.rows?.[0]?.metricValues?.[0]?.value;
     return value === undefined ? 0 : Number(value);
-  } catch {
-    return null; // GA4 가 막혀도 나머지 숫자는 보낸다
+  } catch (e) {
+    // 키 형식이 깨졌거나 토큰 발급이 막힌 경우 — 나머지 숫자는 그대로 보낸다
+    console.warn(`[report] GA4 실패: ${e instanceof Error ? e.message : String(e)}`);
+    return null;
   }
 }

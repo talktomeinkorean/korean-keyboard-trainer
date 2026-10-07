@@ -1,5 +1,5 @@
 import { getServiceClient } from '@/lib/supabase/server';
-import { formatSlackMessage, reportWindow, type DailyReport, type ReportWindow } from '@/lib/report/daily';
+import { formatSlackMessage, kstDateOf, type DailyReport } from '@/lib/report/daily';
 import { homeVisitors } from '@/lib/report/ga4';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -24,30 +24,27 @@ export async function GET(request: Request): Promise<Response> {
     return Response.json({ error: 'not configured' }, { status: 503 });
   }
 
-  // ?date=today | yesterday | YYYY-MM-DD — 없으면 어제 (크론이 쓰는 기본값)
-  const requested = new URL(request.url).searchParams.get('date');
-  const window = reportWindow(new Date(), requested);
-  if (!window) {
-    return Response.json({ error: 'invalid date' }, { status: 400 });
-  }
+  // 누계만 보내므로 집계 구간이 없다 — 언제나 '지금까지'다
+  const now = new Date();
 
   try {
-    const report = await collect(supabase, window);
+    const report = await collect(supabase, now);
     const res = await fetch(webhook, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text: formatSlackMessage(report, window.end) }),
+      body: JSON.stringify({ text: formatSlackMessage(report, now) }),
     });
     if (!res.ok) {
       return Response.json({ error: 'slack failed', status: res.status }, { status: 502 });
     }
-    return Response.json({ ok: true, date: report.date });
+    // homeVisitors 를 함께 돌려준다 — 수동 실행으로 GA4 연결 여부를 바로 확인할 수 있다
+    return Response.json({ ok: true, date: report.date, homeVisitors: report.homeVisitors });
   } catch {
     return Response.json({ error: 'internal error' }, { status: 500 });
   }
 }
 
-async function collect(supabase: SupabaseClient, window: ReportWindow): Promise<DailyReport> {
+async function collect(supabase: SupabaseClient, now: Date): Promise<DailyReport> {
   /**
    * 세는 일은 저장소에 맡긴다 — 행을 받아와 세면 PostgREST 가 1000행에서 잘라
    * 그보다 많아지면 1000 에서 멈춘 숫자가 나온다.
@@ -56,11 +53,11 @@ async function collect(supabase: SupabaseClient, window: ReportWindow): Promise<
   const [finishStats, scoreStats, visitors] = await Promise.all([
     supabase.from('race_finish_stats').select('finishes, participants').single(),
     supabase.from('race_score_stats').select('submissions, entrants, marketing_people').single(),
-    homeVisitors(window.end),
+    homeVisitors(now),
   ]);
 
   return {
-    date: window.date,
+    date: kstDateOf(now),
     homeVisitors: visitors,
     finishes: finishStats.data?.finishes ?? 0,
     participants: finishStats.data?.participants ?? 0,
