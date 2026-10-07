@@ -1,14 +1,22 @@
-/** 리포트에 담는 숫자. 개인정보는 넣지 않는다 — 숫자만. */
+/**
+ * 리포트에 담는 숫자 — 모두 누계다. 개인정보는 넣지 않는다.
+ * 하루치는 넣지 않는다 (2026-10-07 요청) — 추이는 GA4 에서 본다.
+ */
 export interface DailyReport {
-  /** 집계 대상 날짜 (한국 시간 기준, YYYY-MM-DD) */
+  /** 집계 시각이 한국 시간으로 며칠인지 (YYYY-MM-DD) */
   date: string;
-  /** 아직 끝나지 않은 하루인지 (오늘 중간 집계) */
-  partial: boolean;
+  /** 홈 방문자 수 — GA4 에서 읽는다. 설정이 없으면 null 이라 그 줄을 뺀다 */
+  homeVisitors: number | null;
+  /** 완주 횟수 */
   finishes: number;
+  /** 완주자 수 — 같은 브라우저의 여러 판은 한 명 */
   participants: number;
+  /** 응모 횟수 (= 기록 저장) */
   submissions: number;
-  newsletterOptIns: number;
-  totals: { finishes: number; participants: number; submissions: number };
+  /** 응모자 수 — 같은 이메일은 한 명 */
+  entrants: number;
+  /** 마케팅 동의자 수 — 같은 이메일은 한 명 */
+  marketingPeople: number;
 }
 
 /** 집계 구간 — 한국 시간 기준으로 자른다 */
@@ -67,13 +75,15 @@ function kstClock(at: Date): string {
 
 /** 슬랙에 보낼 본문 (mrkdwn). 숫자만 담고 이메일 같은 개인정보는 넣지 않는다. */
 export function formatSlackMessage(r: DailyReport, until?: Date): string {
-  const title = r.partial
-    ? `*한글타자 레이스 — ${r.date} 중간 현황${until ? ` (${kstClock(until)} KST 기준)` : ''}*`
-    : `*한글타자 레이스 — ${r.date} 참여 리포트*`;
-  return [
-    title,
-    `• 완주 ${r.finishes.toLocaleString('en-US')}회 · 참여자 ${r.participants.toLocaleString('en-US')}명`,
-    `• 기록 저장 ${r.submissions.toLocaleString('en-US')}건 · 뉴스레터 동의 ${r.newsletterOptIns.toLocaleString('en-US')}건`,
-    `• 누계 — 완주 ${r.totals.finishes.toLocaleString('en-US')}회 · 참여자 ${r.totals.participants.toLocaleString('en-US')}명 · 기록 저장 ${r.totals.submissions.toLocaleString('en-US')}건`,
-  ].join('\n');
+  const n = (v: number) => v.toLocaleString('en-US');
+  const when = until ? ` ${kstClock(until)} KST` : '';
+  const lines = [
+    `*한글타자 레이스 — 누계 리포트 (${r.date}${when} 기준)*`,
+    // GA4 설정이 없으면 이 줄만 빠진다
+    ...(r.homeVisitors === null ? [] : [`• 홈 방문자 ${n(r.homeVisitors)}명`]),
+    `• 완주 ${n(r.finishes)}회 · 완주자 ${n(r.participants)}명`,
+    `• 응모 ${n(r.submissions)}건 · 응모자 ${n(r.entrants)}명`,
+    `• 마케팅 동의자 ${n(r.marketingPeople)}명`,
+  ];
+  return lines.join('\n');
 }

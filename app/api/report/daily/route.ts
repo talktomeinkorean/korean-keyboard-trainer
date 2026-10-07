@@ -1,6 +1,6 @@
 import { getServiceClient } from '@/lib/supabase/server';
 import { formatSlackMessage, reportWindow, type DailyReport, type ReportWindow } from '@/lib/report/daily';
-import { countParticipants } from '@/lib/report/participants';
+import { homeVisitors } from '@/lib/report/ga4';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
@@ -41,48 +41,31 @@ export async function GET(request: Request): Promise<Response> {
     if (!res.ok) {
       return Response.json({ error: 'slack failed', status: res.status }, { status: 502 });
     }
-    return Response.json({ ok: true, date: report.date, partial: report.partial });
+    return Response.json({ ok: true, date: report.date });
   } catch {
     return Response.json({ error: 'internal error' }, { status: 500 });
   }
 }
 
 async function collect(supabase: SupabaseClient, window: ReportWindow): Promise<DailyReport> {
-  const from = window.start.toISOString();
-  const to = window.end.toISOString();
-
   /**
    * 세는 일은 저장소에 맡긴다 — 행을 받아와 세면 PostgREST 가 1000행에서 잘라
-   * 그보다 많은 날에는 1000 에서 멈춘 숫자가 나온다.
+   * 그보다 많아지면 1000 에서 멈춘 숫자가 나온다.
+   * 홈 방문자만 우리 DB 에 없어 GA4 에 묻는다 (설정이 없으면 null → 그 줄은 빠진다).
    */
-  const countInWindow = (table: string) =>
-    supabase
-      .from(table)
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', from)
-      .lt('created_at', to);
-
-  const [finishes, submissions, optIns, participants, totalStats, totalSubmissions] =
-    await Promise.all([
-      countInWindow('race_finishes'),
-      countInWindow('race_scores'),
-      countInWindow('race_scores').eq('consent_marketing', true),
-      countParticipants(supabase, from, to),
-      supabase.from('race_finish_stats').select('finishes, participants').single(),
-      supabase.from('race_scores').select('*', { count: 'exact', head: true }),
-    ]);
+  const [finishStats, scoreStats, visitors] = await Promise.all([
+    supabase.from('race_finish_stats').select('finishes, participants').single(),
+    supabase.from('race_score_stats').select('submissions, entrants, marketing_people').single(),
+    homeVisitors(window.end),
+  ]);
 
   return {
     date: window.date,
-    partial: window.partial,
-    finishes: finishes.count ?? 0,
-    participants,
-    submissions: submissions.count ?? 0,
-    newsletterOptIns: optIns.count ?? 0,
-    totals: {
-      finishes: totalStats.data?.finishes ?? 0,
-      participants: totalStats.data?.participants ?? 0,
-      submissions: totalSubmissions.count ?? 0,
-    },
+    homeVisitors: visitors,
+    finishes: finishStats.data?.finishes ?? 0,
+    participants: finishStats.data?.participants ?? 0,
+    submissions: scoreStats.data?.submissions ?? 0,
+    entrants: scoreStats.data?.entrants ?? 0,
+    marketingPeople: scoreStats.data?.marketing_people ?? 0,
   };
 }
