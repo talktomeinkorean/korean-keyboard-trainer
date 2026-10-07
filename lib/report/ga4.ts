@@ -11,8 +11,8 @@ import { createSign } from 'node:crypto';
  * 필요한 값: GA4_PROPERTY_ID, GA4_CLIENT_EMAIL, GA4_PRIVATE_KEY
  */
 
-/** 집계 시작일 — 서비스 공개 전 데이터는 없다 */
-const START_DATE = '2026-09-01';
+/** 집계 시작일 — 이벤트 시작일(2026-10-01)부터 센다 */
+const START_DATE = '2026-10-01';
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const SCOPE = 'https://www.googleapis.com/auth/analytics.readonly';
 
