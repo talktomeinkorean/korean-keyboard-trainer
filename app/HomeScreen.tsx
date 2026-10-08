@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element -- 시안 그대로의 고정 px 배경 아트라 최적화 파이프라인이 필요 없다. */
 import Link from 'next/link';
-import { Faq } from '@/components/event/Faq';
 import { TtmikFooter } from '@/components/event/TtmikFooter';
 
 // 홈 배경 시안 (1359:10058 · 모바일 1559:11386) 을 2x 로 export 한 아트. 1920 폭이고 가운데 393 이 모바일 홈(1220:24828) 과 같은 그림이다.
@@ -63,14 +62,11 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
   );
 }
 
-/** 히어로 아래 어두운 영역 — Q&A, 푸터. */
-function PrizeSection() {
+/** 히어로 아래 어두운 영역 — 푸터. */
+function FooterSection() {
   return (
     <section className="relative pb-[30px] pt-[72.88px]">
-      <div className="mx-auto flex w-[350px] max-w-[calc(100%-32px)] flex-col gap-[60px]">
-        <div className="flex flex-col gap-[40px]">
-          <Faq />
-        </div>
+      <div className="mx-auto flex w-[350px] max-w-[calc(100%-32px)] flex-col">
         <TtmikFooter />
       </div>
     </section>
@@ -84,7 +80,7 @@ export function HomeScreen({ runnerCount }: { runnerCount: number | null }) {
       <HomeBackdrop />
       <main className="relative flex-1 overflow-x-clip">
         <Hero runnerCount={runnerCount} />
-        <PrizeSection />
+        <FooterSection />
       </main>
     </div>
   );

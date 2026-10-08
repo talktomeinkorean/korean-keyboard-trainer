@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { ResultCard } from './ResultCard';
 import { SubmitRecordPopup } from './SubmitRecordPopup';
 import { ShareLinkPopup } from './ShareLinkPopup';
-import { Faq } from '@/components/event/Faq';
 import { TtmikFooter } from '@/components/event/TtmikFooter';
 import { PIXEL_BUTTON, PIXEL_BUTTON_BASE } from './pixelButton';
 import { encodeResultCode } from '@/lib/game/resultCode';
@@ -39,25 +38,6 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
   const [submitted, setSubmitted] = useState(false);
   // 이미지 처리가 끝난 뒤 뜨는 링크 공유 팝업
   const [showShareLink, setShowShareLink] = useState(false);
-
-  /**
-   * 저장 직후 이벤트 안내(시안 1278:7091)까지 내려 준다 — 저장한 사람에게 추첨 안내를 바로 보여준다.
-   * 내려가는 양을 px 로 정하면 화면 높이마다 보이는 범위가 달라지므로,
-   * Q&A 첫 점선을 화면 맨 아래에 맞춘다 — 어떤 화면에서도 트로피부터 추첨 기간까지는 보이고
-   * Q&A 가 화면 경계에서 시작해 더 볼 게 있다는 것이 드러난다.
-   */
-  const prizeRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!submitted) return;
-    const smooth = !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    // 팝업이 닫히며 다시 그려진 뒤에 움직여야 위치가 맞는다
-    const id = requestAnimationFrame(() => {
-      const target =
-        prizeRef.current?.querySelector('[data-testid="faq-first-divider"]') ?? prizeRef.current;
-      target?.scrollIntoView?.({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
-    });
-    return () => cancelAnimationFrame(id);
-  }, [submitted]);
 
   const code = encodeResultCode({ timeMs, keysPerMin, backgroundId });
   // 이 주소를 열면 결과 카드가 보이고, 링크 미리보기에도 카드 이미지가 뜬다.
@@ -209,11 +189,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
           </Link>
 
           {/* 시안: Practice Typing 아래 65.68px (부모 gap 10 + 55.68) */}
-          <div className="mt-[55.68px] flex w-[350px] max-w-full flex-col gap-[60px]">
-            {/* 저장 직후 스크롤이 이 덩어리 안의 "What can I win?" 답변까지 내려간다 */}
-            <div ref={prizeRef} data-testid="result-prize-heading" className="flex flex-col gap-[40px]">
-              <Faq />
-            </div>
+          <div className="mt-[55.68px] flex w-[350px] max-w-full flex-col">
             <TtmikFooter />
           </div>
         </div>

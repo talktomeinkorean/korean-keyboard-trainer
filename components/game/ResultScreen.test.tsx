@@ -93,29 +93,6 @@ describe('ResultScreen', () => {
     expect(submit).toHaveTextContent('Play again for another entry');
   });
 
-  // px 로 내려가는 양을 정하면 화면 높이마다 보이는 데까지가 달라진다 —
-  // Q&A 첫 점선을 화면 아래에 맞춰 어떤 화면에서도 같은 자리에서 멈추게 한다
-  it('저장에 성공하면 Q&A 첫 점선까지 스크롤한다 (시안 1278:7091)', async () => {
-    stubFetch();
-    const scrollIntoView = vi.fn();
-    vi.stubGlobal('requestAnimationFrame', (fn: FrameRequestCallback) => {
-      fn(0);
-      return 0;
-    });
-    vi.stubGlobal('cancelAnimationFrame', () => {});
-    open();
-    screen.getByTestId('faq-first-divider').scrollIntoView = scrollIntoView;
-
-    fireEvent.click(screen.getByTestId('result-submit'));
-    fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
-    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
-    fireEvent.click(screen.getByTestId('consent-required'));
-    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
-
-    await waitFor(() => expect(scrollIntoView).toHaveBeenCalled());
-    expect(scrollIntoView.mock.calls[0][0]).toMatchObject({ block: 'end' });
-  });
-
   it('새 판을 시작하면 제출 버튼이 원래대로 돌아온다', async () => {
     stubFetch();
     // RaceGame 은 새 단어를 받으면 판 전체를 다시 마운트한다 — 그 상황을 흉내낸다
