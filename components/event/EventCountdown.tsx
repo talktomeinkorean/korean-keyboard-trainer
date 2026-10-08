@@ -1,20 +1,24 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { countdownParts, isCountdownVisible, remainingMs } from '@/lib/event/countdown';
+import { useEffect, useState } from "react";
+import {
+  countdownParts,
+  isCountdownVisible,
+  remainingMs,
+} from "@/lib/event/countdown";
 
 /**
  * 칸 폭 — 시안 1857:12569. 아래 라벨 글자 폭에 맞춰 칸마다 다르다.
  * Days 는 쓰지 않는다 (남은 시간이 24시간 안이라 시·분·초면 충분하다).
  */
 const BOX = [
-  { key: 'hours', label: 'Hours', width: 55 },
-  { key: 'minutes', label: 'Minutes', width: 60 },
-  { key: 'seconds', label: 'Seconds', width: 57 },
+  { key: "hours", label: "Hours", width: 55 },
+  { key: "minutes", label: "Minutes", width: 60 },
+  { key: "seconds", label: "Seconds", width: 57 },
 ] as const;
 
 /** 숫자 칸과 구분점이 같은 서체·크기를 쓴다 (시안 VT323 30px) */
-const DIGIT = 'font-vt323 text-[30px] leading-[1.1] text-[#36454d]';
+const DIGIT = "font-vt323 text-[30px] leading-[1.1] text-[#36454d]";
 
 /**
  * 종료까지 남은 시간. 종료 24시간 전부터 저절로 나타난다 — 그때 맞춰 배포하지 않아도 된다.
@@ -41,7 +45,7 @@ export function EventCountdown({ className }: { className?: string }) {
     <div
       data-testid="event-countdown"
       role="timer"
-      className={`flex flex-col items-center gap-[5px] ${className ?? ''}`}
+      className={`flex flex-col items-center gap-[5px] ${className ?? ""}`}
     >
       <div className="flex items-center gap-[5px]">
         {BOX.map(({ key, width }, i) => (

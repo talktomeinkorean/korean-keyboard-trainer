@@ -32,7 +32,7 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
       <h1 className="sr-only">Type a Korean word. Take a step. Race across Seoul!</h1>
 
       {/* 이벤트 블록 — 배경 아트에는 하늘만 있고 여기부터는 전부 HTML 이다. */}
-      <div className="absolute left-[46.5px] top-[552.07px] flex w-[300px] flex-col items-center gap-[20px]">
+      <div className="absolute left-[46.5px] top-[561.7px] flex w-[300px] flex-col items-center gap-[14px]">
         <Link
           href="/race"
           className="flex h-[59px] w-full items-center justify-center rounded-[2px] border border-[#36454d] bg-[#f9f064] font-dmmono text-[25px] font-medium text-[#36454d] shadow-[inset_0px_-3px_0px_0px_rgba(0,0,0,0.2),inset_0px_3px_0px_0px_rgba(255,255,255,0.8)]"
@@ -56,9 +56,10 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
         </a>
       </div>
 
-      {/* 종료 24시간 전부터 나타난다 (시안 1857:12569). "Just tap and play."(≈430) 아래에 놓는다.
-          칸이 72px 이라 예전 빈 띠(46px)에는 들어가지 않아, 아래 이벤트 블록을 32px 내렸다. */}
-      <EventCountdown className="absolute inset-x-0 top-[430px] items-center" />
+      {/* 종료 24시간 전부터 나타난다 (시안 1857:12569). 타이틀과 Join Now 사이다.
+          배경 아트가 위아래를 막고 있어(태그라인 428 · "Runners so far" 말풍선 657) 그 사이 229px 안에
+          타이틀·카운트다운·버튼·See prizes 를 넣는다. 간격은 시안 비율(22:36:25)을 그 높이에 맞춰 줄였다. */}
+      <EventCountdown className="absolute inset-x-0 top-[470px] items-center" />
 
       {/* 이벤트 타이틀 — 픽셀 글자라 에셋으로 넣는다.
           시안은 40% 검정 + plus-darker(= 배경에서 102 만큼 빼기)인데, 그 블렌드는 사파리에만 있어
@@ -67,7 +68,7 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
       <img
         src="/home/prize-title.svg"
         alt="Hangeul Day Prize Draw"
-        className="absolute left-[65.26px] top-[507.99px] h-[22px] w-[262.49px]"
+        className="absolute left-[65.26px] top-[436px] h-[22px] w-[262.49px]"
       />
       {/* 선물·게임패드 — Join Now 버튼 모서리에 걸친다. 버튼 위에 그려지므로 클릭을 가로채지 않게 한다.
           좌표: 시안 프레임(1559:11645) 46.5·475.99 + 그룹 0·31 + 그룹 안 위치.
@@ -77,13 +78,13 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
         src="/home/icon-gift-left.svg"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute left-[51.64px] top-[538.99px] size-[38px]"
+        className="pointer-events-none absolute left-[51.64px] top-[548.62px] size-[38px]"
       />
       <img
         src="/home/icon-gift-right.svg"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute left-[304.05px] top-[598.88px] h-[33.88px] w-[38.52px]"
+        className="pointer-events-none absolute left-[304.05px] top-[608.51px] h-[33.88px] w-[38.52px]"
       />
 
       <p className="absolute left-1/2 top-[706.7px] -translate-x-1/2 whitespace-nowrap text-center font-silkscreen text-[40px] leading-[1.3] tracking-[-4px] text-[#36454d]">
