@@ -59,7 +59,7 @@ export default function Home() {
           </p>
         </div>
 
-        <nav className='flex w-full flex-col items-center gap-[10px] px-4'>
+        <nav className='flex w-full flex-col items-center gap-[15px] px-4'>
           {/* 화살표는 결과 화면과 같은 에셋을 쓴다 — 시안의 벡터와 파일이 같다 */}
           <Link href='/game' data-testid='typing-game' className={GAME_BUTTON}>
             Typing Game
