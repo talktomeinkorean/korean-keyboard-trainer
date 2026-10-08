@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   COUNTDOWN_WINDOW_MS,
   EVENT_END_MS,
-  formatCountdown,
+  countdownParts,
   isCountdownVisible,
   remainingMs,
 } from './countdown';
@@ -41,18 +41,25 @@ describe('remainingMs', () => {
   });
 });
 
-describe('formatCountdown', () => {
-  it('HH:MM:SS 로 두 자리씩 채운다', () => {
-    expect(formatCountdown(9 * HOUR + 5 * MINUTE + 3 * SECOND)).toBe('09:05:03');
+describe('countdownParts', () => {
+  it('시·분·초를 두 자리씩 채운다 — 일 단위는 두지 않는다 (시안 1857:12569)', () => {
+    expect(countdownParts(9 * HOUR + 5 * MINUTE + 3 * SECOND)).toEqual({
+      hours: '09',
+      minutes: '05',
+      seconds: '03',
+    });
   });
 
   it('24시간 창의 처음과 끝', () => {
-    expect(formatCountdown(COUNTDOWN_WINDOW_MS)).toBe('24:00:00');
-    expect(formatCountdown(0)).toBe('00:00:00');
+    expect(countdownParts(COUNTDOWN_WINDOW_MS)).toEqual({
+      hours: '24',
+      minutes: '00',
+      seconds: '00',
+    });
+    expect(countdownParts(0)).toEqual({ hours: '00', minutes: '00', seconds: '00' });
   });
 
   it('남은 밀리초는 버린다 — 1초 미만은 0 초로 보인다', () => {
-    expect(formatCountdown(999)).toBe('00:00:00');
-    expect(formatCountdown(1999)).toBe('00:00:01');
+    expect(countdownParts(999)).toEqual({ hours: '00', minutes: '00', seconds: '00' });
   });
 });

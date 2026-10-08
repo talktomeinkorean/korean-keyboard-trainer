@@ -22,9 +22,16 @@ export function isCountdownVisible(now: number): boolean {
   return EVENT_END_MS - now <= COUNTDOWN_WINDOW_MS;
 }
 
-/** HH:MM:SS. 24시간 창 안에서만 쓰므로 시간은 두 자리로 충분하다. */
-export function formatCountdown(ms: number): string {
+/**
+ * 시·분·초를 두 자리 문자열로. 24시간 창 안에서만 쓰므로 '일'은 두지 않고,
+ * 시간도 두 자리면 충분하다 (최대 24).
+ */
+export function countdownParts(ms: number): { hours: string; minutes: string; seconds: string } {
   const total = Math.floor(ms / 1000);
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${pad(Math.floor(total / 3600))}:${pad(Math.floor(total / 60) % 60)}:${pad(total % 60)}`;
+  return {
+    hours: pad(Math.floor(total / 3600)),
+    minutes: pad(Math.floor(total / 60) % 60),
+    seconds: pad(total % 60),
+  };
 }
