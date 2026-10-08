@@ -86,7 +86,7 @@ const FAQ: { question: string; cardGap: string; answer: ReactNode }[] = [
         <p className="leading-[1.3]">
           Each record you save is one entry in the draw for that rank so play as many times as you like!
         </p>
-        <p className={`leading-[1.3] ${PURPLE}`}>Oct 1 – Oct 11, 2026 (11:59 PM KST)</p>
+        <p className={`leading-[1.3] ${PURPLE}`}>Oct 1 – Oct 11, 2026 (11:59 PM UTC)</p>
       </>
     ),
   },
