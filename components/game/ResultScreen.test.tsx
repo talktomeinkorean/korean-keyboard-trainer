@@ -19,14 +19,20 @@ describe('ResultScreen', () => {
   beforeEach(() => localStorage.clear());
   afterEach(() => vi.unstubAllGlobals());
 
-  it('시안의 버튼 4개와 연습 유도를 보여준다', async () => {
+  it('시안의 버튼과 연습 유도를 보여준다 (기록 저장은 감춰 둔 상태)', async () => {
     stubFetch();
     open();
-    expect(screen.getByTestId('result-submit')).toHaveTextContent('Submit This Record');
     expect(screen.getByTestId('result-save')).toHaveTextContent('Save');
     expect(screen.getByTestId('result-share')).toHaveTextContent('Share');
     expect(screen.getByTestId('result-retry')).toHaveTextContent('Try Again');
     expect(screen.getByTestId('result-practice')).toHaveAttribute('href', '/lessons');
+  });
+
+  // 아래 저장 흐름 테스트들은 버튼을 다시 열 때를 위해 남겨 둔다 — 지금은 눌릴 수 없는 길이다
+  it('기록 저장 버튼은 지금 감춰 둔다', async () => {
+    stubFetch();
+    open();
+    expect(screen.getByTestId('result-submit')).not.toBeVisible();
   });
 
   it('결과 카드에 기록과 등급을 넘긴다', async () => {

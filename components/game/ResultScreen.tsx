@@ -119,9 +119,15 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
 
           <div className="flex flex-col items-center gap-[10px]">
             {/* 저장 후에는 잠기고 문구가 바뀐다. 새 판을 시작하면 화면이 다시
-                마운트되므로 자동으로 원래 상태로 돌아간다. */}
+                마운트되므로 자동으로 원래 상태로 돌아간다.
+
+                지금은 잠시 감춰 둔다 — 다시 열 때 아래 style 줄만 지우면 된다.
+                저장 흐름과 팝업은 그대로 두었다. display:none 이라 화면에 보이지도,
+                탭으로 닿지도 않는다. (클래스 hidden 은 PIXEL_BUTTON_BASE 의 flex 와
+                충돌해 어느 쪽이 이길지 CSS 순서에 달리므로 쓰지 않는다.) */}
             <button
               type="button"
+              style={{ display: 'none' }}
               disabled={submitted}
               onClick={() => setShowSubmit(true)}
               data-testid="result-submit"
