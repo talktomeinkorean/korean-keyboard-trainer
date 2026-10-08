@@ -25,7 +25,7 @@ describe('ResultScreen', () => {
     expect(screen.getByTestId('result-save')).toHaveTextContent('Save');
     expect(screen.getByTestId('result-share')).toHaveTextContent('Share');
     expect(screen.getByTestId('result-retry')).toHaveTextContent('Try Again');
-    expect(screen.getByTestId('result-practice')).toHaveAttribute('href', '/lessons');
+    expect(screen.getByTestId('result-practice')).toHaveAttribute('href', '/');
   });
 
   // 아래 저장 흐름 테스트들은 버튼을 다시 열 때를 위해 남겨 둔다 — 지금은 눌릴 수 없는 길이다

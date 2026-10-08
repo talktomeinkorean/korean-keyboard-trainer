@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import LessonsPage from './page';
+import Home from './page';
 
 describe('타자연습 홈', () => {
   it('시안의 버튼 4개를 순서대로 보여준다', () => {
-    render(<LessonsPage />);
+    render(<Home />);
     const labels = ['Basics', 'Vocabulary', 'Sentences', 'Long Text'];
     const rendered = screen
       .getAllByTestId(/^category-/)
@@ -13,7 +13,7 @@ describe('타자연습 홈', () => {
   });
 
   it('각 버튼이 해당 카테고리로 연결된다', () => {
-    render(<LessonsPage />);
+    render(<Home />);
     expect(screen.getByTestId('category-consonants-vowels')).toHaveAttribute(
       'href',
       '/lessons/consonants-vowels',
@@ -22,7 +22,7 @@ describe('타자연습 홈', () => {
   });
 
   it('제목은 화면에 보이지 않아도 접근성용으로 남긴다 (배경 이미지에 그려짐)', () => {
-    render(<LessonsPage />);
+    render(<Home />);
     expect(screen.getByRole('heading', { name: /hangeul typing practice/i })).toBeInTheDocument();
   });
 });

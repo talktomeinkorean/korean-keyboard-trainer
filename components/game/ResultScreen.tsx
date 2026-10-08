@@ -181,7 +181,7 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
             Want to build <span className="text-[#ab99ff]">real typing skills</span>?
           </p>
           <Link
-            href="/lessons"
+            href="/"
             data-testid="result-practice"
             className={`${PIXEL_BUTTON_BASE} ${BUTTON} h-[50px] gap-[30px] bg-[#ab99ff] pl-[40px]`}
           >
