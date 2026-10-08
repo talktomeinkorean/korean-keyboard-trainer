@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- 시안 그대로의 고정 px 배경 아트라 최적화 파이프라인이 필요 없다. */
 import Link from 'next/link';
+import { EventCountdown } from '@/components/event/EventCountdown';
 import { PrizeDrawHeading } from '@/components/event/PrizeDrawHeading';
 import { Faq } from '@/components/event/Faq';
 import { TtmikFooter } from '@/components/event/TtmikFooter';
@@ -54,6 +55,10 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
           </span>
         </a>
       </div>
+
+      {/* 종료 24시간 전부터 나타난다. "Just tap and play." (≈430) 와 이벤트 타이틀(476) 사이의
+          빈 띠에 놓는다 — 둘 다 배경 아트에 그려져 있어 좌표로 비켜 둘 수밖에 없다. */}
+      <EventCountdown className="absolute inset-x-0 top-[436px]" />
 
       {/* 이벤트 타이틀 — 픽셀 글자라 에셋으로 넣는다.
           시안은 40% 검정 + plus-darker(= 배경에서 102 만큼 빼기)인데, 그 블렌드는 사파리에만 있어
