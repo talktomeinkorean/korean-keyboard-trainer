@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { ResultCard } from './ResultCard';
 import { SubmitRecordPopup } from './SubmitRecordPopup';
 import { ShareLinkPopup } from './ShareLinkPopup';
-import { PrizeDrawHeading } from '@/components/event/PrizeDrawHeading';
 import { Faq } from '@/components/event/Faq';
 import { TtmikFooter } from '@/components/event/TtmikFooter';
 import { PIXEL_BUTTON, PIXEL_BUTTON_BASE } from './pixelButton';
@@ -209,11 +208,10 @@ export function ResultScreen({ timeMs, accuracy, keysPerMin, backgroundId, onRet
             />
           </Link>
 
-          {/* 시안: Practice Typing 아래 65.68px (부모 gap 10 + 55.68). 트로피는 홈보다 18% 크다 */}
+          {/* 시안: Practice Typing 아래 65.68px (부모 gap 10 + 55.68) */}
           <div className="mt-[55.68px] flex w-[350px] max-w-full flex-col gap-[60px]">
             {/* 저장 직후 스크롤이 이 덩어리 안의 "What can I win?" 답변까지 내려간다 */}
             <div ref={prizeRef} data-testid="result-prize-heading" className="flex flex-col gap-[40px]">
-              <PrizeDrawHeading trophyScale={33.049 / 27.972} />
               <Faq />
             </div>
             <TtmikFooter />
