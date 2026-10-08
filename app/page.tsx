@@ -24,6 +24,18 @@ const CATEGORY_BUTTON =
   'shadow-[inset_0_-3px_0_0_rgba(0,0,0,0.2),inset_0_3px_0_0_rgba(255,255,255,0.5)] ' +
   'transition active:translate-y-px hover:brightness-105';
 
+/**
+ * 게임으로 보내는 버튼 (시안 880:7255). 카테고리 버튼과 같은 300x55 틀이지만
+ * 노랑→연두 그라데이션에 픽셀 글자라 한눈에 구분된다.
+ * 글자는 왼쪽 85px 에서 시작하고 화살표는 오른쪽 20px 안쪽에 붙는다.
+ */
+const GAME_BUTTON =
+  'flex h-[55px] w-[300px] max-w-full items-center justify-between rounded-[2px] ' +
+  'border border-[#36454d] bg-gradient-to-r from-[#f9f064] from-[63.405%] to-[#8ceb97] ' +
+  'pl-[85px] pr-[20px] font-vt323 text-[28px] leading-none text-[#36454d] ' +
+  'shadow-[inset_0_-3px_0_0_rgba(0,0,0,0.2),inset_0_3px_0_0_rgba(255,255,255,0.5)] ' +
+  'transition active:translate-y-px hover:brightness-105';
+
 export default function Home() {
   return (
     <main className='flex min-h-screen flex-col'>
@@ -48,6 +60,17 @@ export default function Home() {
         </div>
 
         <nav className='flex w-full flex-col items-center gap-[10px] px-4'>
+          {/* 화살표는 결과 화면과 같은 에셋을 쓴다 — 시안의 벡터와 파일이 같다 */}
+          <Link href='/game' data-testid='typing-game' className={GAME_BUTTON}>
+            Typing Game
+            <img
+              src='/race/icons/arrow-right.svg'
+              alt=''
+              aria-hidden
+              className='h-[11px] w-[16.5px]'
+            />
+          </Link>
+
           {CATEGORIES.map((category) => {
             const hasContent = category.stages.length > 0 || category.dbKind;
             return hasContent ? (

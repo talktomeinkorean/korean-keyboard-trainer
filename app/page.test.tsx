@@ -3,6 +3,11 @@ import { render, screen } from '@testing-library/react';
 import Home from './page';
 
 describe('타자연습 홈', () => {
+  it('맨 위에서 게임으로 보낸다 (시안 880:7255)', () => {
+    render(<Home />);
+    expect(screen.getByTestId('typing-game')).toHaveAttribute('href', '/game');
+  });
+
   it('시안의 버튼 4개를 순서대로 보여준다', () => {
     render(<Home />);
     const labels = ['Basics', 'Vocabulary', 'Sentences', 'Long Text'];
