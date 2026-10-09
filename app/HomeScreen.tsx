@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element -- 시안 그대로의 고정 px 배경 아트라 최적화 파이프라인이 필요 없다. */
-import Link from 'next/link';
-import { EventCountdown } from '@/components/event/EventCountdown';
-import { PrizeDrawHeading } from '@/components/event/PrizeDrawHeading';
-import { Faq } from '@/components/event/Faq';
-import { TtmikFooter } from '@/components/event/TtmikFooter';
+import Link from "next/link";
+import { EventCountdown } from "@/components/event/EventCountdown";
+import { PrizeDrawHeading } from "@/components/event/PrizeDrawHeading";
+import { Faq } from "@/components/event/Faq";
+import { TtmikFooter } from "@/components/event/TtmikFooter";
 
 // 홈 배경 시안 (1359:10058 · 모바일 1559:11386) 을 2x 로 export 한 아트. 1920 폭이고 가운데 393 이 모바일 홈(1220:24828) 과 같은 그림이다.
 // 이벤트 블록(타이틀·Join Now·See prizes)과 참여인원 숫자는 이 이미지에서 빠져 있어 아래에서 HTML 로 얹는다.
@@ -14,10 +14,9 @@ import { TtmikFooter } from '@/components/event/TtmikFooter';
 const CANVAS_WIDTH = 393;
 const HERO_HEIGHT = 812.158;
 
-
 /** "Runners so far" 숫자. 집계를 못 읽었으면 가짜 숫자 대신 "-" 를 보인다. */
 function formatRunnerCount(count: number | null): string {
-  return count === null ? '-' : count.toLocaleString('en-US');
+  return count === null ? "-" : count.toLocaleString("en-US");
 }
 
 /** 시안 배경 위에 얹는 인터랙티브 영역. */
@@ -26,10 +25,16 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
     // mx-auto 는 화면이 캔버스(393)보다 좁으면 왼쪽에 붙어 버려 가운데 정렬된 배경 그림과 어긋난다 — 양쪽으로 넘치게 가운데 맞춘다.
     <section
       className="relative"
-      style={{ width: CANVAS_WIDTH, height: HERO_HEIGHT, marginLeft: `calc((100% - ${CANVAS_WIDTH}px) / 2)` }}
+      style={{
+        width: CANVAS_WIDTH,
+        height: HERO_HEIGHT,
+        marginLeft: `calc((100% - ${CANVAS_WIDTH}px) / 2)`,
+      }}
     >
       {/* 헤드라인은 배경 아트에 그려져 있어 문서 구조용으로만 남긴다. */}
-      <h1 className="sr-only">Type a Korean word. Take a step. Race across Seoul!</h1>
+      <h1 className="sr-only">
+        Type a Korean word. Take a step. Race across Seoul!
+      </h1>
 
       {/* 이벤트 블록 — 배경 아트에는 하늘만 있고 여기부터는 전부 HTML 이다. */}
       <div className="absolute left-[46.5px] top-[561.7px] flex w-[300px] flex-col items-center gap-[14px]">
@@ -59,7 +64,7 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
       {/* 종료 24시간 전부터 나타난다 (시안 1857:12569). 타이틀과 Join Now 사이다.
           배경 아트가 위아래를 막고 있어(태그라인 428 · "Runners so far" 말풍선 657) 그 사이 229px 안에
           타이틀·카운트다운·버튼·See prizes 를 넣는다. 간격은 시안 비율(22:36:25)을 그 높이에 맞춰 줄였다. */}
-      <EventCountdown className="absolute inset-x-0 top-[470px] items-center" />
+      <EventCountdown className="absolute inset-x-0 top-[480px] items-center" />
 
       {/* 이벤트 타이틀 — 픽셀 글자라 에셋으로 넣는다.
           시안은 40% 검정 + plus-darker(= 배경에서 102 만큼 빼기)인데, 그 블렌드는 사파리에만 있어
@@ -68,7 +73,7 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
       <img
         src="/home/prize-title.svg"
         alt="Hangeul Day Prize Draw"
-        className="absolute left-[65.26px] top-[436px] h-[22px] w-[262.49px]"
+        className="absolute left-[65.26px] top-[444px] h-[22px] w-[262.49px]"
       />
       {/* 선물·게임패드 — Join Now 버튼 모서리에 걸친다. 버튼 위에 그려지므로 클릭을 가로채지 않게 한다.
           좌표: 시안 프레임(1559:11645) 46.5·475.99 + 그룹 0·31 + 그룹 안 위치.
@@ -138,7 +143,10 @@ export function HomeScreen({ runnerCount }: { runnerCount: number | null }) {
 function HomeBackdrop() {
   return (
     // overflow-hidden: 이미지가 화면보다 넓으면 가로 스크롤이 생긴다 — 화면 폭에서 잘라낸다
-    <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-[#36454d]">
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-y-0 left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-[#36454d]"
+    >
       <div
         className="absolute inset-x-0 top-0 bg-[linear-gradient(180deg,#8ceb97_34.859%,#90cfff_105.22%)]"
         style={{ height: HERO_HEIGHT }}
