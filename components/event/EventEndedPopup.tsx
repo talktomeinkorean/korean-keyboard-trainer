@@ -67,8 +67,15 @@ export function EventEndedPopup({ races }: { races: number | null }) {
       data-testid="event-ended-popup"
       className="fixed inset-0 z-[60] overflow-y-auto bg-[#36454d]/50 backdrop-blur-[5px]"
     >
-      {/* 카드(680)가 화면보다 길면 잘리지 않고 스크롤되게 한다 */}
-      <div className="flex min-h-full items-center justify-center p-4">
+      {/* 카드(680)가 화면보다 길면 잘리지 않고 스크롤되게 한다.
+          카드 바깥(배경)을 눌러도 닫힌다 — 카드 안을 누른 것은 무시한다. */}
+      <div
+        data-testid="event-ended-backdrop"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) close();
+        }}
+        className="flex min-h-full items-center justify-center p-4"
+      >
         <div
           role="dialog"
           aria-modal="true"

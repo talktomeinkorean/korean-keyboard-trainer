@@ -39,6 +39,22 @@ describe('EventEndedPopup', () => {
     expect(screen.queryByTestId('event-ended-popup')).toBeNull();
   });
 
+  it('배경을 누르면 닫히고, 카드 안을 누르면 닫히지 않는다', async () => {
+    await renderPopup();
+    fireEvent.click(screen.getByRole('dialog'));
+    expect(screen.getByTestId('event-ended-popup')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('event-ended-backdrop'));
+    expect(screen.queryByTestId('event-ended-popup')).toBeNull();
+  });
+
+  it('배경으로 닫아도 Don’t show again 을 따른다', async () => {
+    const { HIDE_KEY } = await renderPopup();
+    fireEvent.click(screen.getByTestId('event-ended-hide'));
+    fireEvent.click(screen.getByTestId('event-ended-backdrop'));
+    expect(localStorage.getItem(HIDE_KEY)).toBe('hidden');
+  });
+
   it('같은 방문 안에서 목록으로 돌아오면 다시 뜨지 않는다', async () => {
     vi.resetModules();
     const { EventEndedPopup } = await import('./EventEndedPopup');
