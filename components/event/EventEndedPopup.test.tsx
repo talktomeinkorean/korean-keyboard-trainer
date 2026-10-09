@@ -55,6 +55,20 @@ describe('EventEndedPopup', () => {
     expect(localStorage.getItem(HIDE_KEY)).toBe('hidden');
   });
 
+  it('Esc 를 누르면 닫히고 Don’t show again 을 따른다', async () => {
+    const { HIDE_KEY } = await renderPopup();
+    fireEvent.click(screen.getByTestId('event-ended-hide'));
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByTestId('event-ended-popup')).toBeNull();
+    expect(localStorage.getItem(HIDE_KEY)).toBe('hidden');
+  });
+
+  it('다른 키는 무시한다', async () => {
+    await renderPopup();
+    fireEvent.keyDown(window, { key: 'Enter' });
+    expect(screen.getByTestId('event-ended-popup')).toBeInTheDocument();
+  });
+
   it('같은 방문 안에서 목록으로 돌아오면 다시 뜨지 않는다', async () => {
     vi.resetModules();
     const { EventEndedPopup } = await import('./EventEndedPopup');

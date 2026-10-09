@@ -48,8 +48,6 @@ export function EventEndedPopup({ races }: { races: number | null }) {
     if (!hidden && !closedThisVisit) setOpen(true);
   }, []);
 
-  if (!open) return null;
-
   function close() {
     if (hideForever) {
       try {
@@ -61,6 +59,19 @@ export function EventEndedPopup({ races }: { races: number | null }) {
     closedThisVisit = true;
     setOpen(false);
   }
+
+  // Esc 로도 닫는다. 카드 안 빈 곳을 눌러 포커스가 버튼을 떠나도 잡히도록 창에 건다.
+  // 의존성을 두지 않아 매 렌더 다시 거는데, 그래야 체크 상태가 바뀐 close 를 쓴다 (렌더는 몇 번 안 된다).
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  });
+
+  if (!open) return null;
 
   return (
     <div
