@@ -4,6 +4,11 @@ import { CATEGORIES } from '@/lib/curriculum/categories';
 import { pageMetadata } from '@/lib/seo';
 import { TtmikFooter } from '@/components/event/TtmikFooter';
 import { LessonSky } from '@/components/LessonSky';
+import { EventEndedPopup } from '@/components/event/EventEndedPopup';
+import { getEventFinishCount } from '@/lib/finishes/stats';
+
+// 종료 공지 팝업의 숫자(이벤트 기간 완주 수) 때문에 다시 만든다. 종료 뒤로는 바뀌지 않아 길게 둔다.
+export const revalidate = 3600;
 
 export const metadata = pageMetadata({
   title: 'Korean Typing Practice — Hangeul Keyboard Lessons',
@@ -36,9 +41,10 @@ const GAME_BUTTON =
   'shadow-[inset_0_-3px_0_0_rgba(0,0,0,0.2),inset_0_3px_0_0_rgba(255,255,255,0.5)] ' +
   'transition active:translate-y-px hover:brightness-105';
 
-export default function Home() {
+export default async function Home() {
   return (
     <main className='flex min-h-screen flex-col'>
+      <EventEndedPopup races={await getEventFinishCount()} />
       <h1 className='sr-only'>Hangeul Typing Practice</h1>
 
       {/* pt-[15%] 는 배너 자리를 비워 두려고 둔 값이다. 배너를 뺀 지금은 그냥 상단 여백이며,
