@@ -11,10 +11,9 @@ import { TtmikFooter } from '@/components/event/TtmikFooter';
 const CANVAS_WIDTH = 393;
 const HERO_HEIGHT = 812.158;
 
-
 /** "Runners so far" 숫자. 집계를 못 읽었으면 가짜 숫자 대신 "-" 를 보인다. */
 function formatRunnerCount(count: number | null): string {
-  return count === null ? '-' : count.toLocaleString('en-US');
+  return count === null ? "-" : count.toLocaleString("en-US");
 }
 
 /** 시안 배경 위에 얹는 인터랙티브 영역. */
@@ -23,10 +22,16 @@ function Hero({ runnerCount }: { runnerCount: number | null }) {
     // mx-auto 는 화면이 캔버스(393)보다 좁으면 왼쪽에 붙어 버려 가운데 정렬된 배경 그림과 어긋난다 — 양쪽으로 넘치게 가운데 맞춘다.
     <section
       className="relative"
-      style={{ width: CANVAS_WIDTH, height: HERO_HEIGHT, marginLeft: `calc((100% - ${CANVAS_WIDTH}px) / 2)` }}
+      style={{
+        width: CANVAS_WIDTH,
+        height: HERO_HEIGHT,
+        marginLeft: `calc((100% - ${CANVAS_WIDTH}px) / 2)`,
+      }}
     >
       {/* 헤드라인은 배경 아트에 그려져 있어 문서 구조용으로만 남긴다. */}
-      <h1 className="sr-only">Type a Korean word. Take a step. Race across Seoul!</h1>
+      <h1 className="sr-only">
+        Type a Korean word. Take a step. Race across Seoul!
+      </h1>
 
       {/* 배경 아트에는 하늘만 있고 여기부터는 전부 HTML 이다. */}
       <div className="absolute left-[46.5px] top-[520.07px] flex w-[300px] flex-col items-center gap-[20px]">
@@ -102,7 +107,10 @@ export function HomeScreen({ runnerCount }: { runnerCount: number | null }) {
 function HomeBackdrop() {
   return (
     // overflow-hidden: 이미지가 화면보다 넓으면 가로 스크롤이 생긴다 — 화면 폭에서 잘라낸다
-    <div aria-hidden className="pointer-events-none absolute inset-y-0 left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-[#36454d]">
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-y-0 left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-[#36454d]"
+    >
       <div
         className="absolute inset-x-0 top-0 bg-[linear-gradient(180deg,#8ceb97_34.859%,#90cfff_105.22%)]"
         style={{ height: HERO_HEIGHT }}
