@@ -12,21 +12,16 @@ export const HIDE_KEY = 'htt.eventEndedNotice';
  */
 let closedThisVisit = false;
 
+/**
+ * 여기부터는 띄우지 않는다 — 10/16(KST) 하루가 끝나는 때. 당첨자 발표일이 지나면 공지가 낡는다.
+ * 페이지는 1시간씩 캐시되므로 서버가 아니라 브라우저 시계로 판단한다.
+ */
+export const SHOW_UNTIL_MS = Date.parse('2026-10-17T00:00:00+09:00');
+
 const CHECKBOX_ICON = { on: '/race/checkbox-on.svg', off: '/race/checkbox-off.svg' } as const;
 
-/** 시안의 숫자는 "123,456+" 처럼 끝에 + 를 작게 붙인다. 숫자를 못 읽었으면 "-" 만 둔다. */
-function RaceCount({ count }: { count: number | null }) {
-  if (count === null) return <span className="text-[30.061px]">-</span>;
-  return (
-    <>
-      <span className="text-[30.061px]">{count.toLocaleString('en-US')}</span>
-      <span className="text-[20px]">+</span>
-    </>
-  );
-}
-
 /**
- * 이벤트 종료 공지 (시안 1857:13937). 타자연습 목록(/)에 들어오면 한 번 뜬다.
+ * 이벤트 종료 공지 (시안 1857:13937). 10/16(KST)까지 타자연습 목록(/)에 들어오면 뜬다.
  *
  * 열지 말지는 브라우저에서만 정한다 — 서버는 localStorage 를 볼 수 없어서, 서버에서 그리면
  * "다시 보지 않기" 를 고른 사람에게도 한 번 번쩍인다.
@@ -45,7 +40,7 @@ export function EventEndedPopup({ races }: { races: number | null }) {
       // 저장소가 막힌 브라우저 — 매번 보여 준다
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage 는 브라우저에서만 읽을 수 있다
-    if (!hidden && !closedThisVisit) setOpen(true);
+    if (!hidden && !closedThisVisit && Date.now() < SHOW_UNTIL_MS) setOpen(true);
   }, []);
 
   function close() {
@@ -164,9 +159,9 @@ export function EventEndedPopup({ races }: { races: number | null }) {
                     {/* 시안은 이 글자색이 투명(alpha 0)이라 보이지 않는다 — 홈 숫자와 같은 색으로 둔다 */}
                     <p
                       data-testid="event-ended-races"
-                      className="absolute left-[89.71px] top-[31.64px] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-silkscreen leading-[1.3] tracking-[-3.0061px] text-[#36454d] [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]"
+                      className="absolute left-[89.71px] top-[31.64px] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap font-silkscreen text-[30.061px] leading-[1.3] tracking-[-3.0061px] text-[#36454d] [text-box-edge:cap_alphabetic] [text-box-trim:trim-both]"
                     >
-                      <RaceCount count={races} />
+                      {races === null ? '-' : races.toLocaleString('en-US')}
                     </p>
                     <p className="absolute left-[154.49px] top-[64.72px] -translate-x-1/2 whitespace-nowrap font-dmsans text-[14px] font-semibold leading-[1.2] text-[#6b8999]">
                       races

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 // "이번 방문에서 닫았다" 는 모듈 변수라 테스트마다 새로 불러온다
@@ -9,11 +9,29 @@ async function renderPopup(races: number | null = 25432) {
 }
 
 describe('EventEndedPopup', () => {
-  beforeEach(() => localStorage.clear());
+  // 뜨는 기간(10/16 KST 까지) 안으로 시계를 고정한다 — 실제 날짜가 지나도 테스트가 깨지지 않게
+  beforeEach(() => {
+    localStorage.clear();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-12T10:00:00+09:00'));
+  });
+  afterEach(() => vi.useRealTimers());
 
-  it('이벤트 기간 완주 수를 천 단위로 끊고 + 를 붙인다', async () => {
+  it('이벤트 기간 완주 수를 천 단위로 끊어 보인다 (+ 는 붙이지 않는다)', async () => {
     await renderPopup(25432);
-    expect(screen.getByTestId('event-ended-races')).toHaveTextContent('25,432+');
+    expect(screen.getByTestId('event-ended-races')).toHaveTextContent(/^25,432$/);
+  });
+
+  it('10/16(KST) 마지막 순간까지는 뜬다', async () => {
+    vi.setSystemTime(new Date('2026-10-16T23:59:59+09:00'));
+    await renderPopup();
+    expect(screen.getByTestId('event-ended-popup')).toBeInTheDocument();
+  });
+
+  it('10/17 0시(KST)부터는 뜨지 않는다', async () => {
+    vi.setSystemTime(new Date('2026-10-17T00:00:00+09:00'));
+    await renderPopup();
+    expect(screen.queryByTestId('event-ended-popup')).toBeNull();
   });
 
   it('숫자를 못 읽었으면 "-" 만 보인다', async () => {
