@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { getServiceClient } from '@/lib/supabase/server';
+import { EVENT_END_MS } from '@/lib/event/countdown';
 
 export interface FinishStats {
   /** 완주 횟수 — 행 수 */
@@ -41,6 +42,36 @@ export async function getRunnerCount(): Promise<number | null> {
   if (!getServiceClient()) return null;
   try {
     return (await getCachedFinishStats()).finishes;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchEventFinishes(): Promise<number> {
+  const supabase = getServiceClient();
+  if (!supabase) throw new Error('not configured');
+  const { count, error } = await supabase
+    .from('race_finishes')
+    .select('*', { count: 'exact', head: true })
+    .lt('created_at', new Date(EVENT_END_MS).toISOString());
+  if (error || count === null) throw new Error(error?.message ?? 'no count');
+  return count;
+}
+
+/** 종료 뒤에는 숫자가 바뀌지 않으므로 오래 들고 있는다 */
+const getCachedEventFinishes = unstable_cache(fetchEventFinishes, ['race-finishes-event'], {
+  revalidate: 3600,
+});
+
+/**
+ * 이벤트 기간의 완주 횟수 — 종료 공지 팝업의 숫자. 종료 시각 이후 완주는 세지 않는다
+ * (게임은 계속되므로 전체 완주 수는 계속 오른다).
+ * 저장소가 없거나 조회에 실패하면 null.
+ */
+export async function getEventFinishCount(): Promise<number | null> {
+  if (!getServiceClient()) return null;
+  try {
+    return await getCachedEventFinishes();
   } catch {
     return null;
   }

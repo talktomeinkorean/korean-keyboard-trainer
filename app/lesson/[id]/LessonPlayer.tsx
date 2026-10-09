@@ -111,7 +111,7 @@ export function LessonPlayer({ lesson, onRedraw }: PlayerProps) {
 
   // Vocabulary·Sentences 는 카테고리 주소가 곧 새 연습이라 뒤로가기가
   // "다른 단어로 이동"처럼 보인다. 목록이 있는 카테고리만 그리로 보낸다.
-  const backHref = category?.randomSet ? '/lessons' : `/lessons/${categorySlug}`;
+  const backHref = category?.randomSet ? '/' : `/lessons/${categorySlug}`;
 
   const result = session.isComplete && (
     <PracticeResult

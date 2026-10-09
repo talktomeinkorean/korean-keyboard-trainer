@@ -13,8 +13,11 @@ const nextConfig: NextConfig = {
   },
   // Basics 를 시안대로 3개 레슨으로 합치면서 예전 레슨 주소 7개가 사라졌다.
   // 이미 색인됐을 수 있어 합쳐진 레슨으로 영구 이동시킨다.
+  // 타자연습 목록이 홈으로 올라오면서 /lessons 도 같은 이유로 홈을 가리킨다
+  // (하위 /lessons/<카테고리> 는 그대로 남는다).
   async redirects() {
     return [
+      { source: '/lessons', destination: '/', permanent: true },
       { source: '/lesson/c1', destination: '/lesson/consonants', permanent: true },
       { source: '/lesson/c2', destination: '/lesson/consonants', permanent: true },
       { source: '/lesson/c3', destination: '/lesson/consonants', permanent: true },
