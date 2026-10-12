@@ -38,7 +38,12 @@ export async function GET(request: Request): Promise<Response> {
       return Response.json({ error: 'slack failed', status: res.status }, { status: 502 });
     }
     // homeVisitors 를 함께 돌려준다 — 수동 실행으로 GA4 연결 여부를 바로 확인할 수 있다
-    return Response.json({ ok: true, date: report.date, homeVisitors: report.homeVisitors });
+    return Response.json({
+      ok: true,
+      date: report.date,
+      homeVisitors: report.homeVisitors,
+      returningVisitors: report.returningVisitors,
+    });
   } catch {
     return Response.json({ error: 'internal error' }, { status: 500 });
   }
@@ -58,7 +63,8 @@ async function collect(supabase: SupabaseClient, now: Date): Promise<DailyReport
 
   return {
     date: kstDateOf(now),
-    homeVisitors: visitors,
+    homeVisitors: visitors?.total ?? null,
+    returningVisitors: visitors?.returning ?? null,
     finishes: finishStats.data?.finishes ?? 0,
     participants: finishStats.data?.participants ?? 0,
     submissions: scoreStats.data?.submissions ?? 0,
