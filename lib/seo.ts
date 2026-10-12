@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import type { Lesson } from '@/lib/curriculum/types';
+import { SITE_URL } from '@/lib/site';
 
-export const SITE_NAME = 'Hangeul Typing Practice';
+export const SITE_NAME = 'Hangeul Typing Race';
 
 interface PageMeta {
   /** <title> 에 그대로 들어간다 — 페이지마다 달라야 색인에서 중복 취급을 받지 않는다 */
@@ -9,6 +10,10 @@ interface PageMeta {
   description: string;
   /** 사이트 루트 기준 경로. canonical 과 og:url 에 쓴다 */
   path: string;
+  /** 공유 카드용 설명. 검색결과와 달리 짧게 끊어 쓰고 싶을 때만 준다 (없으면 description) */
+  ogDescription?: string;
+  /** 트위터 카드용 설명. 없으면 ogDescription, 그것도 없으면 description */
+  twitterDescription?: string;
 }
 
 /**
@@ -20,7 +25,7 @@ const OG_IMAGE = {
   url: '/og.png',
   width: 1200,
   height: 630,
-  alt: 'Hangeul Typing Race — 한글타자',
+  alt: 'Hangeul Typing Race: Korean typing practice game',
 };
 
 /**
@@ -30,13 +35,25 @@ const OG_IMAGE = {
  * (필드 단위 병합이 아니다). 그래서 페이지마다 직접 쓰지 않고 이 함수를 거치게 해
  * og/twitter 태그가 빠지는 일이 없게 한다.
  */
-export function pageMetadata({ title, description, path }: PageMeta): Metadata {
+export function pageMetadata({
+  title,
+  description,
+  path,
+  ogDescription,
+  twitterDescription,
+}: PageMeta): Metadata {
+  const og = ogDescription ?? description;
   return {
     title,
     description,
     alternates: { canonical: path },
-    openGraph: { title, description, url: path, siteName: SITE_NAME, type: 'website', images: [OG_IMAGE] },
-    twitter: { card: 'summary_large_image', title, description, images: [OG_IMAGE.url] },
+    openGraph: { title, description: og, url: path, siteName: SITE_NAME, type: 'website', images: [OG_IMAGE] },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: twitterDescription ?? og,
+      images: [OG_IMAGE.url],
+    },
   };
 }
 
@@ -84,3 +101,30 @@ export function lessonDescription(lesson: Lesson): string {
       return `Type a Korean passage line by line — ${count} lines, starting with "${firstLine(lesson.items, 50)}".`;
   }
 }
+
+/**
+ * 홈에 넣는 구조화 데이터 (마케팅팀 SEO 요청서 2026-10-07 작업 3).
+ *
+ * alternateName 은 화면에 보이지 않는다 — 영어권에서 많이 쓰는 "Hangul" 표기로
+ * 검색해도 같은 사이트라는 것을 검색엔진에 알려 주는 용도다.
+ *
+ * 요청서의 inLanguage 는 "ko" 였으나 이 값은 **페이지 언어**를 가리킨다.
+ * 화면 글은 모두 영어이므로(요청서도 "페이지 언어 영어 유지") "en" 으로 넣는다.
+ */
+export const WEB_APPLICATION_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Hangeul Typing Race',
+  alternateName: ['Hangul Typing Race', 'Hangul Typing Practice'],
+  url: SITE_URL,
+  description: 'Free Korean typing practice game for learners.',
+  applicationCategory: 'EducationalApplication',
+  operatingSystem: 'Any',
+  inLanguage: 'en',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Talk To Me In Korean',
+    url: 'https://talktomeinkorean.com',
+  },
+} as const;

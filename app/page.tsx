@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- 시안 그대로의 고정 크기 배너라 최적화 파이프라인이 필요 없다. */
 import Link from 'next/link';
 import { CATEGORIES } from '@/lib/curriculum/categories';
-import { pageMetadata } from '@/lib/seo';
+import { pageMetadata, WEB_APPLICATION_JSON_LD } from '@/lib/seo';
 import { TtmikFooter } from '@/components/event/TtmikFooter';
 import { LessonSky } from '@/components/LessonSky';
 import { EventEndedPopup } from '@/components/event/EventEndedPopup';
@@ -10,10 +10,16 @@ import { getEventFinishCount } from '@/lib/finishes/stats';
 // 종료 공지 팝업의 숫자(이벤트 기간 완주 수) 때문에 다시 만든다. 종료 뒤로는 바뀌지 않아 길게 둔다.
 export const revalidate = 3600;
 
+// 문구는 마케팅팀 SEO 요청서(2026-10-07) 2부 작업 1 확정안이다.
+// 검색어(Korean typing practice/test)를 앞에 두고 브랜드명을 뒤로 보낸다.
 export const metadata = pageMetadata({
-  title: 'Korean Typing Practice — Hangeul Keyboard Lessons',
+  title: 'Korean Typing Practice & Test (Free) | Hangeul Typing Race',
   description:
-    'Free Korean typing practice: consonants and vowels, vocabulary, sentences, and long passages, with feedback on every consonant and vowel you type.',
+    'Free Korean typing practice. Type real Korean words in Hangeul (Hangul), check your speed in keys per minute, and race across Seoul. No sign-up needed.',
+  ogDescription:
+    'Practice Hangeul typing with real Korean words. Check your speed and race across Seoul. Free, no sign-up.',
+  twitterDescription:
+    'Practice Hangeul typing with real Korean words. Check your speed and race across Seoul.',
   path: '/',
 });
 
@@ -44,6 +50,12 @@ const GAME_BUTTON =
 export default async function Home() {
   return (
     <main className='flex min-h-screen flex-col'>
+      {/* 구조화 데이터 — 검색결과에 앱 정보를 넘긴다. FAQPage 는 화면에 FAQ 가 올라온 뒤에 더한다
+          (보이지 않는 내용을 넣으면 구글이 구조화 데이터 위반으로 본다). */}
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEB_APPLICATION_JSON_LD) }}
+      />
       <EventEndedPopup races={await getEventFinishCount()} />
       <h1 className='sr-only'>Hangeul Typing Practice</h1>
 
