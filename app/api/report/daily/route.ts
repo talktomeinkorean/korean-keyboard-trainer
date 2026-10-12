@@ -4,7 +4,7 @@ import { homeVisitors } from '@/lib/report/ga4';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
- * 하루 참여 리포트를 슬랙으로 보낸다. Vercel Cron 이 매일 00:00 UTC(=09:00 KST)에 호출한다.
+ * 누계 참여 리포트를 슬랙으로 보낸다. Vercel Cron 이 매주 월요일 00:00 UTC(=09:00 KST)에 호출한다.
  *
  * 주소가 알려지면 누구나 리포트를 띄울 수 있으므로 CRON_SECRET 으로 호출자를 확인한다
  * (Vercel Cron 은 Authorization: Bearer <CRON_SECRET> 를 자동으로 붙인다).
@@ -57,7 +57,7 @@ async function collect(supabase: SupabaseClient, now: Date): Promise<DailyReport
    */
   const [finishStats, scoreStats, visitors] = await Promise.all([
     supabase.from('race_finish_stats').select('finishes, participants').single(),
-    supabase.from('race_score_stats').select('submissions, entrants, marketing_people').single(),
+    supabase.from('race_score_stats').select('marketing_people').single(),
     homeVisitors(now),
   ]);
 
@@ -67,8 +67,6 @@ async function collect(supabase: SupabaseClient, now: Date): Promise<DailyReport
     returningVisitors: visitors?.returning ?? null,
     finishes: finishStats.data?.finishes ?? 0,
     participants: finishStats.data?.participants ?? 0,
-    submissions: scoreStats.data?.submissions ?? 0,
-    entrants: scoreStats.data?.entrants ?? 0,
     marketingPeople: scoreStats.data?.marketing_people ?? 0,
   };
 }

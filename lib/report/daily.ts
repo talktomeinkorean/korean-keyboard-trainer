@@ -13,10 +13,6 @@ export interface DailyReport {
   finishes: number;
   /** 완주자 수 — 같은 브라우저의 여러 판은 한 명 */
   participants: number;
-  /** 응모 횟수 (= 기록 저장) */
-  submissions: number;
-  /** 응모자 수 — 같은 이메일은 한 명 */
-  entrants: number;
   /** 마케팅 동의자 수 — 같은 이메일은 한 명 */
   marketingPeople: number;
 }
@@ -49,7 +45,6 @@ export function formatSlackMessage(r: DailyReport, until?: Date): string {
     // GA4 설정이 없으면 이 줄만 빠진다
     ...(r.homeVisitors === null ? [] : [`• 홈 방문자 ${n(r.homeVisitors)}명${returning(r)}`]),
     `• 완주 ${n(r.finishes)}회 · 완주자 ${n(r.participants)}명`,
-    `• 응모 ${n(r.submissions)}건 · 응모자 ${n(r.entrants)}명`,
     `• 마케팅 동의자 ${n(r.marketingPeople)}명`,
   ];
   return lines.join('\n');
