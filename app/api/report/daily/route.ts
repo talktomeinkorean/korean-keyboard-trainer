@@ -57,7 +57,7 @@ async function collect(supabase: SupabaseClient, now: Date): Promise<DailyReport
    */
   const [finishStats, scoreStats, visitors] = await Promise.all([
     supabase.from('race_finish_stats').select('finishes, participants').single(),
-    supabase.from('race_score_stats').select('submissions, entrants, marketing_people').single(),
+    supabase.from('race_score_stats').select('marketing_people').single(),
     homeVisitors(now),
   ]);
 
@@ -67,8 +67,6 @@ async function collect(supabase: SupabaseClient, now: Date): Promise<DailyReport
     returningVisitors: visitors?.returning ?? null,
     finishes: finishStats.data?.finishes ?? 0,
     participants: finishStats.data?.participants ?? 0,
-    submissions: scoreStats.data?.submissions ?? 0,
-    entrants: scoreStats.data?.entrants ?? 0,
     marketingPeople: scoreStats.data?.marketing_people ?? 0,
   };
 }

@@ -17,18 +17,15 @@ describe('formatSlackMessage', () => {
     returningVisitors: 2_840,
     finishes: 21_811,
     participants: 6_277,
-    submissions: 9_530,
-    entrants: 4_120,
     marketingPeople: 1_380,
   };
 
-  // 2026-10-07 요청 — 하루치는 빼고 누계 6가지만 보낸다
-  it('누계 여섯 가지를 보낸다', () => {
+  // 2026-10-07 요청 — 하루치는 빼고 누계만 보낸다. 응모 줄은 2026-10-12 에 뺐다.
+  it('누계 숫자들을 보낸다', () => {
     const text = formatSlackMessage(report, new Date('2026-10-01T00:00:00Z'));
     expect(text).toContain('누계 리포트 (2026-10-01 09:00 KST 기준)');
     expect(text).toContain('홈 방문자 12,345명 (재방문 2,840명 · 23%)');
     expect(text).toContain('완주 21,811회 · 완주자 6,277명');
-    expect(text).toContain('응모 9,530건 · 응모자 4,120명');
     expect(text).toContain('마케팅 동의자 1,380명');
   });
 
