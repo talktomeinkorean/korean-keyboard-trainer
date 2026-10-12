@@ -14,6 +14,7 @@ describe('formatSlackMessage', () => {
   const report = {
     date: '2026-10-01',
     homeVisitors: 12_345,
+    returningVisitors: 2_840,
     finishes: 21_811,
     participants: 6_277,
     submissions: 9_530,
@@ -25,7 +26,7 @@ describe('formatSlackMessage', () => {
   it('누계 여섯 가지를 보낸다', () => {
     const text = formatSlackMessage(report, new Date('2026-10-01T00:00:00Z'));
     expect(text).toContain('누계 리포트 (2026-10-01 09:00 KST 기준)');
-    expect(text).toContain('홈 방문자 12,345명');
+    expect(text).toContain('홈 방문자 12,345명 (재방문 2,840명 · 23%)');
     expect(text).toContain('완주 21,811회 · 완주자 6,277명');
     expect(text).toContain('응모 9,530건 · 응모자 4,120명');
     expect(text).toContain('마케팅 동의자 1,380명');
@@ -39,9 +40,19 @@ describe('formatSlackMessage', () => {
   });
 
   it('GA4 설정이 없으면 홈 방문자 줄만 뺀다', () => {
-    const text = formatSlackMessage({ ...report, homeVisitors: null });
+    const text = formatSlackMessage({ ...report, homeVisitors: null, returningVisitors: null });
     expect(text).not.toContain('홈 방문자');
     expect(text).toContain('완주 21,811회');
     expect(text).toContain('마케팅 동의자 1,380명');
+  });
+
+  it('재방문자만 못 읽었으면 괄호 없이 홈 방문자만 보인다', () => {
+    const text = formatSlackMessage({ ...report, returningVisitors: null });
+    expect(text).toContain('• 홈 방문자 12,345명\n');
+  });
+
+  it('홈 방문자가 0 이면 비율은 빼고 숫자만 둔다', () => {
+    const text = formatSlackMessage({ ...report, homeVisitors: 0, returningVisitors: 0 });
+    expect(text).toContain('홈 방문자 0명 (재방문 0명)');
   });
 });

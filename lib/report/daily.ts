@@ -7,6 +7,8 @@ export interface DailyReport {
   date: string;
   /** 홈 방문자 수 — GA4 에서 읽는다. 설정이 없으면 null 이라 그 줄을 뺀다 */
   homeVisitors: number | null;
+  /** 그중 재방문자 수 — 읽지 못하면 null 이라 괄호를 뺀다 */
+  returningVisitors: number | null;
   /** 완주 횟수 */
   finishes: number;
   /** 완주자 수 — 같은 브라우저의 여러 판은 한 명 */
@@ -31,6 +33,13 @@ function kstClock(at: Date): string {
   return new Date(at.getTime() + KST_OFFSET_MS).toISOString().slice(11, 16);
 }
 
+/** " (재방문 1,234명 · 23%)" — 재방문자를 못 읽었으면 빈 문자열 */
+function returning(r: DailyReport): string {
+  if (r.homeVisitors === null || r.returningVisitors === null) return '';
+  const share = r.homeVisitors > 0 ? ` · ${Math.round((r.returningVisitors / r.homeVisitors) * 100)}%` : '';
+  return ` (재방문 ${r.returningVisitors.toLocaleString('en-US')}명${share})`;
+}
+
 /** 슬랙에 보낼 본문 (mrkdwn). 숫자만 담고 이메일 같은 개인정보는 넣지 않는다. */
 export function formatSlackMessage(r: DailyReport, until?: Date): string {
   const n = (v: number) => v.toLocaleString('en-US');
@@ -38,7 +47,7 @@ export function formatSlackMessage(r: DailyReport, until?: Date): string {
   const lines = [
     `*한글타자 레이스 — 누계 리포트 (${r.date}${when} 기준)*`,
     // GA4 설정이 없으면 이 줄만 빠진다
-    ...(r.homeVisitors === null ? [] : [`• 홈 방문자 ${n(r.homeVisitors)}명`]),
+    ...(r.homeVisitors === null ? [] : [`• 홈 방문자 ${n(r.homeVisitors)}명${returning(r)}`]),
     `• 완주 ${n(r.finishes)}회 · 완주자 ${n(r.participants)}명`,
     `• 응모 ${n(r.submissions)}건 · 응모자 ${n(r.entrants)}명`,
     `• 마케팅 동의자 ${n(r.marketingPeople)}명`,
