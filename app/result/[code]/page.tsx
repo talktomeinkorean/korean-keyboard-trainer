@@ -38,7 +38,7 @@ export default async function ResultPage({ params }: Props) {
         Try It Yourself
       </Link>
       <Link
-        href="/lessons"
+        href="/"
         className={`${PIXEL_BUTTON_BASE} h-[40px] w-[265px] max-w-full bg-[#ab99ff]`}
       >
         Practice Typing

@@ -12,8 +12,8 @@ describe('ExitPopup', () => {
 
   it('Practice Typing 은 /lessons, Back to Home 은 / 로 간다', () => {
     render(<ExitPopup onClose={() => {}} onRestart={() => {}} />);
-    expect(screen.getByTestId('exit-practice')).toHaveAttribute('href', '/lessons');
-    expect(screen.getByTestId('exit-home')).toHaveAttribute('href', '/');
+    expect(screen.getByTestId('exit-practice')).toHaveAttribute('href', '/');
+    expect(screen.getByTestId('exit-home')).toHaveAttribute('href', '/game');
   });
 
   it('Restart 는 콜백을 호출한다', () => {

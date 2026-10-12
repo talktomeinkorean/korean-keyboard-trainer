@@ -69,7 +69,7 @@ export default async function CategoryPage({
 
       {/* 내비게이션 바 — 오른쪽 32px 은 제목을 가운데 두기 위한 빈 자리 */}
       <header className="flex h-[85px] items-center justify-between p-[24px]">
-        <Link href="/lessons" aria-label="Back to practice menu" data-testid="back-to-lessons">
+        <Link href="/" aria-label="Back to practice menu" data-testid="back-to-lessons">
           <img
             src="/lessons/icons/arrow-back.svg"
             alt=""

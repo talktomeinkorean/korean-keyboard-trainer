@@ -39,10 +39,10 @@ export function ExitPopup({ onClose, onRestart }: Props) {
           >
             Restart
           </button>
-          <Link href="/lessons" data-testid="exit-practice" className={`${PIXEL_BUTTON} w-[200px] max-w-full`}>
+          <Link href="/" data-testid="exit-practice" className={`${PIXEL_BUTTON} w-[200px] max-w-full`}>
             Practice Typing
           </Link>
-          <Link href="/" data-testid="exit-home" className={`${PIXEL_BUTTON} w-[200px] max-w-full`}>
+          <Link href="/game" data-testid="exit-home" className={`${PIXEL_BUTTON} w-[200px] max-w-full`}>
             Back to Home
           </Link>
         </div>

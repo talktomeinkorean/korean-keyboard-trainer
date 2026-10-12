@@ -19,14 +19,20 @@ describe('ResultScreen', () => {
   beforeEach(() => localStorage.clear());
   afterEach(() => vi.unstubAllGlobals());
 
-  it('시안의 버튼 4개와 연습 유도를 보여준다', async () => {
+  it('시안의 버튼과 연습 유도를 보여준다 (기록 저장은 감춰 둔 상태)', async () => {
     stubFetch();
     open();
-    expect(screen.getByTestId('result-submit')).toHaveTextContent('Submit This Record');
     expect(screen.getByTestId('result-save')).toHaveTextContent('Save');
     expect(screen.getByTestId('result-share')).toHaveTextContent('Share');
     expect(screen.getByTestId('result-retry')).toHaveTextContent('Try Again');
-    expect(screen.getByTestId('result-practice')).toHaveAttribute('href', '/lessons');
+    expect(screen.getByTestId('result-practice')).toHaveAttribute('href', '/');
+  });
+
+  // 아래 저장 흐름 테스트들은 버튼을 다시 열 때를 위해 남겨 둔다 — 지금은 눌릴 수 없는 길이다
+  it('기록 저장 버튼은 지금 감춰 둔다', async () => {
+    stubFetch();
+    open();
+    expect(screen.getByTestId('result-submit')).not.toBeVisible();
   });
 
   it('결과 카드에 기록과 등급을 넘긴다', async () => {
@@ -91,29 +97,6 @@ describe('ResultScreen', () => {
     expect(submit).toBeDisabled();
     expect(submit).toHaveTextContent('✓ Record Submitted');
     expect(submit).toHaveTextContent('Play again for another entry');
-  });
-
-  // px 로 내려가는 양을 정하면 화면 높이마다 보이는 데까지가 달라진다 —
-  // Q&A 첫 점선을 화면 아래에 맞춰 어떤 화면에서도 같은 자리에서 멈추게 한다
-  it('저장에 성공하면 Q&A 첫 점선까지 스크롤한다 (시안 1278:7091)', async () => {
-    stubFetch();
-    const scrollIntoView = vi.fn();
-    vi.stubGlobal('requestAnimationFrame', (fn: FrameRequestCallback) => {
-      fn(0);
-      return 0;
-    });
-    vi.stubGlobal('cancelAnimationFrame', () => {});
-    open();
-    screen.getByTestId('faq-first-divider').scrollIntoView = scrollIntoView;
-
-    fireEvent.click(screen.getByTestId('result-submit'));
-    fireEvent.change(screen.getByLabelText('Name:'), { target: { value: 'racer' } });
-    fireEvent.change(screen.getByLabelText('Email:'), { target: { value: 'a@b.co' } });
-    fireEvent.click(screen.getByTestId('consent-required'));
-    fireEvent.click(screen.getByRole('button', { name: /submit record/i }));
-
-    await waitFor(() => expect(scrollIntoView).toHaveBeenCalled());
-    expect(scrollIntoView.mock.calls[0][0]).toMatchObject({ block: 'end' });
   });
 
   it('새 판을 시작하면 제출 버튼이 원래대로 돌아온다', async () => {
