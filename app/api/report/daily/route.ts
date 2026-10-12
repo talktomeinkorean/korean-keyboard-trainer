@@ -4,7 +4,7 @@ import { homeVisitors } from '@/lib/report/ga4';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
- * 하루 참여 리포트를 슬랙으로 보낸다. Vercel Cron 이 매일 00:00 UTC(=09:00 KST)에 호출한다.
+ * 누계 참여 리포트를 슬랙으로 보낸다. Vercel Cron 이 매주 월요일 00:00 UTC(=09:00 KST)에 호출한다.
  *
  * 주소가 알려지면 누구나 리포트를 띄울 수 있으므로 CRON_SECRET 으로 호출자를 확인한다
  * (Vercel Cron 은 Authorization: Bearer <CRON_SECRET> 를 자동으로 붙인다).
