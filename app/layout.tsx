@@ -52,6 +52,9 @@ export const metadata: Metadata = {
   // 실제 페이지는 각자 lib/seo 의 pageMetadata 로 고유한 제목을 붙인다.
   title: SITE_NAME,
   description: "Learn the Korean keyboard, one key at a time.",
+  // /best·/result 는 pageMetadata 를 거치지 않는다. 하위가 openGraph 를 정의하지 않으면
+  // 루트 값을 그대로 상속하므로(Next 16) 사이트 이름은 여기에도 깔아 둔다.
+  openGraph: { siteName: SITE_NAME },
   // Search Console 소유권 확인 — 제거하면 소유권이 해제된다.
   // GTM/GA 방식은 스크립트가 클라이언트에서 삽입돼 검증기가 찾지 못하므로 메타 태그를 쓴다.
   verification: { google: "YKbQhezyX2QD0WdIiWsAI4q9rtczLq5ryD2UmMcHGa4" },
