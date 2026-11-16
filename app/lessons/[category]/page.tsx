@@ -23,7 +23,7 @@ export async function generateMetadata({
   const found = getCategory(category);
   if (!found) return {};
   return pageMetadata({
-    title: `${found.title} — Korean Typing Practice`,
+    title: found.seoTitle,
     description: found.description,
     path: `/lessons/${found.slug}`,
   });

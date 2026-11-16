@@ -4,6 +4,8 @@ import { Lesson, Stage } from './types';
 export interface Category {
   slug: string;
   title: string;
+  /** 카테고리 목록 페이지의 <title>. 화면의 title 과 달리 검색어를 앞세운 문구다 */
+  seoTitle: string;
   /** 카테고리 목록 페이지의 검색 결과 설명문 */
   description: string;
   /** 정적 커리큘럼(lessons.ts)에서 가져오는 stage 들 */
@@ -32,15 +34,17 @@ export const CATEGORIES: Category[] = [
   {
     slug: 'consonants-vowels',
     title: 'Basics',
+    seoTitle: 'Learn the Korean Keyboard: Hangul Letters | Hangeul Typing',
     description:
-      'Learn where every Korean consonant and vowel sits on the keyboard, then put them together into syllables.',
+      'New to the Korean keyboard? Find where each Hangul consonant and vowel is, then practice building syllables. The Key Guide shows the next key to press.',
     stages: ['consonant', 'vowel', 'syllable'],
   },
   {
     slug: 'vocabulary',
     title: 'Vocabulary',
+    seoTitle: 'Korean Vocabulary Typing Practice | Hangeul Typing',
     description:
-      'Type real Korean words by level, from everyday basics upward, with the English meaning alongside.',
+      'Type everyday Korean words by level, with the English meaning next to each word. Build your typing speed and vocabulary at the same time.',
     stages: [],
     dbKind: 'vocabulary',
     randomSet: { size: 30, title: '30 Random Words' },
@@ -48,8 +52,9 @@ export const CATEGORIES: Category[] = [
   {
     slug: 'short-sentences',
     title: 'Sentences',
+    seoTitle: 'Korean Sentence Typing Practice | Hangeul Typing',
     description:
-      'Type full Korean sentences, including spacing and punctuation, with feedback on every consonant and vowel.',
+      'Type real Korean sentences from Core Grammar Levels 1 to 10. Practice spacing, sentence endings, and typing speed with useful example sentences.',
     stages: [],
     dbKind: 'sentence',
     randomSet: { size: 10, title: '10 Random Sentences' },
@@ -57,8 +62,9 @@ export const CATEGORIES: Category[] = [
   {
     slug: 'long-text',
     title: 'Long Text',
+    seoTitle: 'Type Korean Stories: Long Text Practice | Hangeul Typing',
     description:
-      'Type Korean passages line by line — the closest thing to real writing practice on the Hangeul keyboard.',
+      'Practice typing longer Korean texts with short stories for beginners. Get used to reading and typing full paragraphs in Korean.',
     stages: [],
     dbKind: 'long_text',
     showsCompletion: true,

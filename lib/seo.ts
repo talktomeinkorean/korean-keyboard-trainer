@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import type { Lesson } from '@/lib/curriculum/types';
 import { SITE_URL } from '@/lib/site';
 
-export const SITE_NAME = 'Hangeul Typing Race';
+export const SITE_NAME = 'Hangeul Typing';
 
 interface PageMeta {
   /** <title> 에 그대로 들어간다 — 페이지마다 달라야 색인에서 중복 취급을 받지 않는다 */
@@ -10,10 +10,6 @@ interface PageMeta {
   description: string;
   /** 사이트 루트 기준 경로. canonical 과 og:url 에 쓴다 */
   path: string;
-  /** 공유 카드용 설명. 검색결과와 달리 짧게 끊어 쓰고 싶을 때만 준다 (없으면 description) */
-  ogDescription?: string;
-  /** 트위터 카드용 설명. 없으면 ogDescription, 그것도 없으면 description */
-  twitterDescription?: string;
 }
 
 /**
@@ -35,23 +31,16 @@ const OG_IMAGE = {
  * (필드 단위 병합이 아니다). 그래서 페이지마다 직접 쓰지 않고 이 함수를 거치게 해
  * og/twitter 태그가 빠지는 일이 없게 한다.
  */
-export function pageMetadata({
-  title,
-  description,
-  path,
-  ogDescription,
-  twitterDescription,
-}: PageMeta): Metadata {
-  const og = ogDescription ?? description;
+export function pageMetadata({ title, description, path }: PageMeta): Metadata {
   return {
     title,
     description,
     alternates: { canonical: path },
-    openGraph: { title, description: og, url: path, siteName: SITE_NAME, type: 'website', images: [OG_IMAGE] },
+    openGraph: { title, description, url: path, siteName: SITE_NAME, type: 'website', images: [OG_IMAGE] },
     twitter: {
       card: 'summary_large_image',
       title,
-      description: twitterDescription ?? og,
+      description,
       images: [OG_IMAGE.url],
     },
   };
@@ -114,8 +103,8 @@ export function lessonDescription(lesson: Lesson): string {
 export const WEB_APPLICATION_JSON_LD = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Hangeul Typing Race',
-  alternateName: ['Hangul Typing Race', 'Hangul Typing Practice'],
+  name: 'Hangeul Typing',
+  alternateName: ['Hangul Typing', 'Hangeul Typing Race'],
   url: SITE_URL,
   description: 'Free Korean typing practice game for learners.',
   applicationCategory: 'EducationalApplication',
@@ -128,3 +117,39 @@ export const WEB_APPLICATION_JSON_LD = {
     url: 'https://talktomeinkorean.com',
   },
 } as const;
+
+/**
+ * 검색결과에 보이는 사이트 이름용 데이터 (마케팅팀 SEO 요청서 2026-11-16 작업 2).
+ *
+ * 구글은 이 데이터를 도메인·서브도메인의 **루트 페이지**에서만 읽는다 — 그래서 홈(/)에만 넣는다.
+ * 리치 결과 테스트는 사이트 이름을 검사하지 않으므로 확인은 스키마 검사기로 한다.
+ */
+export const WEB_SITE_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Hangeul Typing',
+  alternateName: ['Hangul Typing', '한글타자'],
+  url: `${SITE_URL}/`,
+} as const;
+
+/**
+ * 기초 레슨 3개의 고정 문구 (마케팅팀 SEO 요청서 2026-11-16 작업 1).
+ * 나머지 레슨(voc-/sen-/txt-)은 연습 내용에서 문구를 만든다 — lessonDescription 참고.
+ */
+export const BASICS_META: Record<string, { title: string; description: string }> = {
+  consonants: {
+    title: 'Korean Consonants Typing Practice | Hangeul Typing',
+    description:
+      'Practice typing Korean consonants like ㄱ, ㄴ, and ㄷ one key at a time. The Key Guide shows where each letter is on the Korean keyboard.',
+  },
+  vowels: {
+    title: 'Korean Vowels Typing Practice | Hangeul Typing',
+    description:
+      'Practice typing Korean vowels like ㅏ, ㅓ, and ㅗ one key at a time. The Key Guide shows where each letter is on the Korean keyboard.',
+  },
+  syllables: {
+    title: 'Korean Syllables Typing Practice | Hangeul Typing',
+    description:
+      'Put consonants and vowels together and type full Korean syllables like 가, 나, and 각. A simple next step after learning each letter.',
+  },
+};
